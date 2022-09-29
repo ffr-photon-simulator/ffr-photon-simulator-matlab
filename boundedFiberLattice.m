@@ -9,7 +9,7 @@ fiber_diameter             = 4 * 10^(-6); % 13 microns
 fiber_radius               = fiber_diameter/2;
 fiber_reflection_radius    = fiber_radius + incident_photon_wavelength/2;
 
-  % Fiber Lattice
+  % Fiberq Lattice
 % 10μm diagonal separation means about 14μm horizontal and vertical separation
 % Divide the horizontal and vertical separation in half, and let these be
 % a basis for laying out the lattice.
@@ -63,10 +63,9 @@ incident_photon_initial_coords  = [ incident_photon_initial_x_coord, incident_ph
 incident_photon_final_coords    = [ incident_photon_final_x_coord, incident_photon_final_y_coord ];
 
 
-  % FIBER MATRIX
+  % FIBER LATTICE
 % Initialize matrix
 fiber_lattice = initializeFiberLattice(number_fibers_in_length, number_fibers_in_width, lattice_fibers_length, i, j, x_basis_multiplier);
-%b = plotLattice(fiber_lattice, lattice_width, lattice_length);
 
   % PHOTON MOTION
 leaveBoundsCoordsArray = []; % [ x, y, photon_number ]
@@ -77,21 +76,20 @@ previousPhotonCoords = incident_photon_initial_coords;
 % Set x and y steps
 photonXStep = incident_photon_x_step;
 photonYStep = incident_photon_y_step;
-
-photonTracker = 1;
 % Set the first photon's coordinates
 photonCoords = incidentPhotonCoords;
+
+% Main Process
 atBoundary = false;
 reflected = false;
-
+photonTracker = 1;
 while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
-    %disp("Moving photon " + photonTracker)
     reflected = false;
     atBoundary = false;
     previousPhotonCoords = photonCoords;
     photonCoords = movePhoton(photonXStep, photonYStep, photonCoords);
     [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber_lattice,fiber_reflection_radius);
-    atBoundary = checkIfAtBoundary(photonCoords, boundary_dict);
+    atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_impact_dict);
     if atBoundary == true
         leaveBoundsCoordsArray = [leaveBoundsCoordsArray; photonCoords, photonTracker];
         photonXStep = incident_photon_x_step;
@@ -101,23 +99,20 @@ while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
         photonTracker = photonTracker + 1;
     elseif reflected == true
         disp("Photon " + photonTracker + " reflected off of fiber at: " + coordToString(reflectedFiberCoords))
-        disp("    Photon coords: " + coordToString(photonCoords))
+        disp(" - Photon coords: " + coordToString(photonCoords))
         [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords, general_photon_step);
         photonXStep = newXStep;
         photonYStep = newYStep;
-        disp("    Photon x step: " + photonXStep)
-        disp("    Photon y step: " + photonYStep)
-        % Move the photon back one step to get out of the fiber.
-        %photonCoords = movePhoton(photonXStep, photonYStep, photonCoords);
+        %disp("    Photon x step: " + photonXStep)
+        %disp("    Photon y step: " + photonYStep)
     end
 end
+% Print a summary of the boundaries.
+fprintf(boundarySummary(boundary_impact_dict))
 
   % PLOTS
-% Every function must return a value, so have the plotting functions
-% simply return a boolean.
-
 % Lattice fiber points
-dummyPlotBool = plotLattice(fiber_lattice,lattice_width,lattice_length);
+plotLattice(fiber_lattice,lattice_width,lattice_length);
 % Lattice fiber circles
 for row = 1:size(fiber_lattice)
         fiberXCoord = fiber_lattice(row,1);
@@ -126,14 +121,14 @@ for row = 1:size(fiber_lattice)
         plotFiberCircle(fiberCoords, fiber_reflection_radius)
 end
 % Photons (in blue)
-plotBool2 = plotBoundPhotonPoints(leaveBoundsCoordsArray);
+plotBoundPhotonPoints(leaveBoundsCoordsArray);
 % Incident photon bounds
 xline(incident_photon_initial_coords(1), '--');
 xline(incident_photon_final_coords(1), '--');
 
-
   % FUNCTIONS
 % Syntax: function outputVariable = functionName(inputVariable)
+% Lattice
 function lattice = initializeFiberLattice(number_fibers_in_length, number_fibers_in_width, lattice_fibers_length, i, j, x_basis_multiplier)
   lattice = [];
   for fiber = 1:number_fibers_in_width
@@ -146,7 +141,6 @@ function lattice = initializeFiberLattice(number_fibers_in_length, number_fibers
     end
   end
 end
-
 function oddRow = makeOddFibersRow(number_fibers_in_length, lattice_fibers_length, i, j, x_basis_multiplier)
   leftmostFiber = [ -lattice_fibers_length / 2, j];
   oddRow  = leftmostFiber;
@@ -155,7 +149,6 @@ function oddRow = makeOddFibersRow(number_fibers_in_length, lattice_fibers_lengt
     oddRow = [oddRow ; nextFiber];
   end
 end
-
 function evenRow = makeEvenFibersRow(number_fibers_in_length, lattice_fibers_length, i, j, x_basis_multiplier)
   leftmostFiber = [ (-lattice_fibers_length + 2*i) / 2, j];
   evenRow  = leftmostFiber;
@@ -164,51 +157,13 @@ function evenRow = makeEvenFibersRow(number_fibers_in_length, lattice_fibers_len
     evenRow = [evenRow; nextFiber];
   end
 end
-
 function isodd = isOdd(number)
   % Odd has remainder 1 = true
   % Even has remainder 0 = false
   isodd = rem(number, 2);
 end
 
-function bool = plotLattice(fiber_lattice,lattice_width,lattice_length)
-  plot(fiber_lattice(:,1), fiber_lattice(:,2), 'k.', 'MarkerSize', 20);
-  hold on;
-  % Fibers
-  lowerXLim = -lattice_length/2;
-  upperXLim = lattice_length/2;
-  lowerYLim = 0;
-  upperYLim = lattice_width;
-  xlim([lowerXLim, upperXLim]);
-  ylim([lowerYLim, upperYLim]);
-  % Boundaries
-  xline(lowerXLim, '--');
-  xline(upperXLim, '--');
-  yline(lowerYLim, '--');
-  yline(upperYLim, '--');
-  axis equal;
-  bool = true;
-end
-
-function bool = plotBoundPhotonPoints(leaveBoundsCoordsArray)
-  plot(leaveBoundsCoordsArray(:,1), leaveBoundsCoordsArray(:,2), 'b.', 'MarkerSize', 20);
-  bool = true;
-end
-
-function bool = plotFiberCircle(fiberCoords, fiber_reflection_radius)
-  x = fiberCoords(1);
-  y = fiberCoords(2);
-  r = fiber_reflection_radius;
-  fiberPlotTheta = linspace(0,2*pi,100); % build semi-circle from 100 vectors
-  fiberPlotXCoords = r * cos(fiberPlotTheta) + x;
-  fiberPlotYCoords = r * sin(fiberPlotTheta) + y;
-  plot(fiberPlotXCoords, fiberPlotYCoords)
-end
-
-function alert = alert(message)
-  alert = "\n>>> " + message;
-end
-
+% Photon Motion
 function [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords, general_photon_step)
   % Find the xstep and ystep of a reflected photon.
   %
@@ -298,6 +253,7 @@ function [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber
 end
 
 function newCoords = movePhoton(xStep, yStep, previousCoords)
+  % Move the photon in the x and y directions.
   newCoords = [previousCoords(1) + xStep,  previousCoords(2) + yStep];
 end
 
@@ -323,26 +279,71 @@ function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_im
     atBoundary = true;
   elseif photonCoords(1) > boundary_dict('Right')
     disp("Reached RIGHT bound at coords: " + coordToString(photonCoords)); disp(' ')
-        boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
-
+        boundary_impacts_dict('Right') = boundary_impacts_dict('Right') + 1;
     atBoundary = true;
   elseif photonCoords(2) > boundary_dict('Outer')
     disp("Reached OUTER bound at coords: " + coordToString(photonCoords)); disp(' ')
-        boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
-
+        boundary_impacts_dict('Outer') = boundary_impacts_dict('Outer') + 1;
     atBoundary = true;
   elseif photonCoords(2) < boundary_dict('Inner')
     disp("Reached INNER bound at coords: " + coordToString(photonCoords)); disp(' ')
-        boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
-
+        boundary_impacts_dict('Inner') = boundary_impacts_dict('Inner') + 1;
     atBoundary = true;
   else
     atBoundary = false;
   end
 end
+% Plotting
+% Every function must return a value, so have plotting functions return a dummy boolean.
+function bool = plotLattice(fiber_lattice,lattice_width,lattice_length)
+  plot(fiber_lattice(:,1), fiber_lattice(:,2), 'k.', 'MarkerSize', 20);
+  hold on;
+  % Fibers
+  lowerXLim = -lattice_length/2;
+  upperXLim = lattice_length/2;
+  lowerYLim = 0;
+  upperYLim = lattice_width;
+  xlim([lowerXLim, upperXLim]);
+  ylim([lowerYLim, upperYLim]);
+  % Boundaries
+  xline(lowerXLim, '--');
+  xline(upperXLim, '--');
+  yline(lowerYLim, '--');
+  yline(upperYLim, '--');
+  axis equal;
+  bool = true;
+end
+function bool = plotBoundPhotonPoints(leaveBoundsCoordsArray)
+  plot(leaveBoundsCoordsArray(:,1), leaveBoundsCoordsArray(:,2), 'b.', 'MarkerSize', 20);
+  bool = true;
+end
+function bool = plotFiberCircle(fiberCoords, fiber_reflection_radius)
+  x = fiberCoords(1);
+  y = fiberCoords(2);
+  r = fiber_reflection_radius;
+  fiberPlotTheta = linspace(0,2*pi,100); % build semi-circle from 100 vectors
+  fiberPlotXCoords = r * cos(fiberPlotTheta) + x;
+  fiberPlotYCoords = r * sin(fiberPlotTheta) + y;
+  plot(fiberPlotXCoords, fiberPlotYCoords)
+end
+
+% Quality of life
+function alert = alert(message)
+  % Return a formatted alert string.
+  alert = fprintf("\n>>> " + message);
+end
 
 function coordString = coordToString(coord)
+  % Return xy coordinates as a string.
   xCoord = coord(1);
   yCoord = coord(2);
   coordString = string(xCoord) + ", " + string(yCoord);
+end
+
+function summary = boundarySummary(boundary_impacts_dict)
+  % Summarize how many photons impacted each boundary.
+  summary = "Number photons reached INNER bound: " + string(boundary_impacts_dict('Inner'));
+  summary = summary + "\nNumber photons reached OUTER bound: " + string(boundary_impacts_dict('Outer'));
+  summary = summary + "\nNumber photons reached LEFT bound: " + string(boundary_impacts_dict('Left'));
+  summary = summary + "\nNumber photons reached RIGHT bound: " + string(boundary_impacts_dict('Right')) + "\n";
 end
