@@ -28,8 +28,8 @@ y_basis_multiplier = 2; % twice the basis is the vertical distance between fiber
 % --------------------------------------------------------------------------  <-- inner boundary at y=0
 % ^ leftmost boundary will be at x=-9i                                     ^  rightmost boundary at x=9i
 
-% Dimensions in units of fibers
-number_fibers_in_length = 15; % Must be odd.
+% Dimensions in fibers
+number_fibers_in_length = 15; % Must be Odd
 number_fibers_in_width  = 8;
 x_padding = i;
 y_padding = j;
@@ -44,8 +44,6 @@ lattice_width = lattice_fibers_width + y_padding;
 boundary_names  = {'Outer', 'Inner', 'Left', 'Right'};
 boundary_coords = {lattice_width, 0, -lattice_length/2, lattice_length/2};
 boundary_dict   = containers.Map(boundary_names, boundary_coords);
-boundary_impacts = {0,0,0,0}; % count of number of impacts on each boundary/
-boundary_impact_dict = containers.Map(boundary_names, boundary_impacts);
 
   % Coordinates
 % Photon initially travels towards fiber parallel to y-axis.
@@ -310,7 +308,7 @@ function distanceToFiber = calculatePhotonDistanceToFiber(photonCoords, fiberCoo
   %disp("    Distance to fiber: " + distanceToFiber)
 end
 
-function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_impacts_dict)
+function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict)
   % Check if photon is past the lattice boundaries.
   %
   % If the x-value of the photon is less than the leftmost boundary
@@ -319,22 +317,15 @@ function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_im
   % boundary, the photon is outside the boundaries.
   if photonCoords(1) < boundary_dict('Left')
     disp("Reached LEFT bound at coords: " + coordToString(photonCoords)); disp(' ')
-    boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
     atBoundary = true;
   elseif photonCoords(1) > boundary_dict('Right')
     disp("Reached RIGHT bound at coords: " + coordToString(photonCoords)); disp(' ')
-        boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
-
     atBoundary = true;
   elseif photonCoords(2) > boundary_dict('Outer')
     disp("Reached OUTER bound at coords: " + coordToString(photonCoords)); disp(' ')
-        boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
-
     atBoundary = true;
   elseif photonCoords(2) < boundary_dict('Inner')
     disp("Reached INNER bound at coords: " + coordToString(photonCoords)); disp(' ')
-        boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
-
     atBoundary = true;
   else
     atBoundary = false;
