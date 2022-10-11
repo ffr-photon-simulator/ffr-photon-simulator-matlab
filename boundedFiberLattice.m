@@ -203,42 +203,97 @@ function [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCo
   % newXStep: the step in the x-direction of the reflected photon.
   % newYStep: the step in the y-direction of the reflected photon.
   reflectionPoint = photonCoords;
-  incidentSlope = calculateSlope(previousPhotonCoords, reflectionPoint);
+  incidentSlope = calculateSlope(reflectionPoint, previousPhotonCoords);
+  % Case 1 and 2: incident slope is infinite
   if (incidentSlope == Inf) || (incidentSlope == -Inf)
-    % It's possible that the photon's path is colinear with the center of
-    % the fiber, but unlikely.
-    if previousPhotonCoords(2) == reflectionPoint(2)
-      % Incident path is colinear with the center of the fiber, so the
-      % reflection angle is 0.
+    % Case 1
+    % Incident path is colinear with fiber center.
+    if (photonCoords(2) == reflectedFiberCoords(2))
       newXStep = 0;
-      newYStep = general_photon_step;
+      if (photonCoords(2) > previousPhotonCoords(2))
+        % Photon was travelling up, reflects down
+        reflectedPathDirection = -1;
+      elseif (photonCoords(2) < previousPhotonCoords(2))
+        % Photon was travelling down, reflects up
+        reflectedPathDirection = 1;
+      end
+      newYStep = general_photon_step * reflectedPathDirection;
+    % Case 2
+    % Incident path is not colinear with fiber center.
     else
       % Incident path is parallel to y-axis, but has hit some other section of
-      % the fiber. arctan of the angle between the incident path and the radius
+      % the fiber. The arctan of the angle between the incident path and the radius
       % equals the ratio of the x-distance to the y-distance between the
       % reflection point and fiber center.
-      xDistance = reflectionPoint(1) - reflectedFiberCoords(1);
-      yDistance = reflectionPoint(2) - reflectedFiberCoords(2);
-      phi = atan(xDistance/yDistance);
+      phi = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
       % sin(2*phi)/cos(2*phi) gives the slope of the reflected photon's path
       newXStep = general_photon_step * sin(phi);
       newYStep = general_photon_step * cos(phi);
     end
+  % Case 3: incident slope is not infinite
   else
-    reflectedSlope = 1/incidentSlope;
-    % The reflected path makes angle theta with the x-axis.
-    theta = atan(reflectedSlope);
-    newXStep = general_photon_step * cos(theta);
-    newYStep = general_photon_step * sin(theta);
+    phi = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
+    yIntercept = calculateYIntercept(phi, reflectedFiberCoords);
+    reflectedPoint = reflectPoint(previousPhotonCoords, phi, yIntercept);
+    newXStep = reflectedPoint(1) - reflectedFiberCoords(1);
+    newYStep = reflectedPoint(2) - reflectedFiberCoords(2);
   end
 end
 
-function slope = calculateSlope(pointA, pointB)
-  % Calculate the slope of a line from two points.
-  %
-  % Will return "inf" if the line is vertical, but atan(inf)
-  % evaluates to pi/2 in Matlab, so returning "inf" is fine.
-  slope = (pointB(2) - pointA(2)) / (pointB(1) - pointA(1));
+function angle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords)
+  xDistance = reflectionPoint(1) - reflectedFiberCoords(1);
+  yDistance = reflectionPoint(2) - reflectedFiberCoords(2);
+  angle = atan(xDistance/yDistance);
+end
+
+function yInt = calculateYIntercept(slopeAngle, point)
+  % b = y - mx
+  slope = tan(slopeAngle);
+  yInt = point(2) - (slope * point(1));
+end
+
+function reflectedPoint = reflectPoint(point, angle, yIntercept)
+  % Use a reflection matrix.
+  reflectionMatrix = [cos(2*angle) sin(2*angle); sin(2*angle) -cos(2*angle) ];
+  pointMinusY = point - yIntercept;
+  reflectedPointMinusY = pointMinusY * reflectionMatrix;
+  reflectedPoint = reflectedPointMinusY + yIntercept;
+end
+
+% Unused
+%   if (incidentSlope == Inf) || (incidentSlope == -Inf)
+%     % It's possible that the photon's path is colinear with the center of
+%     % the fiber, but unlikely.
+%     if previousPhotonCoords(1) == reflectionPoint(1)
+%       % Incident path is colinear with the center of the fiber, so the
+%       % reflection angle is 0.
+%       newXStep = 0;
+%       newYStep = general_photon_step;
+%     else
+%       % Incident path is parallel to y-axis, but has hit some other section of
+%       % the fiber. arctan of the angle between the incident path and the radius
+%       % equals the ratio of the x-distance to the y-distance between the
+%       % reflection point and fiber center.
+%       xDistance = reflectionPoint(1) - reflectedFiberCoords(1);
+%       yDistance = reflectionPoint(2) - reflectedFiberCoords(2);
+%       phi = atan(xDistance/yDistance);
+%       % sin(2*phi)/cos(2*phi) gives the slope of the reflected photon's path
+%       newXStep = general_photon_step * sin(phi);
+%       newYStep = general_photon_step * cos(phi);
+%     end
+%   else
+%     reflectedSlope = 1/incidentSlope;
+%     % The reflected path makes angle theta with the x-axis.
+%     theta = atan(reflectedSlope);
+%     newXStep = general_photon_step * cos(theta);
+%     newYStep = general_photon_step * sin(theta);
+%   end
+% end
+
+function slope = calculateSlope(previousPoint, nextPoint)
+  % Calculate the slope of the line connecting a previous point
+  % and a next point.
+  slope = (nextPoint(2) - previousPoint(2)) / (nextPoint(1) - previousPoint(1));
 end
 
 function [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber_lattice,fiber_reflection_radius)
