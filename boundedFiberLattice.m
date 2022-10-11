@@ -81,7 +81,6 @@ photonPathCoordsArray = [];
 
 % Start at incident photon coordiantes
 incidentPhotonCoords = incident_photon_initial_coords;
-previousPhotonCoords = incident_photon_initial_coords;
 % Set x and y steps
 photonXStep = incident_photon_x_step;
 photonYStep = incident_photon_y_step;
@@ -89,8 +88,6 @@ photonYStep = incident_photon_y_step;
 photonCoords = incidentPhotonCoords;
 
 % Main Process
-atBoundary = false;
-reflected = false;
 photonTracker = 1;
 while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
     reflected = false;
@@ -109,7 +106,7 @@ while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
         photonTracker = photonTracker + 1;
     elseif reflected == true
         disp("Photon " + photonTracker + " reflected off of fiber at: " + coordToString(reflectedFiberCoords))
-        disp(" - Photon coords: " + coordToString(photonCoords))
+        %disp(" - Photon coords: " + coordToString(photonCoords))
         [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords, general_photon_step);
         photonXStep = newXStep;
         photonYStep = newYStep;
@@ -225,18 +222,19 @@ function [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCo
       % the fiber. The arctan of the angle between the incident path and the radius
       % equals the ratio of the x-distance to the y-distance between the
       % reflection point and fiber center.
-      phi = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
+      stepAngle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
       % sin(2*phi)/cos(2*phi) gives the slope of the reflected photon's path
-      newXStep = general_photon_step * sin(phi);
-      newYStep = general_photon_step * cos(phi);
+      newXStep = general_photon_step * sin(stepAngle);
+      newYStep = general_photon_step * cos(stepAngle);
     end
   % Case 3: incident slope is not infinite
   else
     phi = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
     yIntercept = calculateYIntercept(phi, reflectedFiberCoords);
     reflectedPoint = reflectPoint(previousPhotonCoords, phi, yIntercept);
-    newXStep = reflectedPoint(1) - reflectedFiberCoords(1);
-    newYStep = reflectedPoint(2) - reflectedFiberCoords(2);
+    stepAngle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedPoint);
+    newXStep = general_photon_step * sin(stepAngle);
+    newYStep = general_photon_step * cos(stepAngle);
   end
 end
 
@@ -247,7 +245,8 @@ function angle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflected
 end
 
 function yInt = calculateYIntercept(slopeAngle, point)
-  % b = y - mx
+  % (y-y1) = m(x-x1)
+  % b = y1 - m(x1)
   slope = tan(slopeAngle);
   yInt = point(2) - (slope * point(1));
 end
@@ -313,7 +312,7 @@ function [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber
         fiberCoords = [fiberXCoord fiberYCoord];
         photonDistanceToFiber = calculatePhotonDistanceToFiber(photonCoords, fiberCoords);
         if photonDistanceToFiber < fiber_reflection_radius
-          disp("  Photon distance to fiber: " + photonDistanceToFiber)
+          %disp("  Photon distance to fiber: " + photonDistanceToFiber)
           reflected = true;
           reflectedFiberCoords = fiberCoords;
         return;
@@ -345,19 +344,19 @@ function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_im
   % photon is less than the bottom boundary or greater than the top
   % boundary, the photon is outside the boundaries.
   if photonCoords(1) < boundary_dict('Left')
-    disp("Reached LEFT bound at coords: " + coordToString(photonCoords)); disp(' ')
+    %disp("Reached LEFT bound at coords: " + coordToString(photonCoords)); disp(' ')
     boundary_impacts_dict('Left') = boundary_impacts_dict('Left') + 1;
     atBoundary = true;
   elseif photonCoords(1) > boundary_dict('Right')
-    disp("Reached RIGHT bound at coords: " + coordToString(photonCoords)); disp(' ')
+    %disp("Reached RIGHT bound at coords: " + coordToString(photonCoords)); disp(' ')
         boundary_impacts_dict('Right') = boundary_impacts_dict('Right') + 1;
     atBoundary = true;
   elseif photonCoords(2) > boundary_dict('Outer')
-    disp("Reached OUTER bound at coords: " + coordToString(photonCoords)); disp(' ')
+    %disp("Reached OUTER bound at coords: " + coordToString(photonCoords)); disp(' ')
         boundary_impacts_dict('Outer') = boundary_impacts_dict('Outer') + 1;
     atBoundary = true;
   elseif photonCoords(2) < boundary_dict('Inner')
-    disp("Reached INNER bound at coords: " + coordToString(photonCoords)); disp(' ')
+    %disp("Reached INNER bound at coords: " + coordToString(photonCoords)); disp(' ')
         boundary_impacts_dict('Inner') = boundary_impacts_dict('Inner') + 1;
     atBoundary = true;
   else
@@ -368,7 +367,7 @@ end
 % Every function must return a value, so have plotting functions return a dummy boolean.
 function bool = saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor)
   frame = getframe(gcf);
-  figureName = "lattice_" + nfil + "x" + nfiw + "_offset" + (latticeOffset * 10^(6)) + "u.png"
+  figureName = "lattice_" + nfil + "x" + nfiw + "_offset" + (latticeOffset * 10^(6)) + "u.png";
   disp("Figure saved as: " + figureName)
   imwrite(frame.cdata, figureName)
 end
@@ -422,7 +421,6 @@ function coordString = coordToString(coord)
 end
 
 function summary = boundarySummary(boundary_impacts_dict)
-
   % Summarize how many photons impacted each boundary.
   summary = "Number photons reached INNER bound: " + string(boundary_impacts_dict('Inner'));
   summary = summary + "\nNumber photons reached OUTER bound: " + string(boundary_impacts_dict('Outer'));
