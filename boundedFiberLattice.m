@@ -1,15 +1,20 @@
-  % CONSTANTS
+function []=boundedFiberLattice(nfil, nfiw, latticeOffset, incShift, stepFactor)
+% CONSTANTS
+% The Standard Parameters include:
+%  - general photon step: (incident_photon_wavelength / 2)
+%  - lattice shift: 0
+%  - incident photon shift: general photon step
 % Units in meters, seconds unless otherwise specified
 incident_photon_wavelength = 2.5 * 10^(-7); % 254nm
-general_photon_step        = incident_photon_wavelength / 2;
-incident_photon_speed      = 3 * 10^8;
-incident_photon_time_step  = 5 * 10^(-16); % seconds
+general_photon_step        = (incident_photon_wavelength / 2) / stepFactor;
+%incident_photon_speed      = 3 * 10^8;
+%incident_photon_time_step  = general_photon_step / incident_photon_speed; % seconds
 
-fiber_diameter             = 4 * 10^(-6); % 13 microns
+fiber_diameter             = 4 * 10^(-6); % 4 microns
 fiber_radius               = fiber_diameter/2;
 fiber_reflection_radius    = fiber_radius + incident_photon_wavelength/2;
 
-  % Fiberq Lattice
+  % Fiber Lattice
 % 10μm diagonal separation means about 14μm horizontal and vertical separation
 % Divide the horizontal and vertical separation in half, and let these be
 % a basis for laying out the lattice.
@@ -18,7 +23,7 @@ fibers_y_separation_basis  = 7.0711 * 10^(-6); % j
 i = fibers_x_separation_basis;
 j = fibers_y_separation_basis;
 x_basis_multiplier = 2; % twice the basis is the horizontal distance between fibers
-y_basis_multiplier = 2; % twice the basis is the vertical distance between fibers
+%y_basis_multiplier = 2; % twice the basis is the vertical distance between fibers
 
 % Representation of fiber coordinates in the lattice
 % --------------------------------------------------------------------------  <-- outer boundary at y=4j
@@ -29,8 +34,10 @@ y_basis_multiplier = 2; % twice the basis is the vertical distance between fiber
 % ^ leftmost boundary will be at x=-9i                                     ^  rightmost boundary at x=9i
 
 % Dimensions in units of fibers
-number_fibers_in_length = 15; % Must be odd.
-number_fibers_in_width  = 8;
+%number_fibers_in_length = 16; % Must be odd.
+%number_fibers_in_width  = 4;
+number_fibers_in_length = nfil; % Must be odd.
+number_fibers_in_width  = nfiw;
 x_padding = i;
 y_padding = j;
 lattice_fibers_length = (2 * number_fibers_in_length * i); % lattice length w/o padding
@@ -44,13 +51,13 @@ lattice_width = lattice_fibers_width + y_padding;
 boundary_names  = {'Outer', 'Inner', 'Left', 'Right'};
 boundary_coords = {lattice_width, 0, -lattice_length/2, lattice_length/2};
 boundary_dict   = containers.Map(boundary_names, boundary_coords);
-boundary_impacts = {0,0,0,0}; % count of number of impacts on each boundary/
+boundary_impacts = {0,0,0,0}; % count of number of impacts on each boundary
 boundary_impact_dict = containers.Map(boundary_names, boundary_impacts);
 
   % Coordinates
 % Photon initially travels towards fiber parallel to y-axis.
 % Photon starting points are on the axis parallel to x-axis.
-incident_photon_x_shift         = 1.5 * 10^(-7);
+incident_photon_x_shift         = (incident_photon_wavelength / 2) / incShift;
 incident_photon_x_step          = 0; % reflected photons have an x step, so initialize it here
 incident_photon_initial_x_coord = -i;
 incident_photon_final_x_coord   = i;
@@ -65,10 +72,12 @@ incident_photon_final_coords    = [ incident_photon_final_x_coord, incident_phot
 
   % FIBER LATTICE
 % Initialize matrix
-fiber_lattice = initializeFiberLattice(number_fibers_in_length, number_fibers_in_width, lattice_fibers_length, i, j, x_basis_multiplier);
+testShift = latticeOffset;
+fiber_lattice = initializeFiberLattice(number_fibers_in_length, number_fibers_in_width, lattice_fibers_length, i, j, x_basis_multiplier, testShift);
 
   % PHOTON MOTION
 leaveBoundsCoordsArray = []; % [ x, y, photon_number ]
+photonPathCoordsArray = [];
 
 % Start at incident photon coordiantes
 incidentPhotonCoords = incident_photon_initial_coords;
@@ -87,6 +96,7 @@ while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
     reflected = false;
     atBoundary = false;
     previousPhotonCoords = photonCoords;
+    photonPathCoordsArray = [photonPathCoordsArray; photonCoords];
     photonCoords = movePhoton(photonXStep, photonYStep, photonCoords);
     [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber_lattice,fiber_reflection_radius);
     atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_impact_dict);
@@ -109,48 +119,54 @@ while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
 end
 % Print a summary of the boundaries.
 fprintf(boundarySummary(boundary_impact_dict))
+disp("")
 
   % PLOTS
 % Lattice fiber points
 plotLattice(fiber_lattice,lattice_width,lattice_length);
 % Lattice fiber circles
 for row = 1:size(fiber_lattice)
-        fiberXCoord = fiber_lattice(row,1);
-        fiberYCoord = fiber_lattice(row,2);
-        fiberCoords = [fiberXCoord fiberYCoord];
-        plotFiberCircle(fiberCoords, fiber_reflection_radius)
+  fiberXCoord = fiber_lattice(row,1);
+  fiberYCoord = fiber_lattice(row,2);
+  fiberCoords = [fiberXCoord fiberYCoord];
+  plotFiberCircle(fiberCoords, fiber_reflection_radius)
 end
 % Photons (in blue)
 plotBoundPhotonPoints(leaveBoundsCoordsArray);
+% Photon paths
+plotPhotonPaths(photonPathCoordsArray);
 % Incident photon bounds
 xline(incident_photon_initial_coords(1), '--');
 xline(incident_photon_final_coords(1), '--');
 
+% Save figure
+saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor);
+
   % FUNCTIONS
 % Syntax: function outputVariable = functionName(inputVariable)
 % Lattice
-function lattice = initializeFiberLattice(number_fibers_in_length, number_fibers_in_width, lattice_fibers_length, i, j, x_basis_multiplier)
+function lattice = initializeFiberLattice(number_fibers_in_length, number_fibers_in_width, lattice_fibers_length, i, j, x_basis_multiplier, testShift)
   lattice = [];
   for fiber = 1:number_fibers_in_width
     if isOdd(fiber)
-      oddRow = makeOddFibersRow(number_fibers_in_length, lattice_fibers_length, i, j*fiber, x_basis_multiplier);
+      oddRow = makeOddFibersRow(number_fibers_in_length, lattice_fibers_length, i, j*fiber, x_basis_multiplier, testShift);
       lattice = [lattice; oddRow];
     else
-      evenRow = makeEvenFibersRow(number_fibers_in_length, lattice_fibers_length, i, j*fiber, x_basis_multiplier);
+      evenRow = makeEvenFibersRow(number_fibers_in_length, lattice_fibers_length, i, j*fiber, x_basis_multiplier, testShift);
       lattice = [lattice; evenRow];
     end
   end
 end
-function oddRow = makeOddFibersRow(number_fibers_in_length, lattice_fibers_length, i, j, x_basis_multiplier)
-  leftmostFiber = [ -lattice_fibers_length / 2, j];
+function oddRow = makeOddFibersRow(number_fibers_in_length, lattice_fibers_length, i, j, x_basis_multiplier, testShift)
+  leftmostFiber = [ (-lattice_fibers_length / 2) + testShift, j];
   oddRow  = leftmostFiber;
   for step = 1:(number_fibers_in_length-1)
     nextFiber = [ leftmostFiber(1) + (step * x_basis_multiplier * i), j];
     oddRow = [oddRow ; nextFiber];
   end
 end
-function evenRow = makeEvenFibersRow(number_fibers_in_length, lattice_fibers_length, i, j, x_basis_multiplier)
-  leftmostFiber = [ (-lattice_fibers_length + 2*i) / 2, j];
+function evenRow = makeEvenFibersRow(number_fibers_in_length, lattice_fibers_length, i, j, x_basis_multiplier, testShift)
+  leftmostFiber = [ ((-lattice_fibers_length + 2*i) / 2) + testShift, j];
   evenRow  = leftmostFiber;
   for step = 1:(number_fibers_in_length-2)
     nextFiber = [leftmostFiber(1) + (step * x_basis_multiplier * i), j];
@@ -176,7 +192,7 @@ function [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCo
   % ystep and xstep. We need to scale the {x,y}steps so that the
   % hypotenuse of the triangle defined by these steps equals
   % the general_photon_step (one half-wavelength). We can use
-  % trigonometry to scale the steps.
+  % trigonometry to scale the {x,y}steps.
   %
   % To get this slope, take the reciprocal of the slope of the
   % path of the incident photon. We can calculate the incident
@@ -295,7 +311,17 @@ function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_im
 end
 % Plotting
 % Every function must return a value, so have plotting functions return a dummy boolean.
+function bool = saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor)
+  frame = getframe(gcf);
+  figureName = "lattice_" + nfil + "x" + nfiw + "_offset" + (latticeOffset * 10^(6)) + "u.png"
+  disp("Figure saved as: " + figureName)
+  imwrite(frame.cdata, figureName)
+end
+function bool = plotPhotonPaths(photonPathsArray)
+  plot(photonPathsArray(:,1), photonPathsArray(:,2), 'k.','MarkerSize',1);
+end 
 function bool = plotLattice(fiber_lattice,lattice_width,lattice_length)
+  clf; % clear current plot
   plot(fiber_lattice(:,1), fiber_lattice(:,2), 'k.', 'MarkerSize', 20);
   hold on;
   % Fibers
@@ -341,9 +367,12 @@ function coordString = coordToString(coord)
 end
 
 function summary = boundarySummary(boundary_impacts_dict)
+
   % Summarize how many photons impacted each boundary.
   summary = "Number photons reached INNER bound: " + string(boundary_impacts_dict('Inner'));
   summary = summary + "\nNumber photons reached OUTER bound: " + string(boundary_impacts_dict('Outer'));
   summary = summary + "\nNumber photons reached LEFT bound: " + string(boundary_impacts_dict('Left'));
   summary = summary + "\nNumber photons reached RIGHT bound: " + string(boundary_impacts_dict('Right')) + "\n";
+end
+
 end
