@@ -89,25 +89,37 @@ photonCoords = incidentPhotonCoords;
 
 % Main Process
 photonTracker = 1;
+photonReflectionTracker = 0;
+hold on;
 while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
     reflected = false;
     atBoundary = false;
+
     previousPhotonCoords = photonCoords;
     photonPathCoordsArray = [photonPathCoordsArray; photonCoords];
     photonCoords = movePhoton(photonXStep, photonYStep, photonCoords);
+    % Reflection and boundary checks
     [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber_lattice,fiber_reflection_radius);
     atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_impact_dict);
     if atBoundary == true
-        leaveBoundsCoordsArray = [leaveBoundsCoordsArray; photonCoords, photonTracker];
+        leaveBoundsCoordsArray = [leaveBoundsCoordsArray; photonCoords, photonTracker]; % store boundary coords
+        % Reset initial steps
         photonXStep = incident_photon_x_step;
         photonYStep = incident_photon_y_step;
-        incidentPhotonCoords(1) = incidentPhotonCoords(1) + incident_photon_x_shift;
-        photonCoords = incidentPhotonCoords;
+        incidentPhotonCoords(1) = incidentPhotonCoords(1) + incident_photon_x_shift; % shift initial x coord
+        photonCoords = incidentPhotonCoords; % update photon coords to next initial coords
         photonTracker = photonTracker + 1;
+        photonReflectionTracker = 0;
     elseif reflected == true
+      if photonReflectionTracker == 0
         disp("Photon " + photonTracker + " reflected off of fiber at: " + coordToString(reflectedFiberCoords))
+        photonReflectionTracker = photonReflectionTracker + 1;
+      else
+        disp("Photon " + photonTracker + " reflected off the same fiber. Count: " + photonReflectionTracker);
+        photonReflectionTracker = photonReflectionTracker + 1;
+      end
         %disp(" - Photon coords: " + coordToString(photonCoords))
-        [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords, general_photon_step);
+        [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords);
         photonXStep = newXStep;
         photonYStep = newYStep;
         %disp("    Photon x step: " + photonXStep)
@@ -115,7 +127,7 @@ while (incidentPhotonCoords(1) < incident_photon_final_coords(1))
     end
 end
 % Print a summary of the boundaries.
-fprintf(boundarySummary(boundary_impact_dict))
+%fprintf(boundarySummary(boundary_impact_dict))
 disp("")
 
   % PLOTS
@@ -137,7 +149,7 @@ xline(incident_photon_initial_coords(1), '--');
 xline(incident_photon_final_coords(1), '--');
 
 % Save figure
-saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor);
+%saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor);
 
   % FUNCTIONS
 % Syntax: function outputVariable = functionName(inputVariable)
@@ -177,87 +189,127 @@ function isodd = isOdd(number)
 end
 
 % Photon Motion
-function [newXStep, newYStep] = calculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords, general_photon_step)
+function [newXStep, newYStep] = calculateNewSteps(reflectionPoint, previousPhotonCoords, reflectedFiberCoords)
   % Find the xstep and ystep of a reflected photon.
-  %
-  % The path of the reflected photon is the image of the path of the
-  % incident photon mirrored (reflected) across the line co-linear
-  % with the center of the fiber and the point of reflection on the
-  % surface of the fiber.
-  %
-  % The slope of the reflected photon's path is the ratio of the
-  % ystep and xstep. We need to scale the {x,y}steps so that the
-  % hypotenuse of the triangle defined by these steps equals
-  % the general_photon_step (one half-wavelength). We can use
-  % trigonometry to scale the {x,y}steps.
-  %
-  % To get this slope, take the reciprocal of the slope of the
-  % path of the incident photon. We can calculate the incident
-  % photon's slope using the photon's previous coordinates
-  % and the reflection coordinates.
-  %
-  % RETURNS
-  % newXStep: the step in the x-direction of the reflected photon.
-  % newYStep: the step in the y-direction of the reflected photon.
-  reflectionPoint = photonCoords;
-  incidentSlope = calculateSlope(reflectionPoint, previousPhotonCoords);
-  % Case 1 and 2: incident slope is infinite
-  if (incidentSlope == Inf) || (incidentSlope == -Inf)
-    % Case 1
-    % Incident path is colinear with fiber center.
-    if (photonCoords(2) == reflectedFiberCoords(2))
-      newXStep = 0;
-      if (photonCoords(2) > previousPhotonCoords(2))
-        % Photon was travelling up, reflects down
-        reflectedPathDirection = -1;
-      elseif (photonCoords(2) < previousPhotonCoords(2))
-        % Photon was travelling down, reflects up
-        reflectedPathDirection = 1;
-      end
-      newYStep = general_photon_step * reflectedPathDirection;
-    % Case 2
-    % Incident path is not colinear with fiber center.
-    else
-      % Incident path is parallel to y-axis, but has hit some other section of
-      % the fiber. The arctan of the angle between the incident path and the radius
-      % equals the ratio of the x-distance to the y-distance between the
-      % reflection point and fiber center.
-      stepAngle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
-      % sin(2*phi)/cos(2*phi) gives the slope of the reflected photon's path
-      newXStep = general_photon_step * sin(stepAngle);
-      newYStep = general_photon_step * cos(stepAngle);
-    end
-  % Case 3: incident slope is not infinite
-  else
-    phi = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
-    yIntercept = calculateYIntercept(phi, reflectedFiberCoords);
-    reflectedPoint = reflectPoint(previousPhotonCoords, phi, yIntercept);
-    stepAngle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedPoint);
-    newXStep = general_photon_step * sin(stepAngle);
-    newYStep = general_photon_step * cos(stepAngle);
-  end
+  x_i = previousPhotonCoords(1);
+  y_i = previousPhotonCoords(2);
+  a = reflectionPoint(1);
+  b = reflectionPoint(2);
+  fibera = reflectedFiberCoords(1);
+  fiberb = reflectedFiberCoords(2);
+
+  m = (b -fiberb)/(a - fibera);
+  i = b - (m*a);
+  n = -1/m;
+  j = y_i - (n*x_i);
+
+  C = b + (n*x_i) - (m*a) - y_i;
+
+  t = fibers_x_separation_basis;
+
+  o = linspace(-3*t,3*t,100);
+  p = m*o + i;
+
+  %plot(o,p,'k.','MarkerSize',5);
+  % Plot the radius to the point of reflection.
+  %plot([reflectionPoint(1) reflectedFiberCoords(1)], [reflectionPoint(2) reflectedFiberCoords(2)],'k.','MarkerSize',15);
+
+  c= (-m*C)/(m^2 + 1);
+  d = (n*c) + j;
+
+  xNew = x_i + 2*(c-x_i);
+  yNew = y_i + 2*(d-y_i);
+  %plot([xNew, yNew ],'k.','MarkerSize',10)
+
+  newXStep = abs(xNew) -abs(a);
+  newYStep = abs(yNew) -abs(b);
+  %disp("    New x step: " + newXStep)
+  %disp("    New y step: " + newYStep)
 end
 
-function angle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords)
-  xDistance = reflectionPoint(1) - reflectedFiberCoords(1);
-  yDistance = reflectionPoint(2) - reflectedFiberCoords(2);
-  angle = atan(xDistance/yDistance);
-end
+% Photon Motion
+%function [newXStep, newYStep] = OLDcalculateNewSteps(photonCoords, previousPhotonCoords, reflectedFiberCoords, general_photon_step)
+%  % Find the xstep and ystep of a reflected photon.
+%  %
+%  % The path of the reflected photon is the image of the path of the
+%
+% % incident photon mirrored (reflected) across the line co-linear
+%  % with the center of the fiber and the point of reflection on the
+%  % surface of the fiber.
+%  %
+%  % The slope of the reflected photon's path is the ratio of the
+%  % ystep and xstep. We need to scale the {x,y}steps so that the
+%  % hypotenuse of the triangle defined by these steps equals
+%  % the general_photon_step (one half-wavelength). We can use
+%  % trigonometry to scale the {x,y}steps.
+%  %
+%  % To get this slope, take the reciprocal of the slope of the
+%  % path of the incident photon. We can calculate the incident
+%  % photon's slope using the photon's previous coordinates
+%  % and the reflection coordinates.
+%  %
+%  % RETURNS
+%  % newXStep: the step in the x-direction of the reflected photon.
+%  % newYStep: the step in the y-direction of the reflected photon.
+%  reflectionPoint = photonCoords;
+%  incidentSlope = calculateSlope(reflectionPoint, previousPhotonCoords);
+%  % Case 1 and 2: incident slope is infinite
+%  if (incidentSlope == Inf) || (incidentSlope == -Inf)
+%    % Case 1
+%    % Incident path is colinear with fiber center.
+%    if (photonCoords(2) == reflectedFiberCoords(2))
+%      newXStep = 0;
+%      if (photonCoords(2) > previousPhotonCoords(2))
+%        % Photon was travelling up, reflects down
+%        reflectedPathDirection = -1;
+%      elseif (photonCoords(2) < previousPhotonCoords(2))
+%        % Photon was travelling down, reflects up
+%        reflectedPathDirection = 1;
+%      end
+%      newYStep = general_photon_step * reflectedPathDirection;
+%    % Case 2
+%    % Incident path is not colinear with fiber center.
+%    else
+%      % Incident path is parallel to y-axis, but has hit some other section of
+%      % the fiber. The arctan of the angle between the incident path and the radius
+%      % equals the ratio of the x-distance to the y-distance between the
+%      % reflection point and fiber center.
+%      stepAngle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
+%      % sin(2*phi)/cos(2*phi) gives the slope of the reflected photon's path
+%      newXStep = general_photon_step * sin(stepAngle);
+%      newYStep = general_photon_step * cos(stepAngle);
+%    end
+%  % Case 3: incident slope is not infinite
+%  else
+%    phi = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords);
+%    yIntercept = calculateYIntercept(phi, reflectedFiberCoords);
+%    reflectedPoint = reflectPoint(previousPhotonCoords, phi, yIntercept);
+%    stepAngle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedPoint);
+%    newXStep = general_photon_step * sin(stepAngle);
+%    newYStep = general_photon_step * cos(stepAngle);
+%  end
+%end
 
-function yInt = calculateYIntercept(slopeAngle, point)
-  % (y-y1) = m(x-x1)
-  % b = y1 - m(x1)
-  slope = tan(slopeAngle);
-  yInt = point(2) - (slope * point(1));
-end
-
-function reflectedPoint = reflectPoint(point, angle, yIntercept)
-  % Use a reflection matrix.
-  reflectionMatrix = [cos(2*angle) sin(2*angle); sin(2*angle) -cos(2*angle) ];
-  pointMinusY = point - yIntercept;
-  reflectedPointMinusY = pointMinusY * reflectionMatrix;
-  reflectedPoint = reflectedPointMinusY + yIntercept;
-end
+%function angle = calculateReflectionPointAngleToXAxis(reflectionPoint, reflectedFiberCoords)
+%  xDistance = reflectionPoint(1) - reflectedFiberCoords(1);
+%  yDistance = reflectionPoint(2) - reflectedFiberCoords(2);
+%  angle = atan(xDistance/yDistance);
+%end
+%
+%function yInt = calculateYIntercept(slopeAngle, point)
+%  % (y-y1) = m(x-x1)
+%  % b = y1 - m(x1)
+%  slope = tan(slopeAngle);
+%  yInt = point(2) - (slope * point(1));
+%end
+%
+%function reflectedPoint = reflectPoint(point, angle, yIntercept)
+%  % Use a reflection matrix.
+%  reflectionMatrix = [cos(2*angle) sin(2*angle); sin(2*angle) -cos(2*angle) ];
+%  pointMinusY = point - yIntercept;
+%  reflectedPointMinusY = pointMinusY * reflectionMatrix;
+%  reflectedPoint = reflectedPointMinusY + yIntercept;
+%end
 
 % Unused
 %   if (incidentSlope == Inf) || (incidentSlope == -Inf)
@@ -289,11 +341,11 @@ end
 %   end
 % end
 
-function slope = calculateSlope(previousPoint, nextPoint)
-  % Calculate the slope of the line connecting a previous point
-  % and a next point.
-  slope = (nextPoint(2) - previousPoint(2)) / (nextPoint(1) - previousPoint(1));
-end
+%function slope = calculateSlope(previousPoint, nextPoint)
+%  % Calculate the slope of the line connecting a previous point
+%  % and a next point.
+%  slope = (nextPoint(2) - previousPoint(2)) / (nextPoint(1) - previousPoint(1));
+%end
 
 function [reflected, reflectedFiberCoords] = checkIfReflected(photonCoords,fiber_lattice,fiber_reflection_radius)
   % Check if a photon has reflected off a fiber.
@@ -363,6 +415,7 @@ function atBoundary = checkIfAtBoundary(photonCoords, boundary_dict, boundary_im
     atBoundary = false;
   end
 end
+
 % Plotting
 % Every function must return a value, so have plotting functions return a dummy boolean.
 function bool = saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor)
@@ -371,13 +424,15 @@ function bool = saveFigure(nfil, nfiw, latticeOffset, incShift, stepFactor)
   disp("Figure saved as: " + figureName)
   imwrite(frame.cdata, figureName)
 end
+
 function bool = plotPhotonPaths(photonPathsArray)
   plot(photonPathsArray(:,1), photonPathsArray(:,2), 'k.','MarkerSize',1);
-end 
+end
+
 function bool = plotLattice(fiber_lattice,lattice_width,lattice_length)
-  clf; % clear current plot
+  %clf; % clear current plot
   plot(fiber_lattice(:,1), fiber_lattice(:,2), 'k.', 'MarkerSize', 20);
-  hold on;
+  %hold on;
   % Fibers
   lowerXLim = -lattice_length/2;
   upperXLim = lattice_length/2;
