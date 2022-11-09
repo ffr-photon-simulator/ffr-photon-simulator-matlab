@@ -221,8 +221,8 @@ function [newXStep, newYStep] = calculateNewSteps(reflectionPoint, previousPhoto
   yNew = y_i + 2*(d-y_i);
   %plot([xNew, yNew ],'k.','MarkerSize',10)
 
-  newXStep = abs(xNew) -abs(a);
-  newYStep = abs(yNew) -abs(b);
+  newXStep = abs(xNew) -abs(a); % WRONG, no abs
+  newYStep = abs(yNew) -abs(b); % WRONG, no abs
   %disp("    New x step: " + newXStep)
   %disp("    New y step: " + newYStep)
 end
