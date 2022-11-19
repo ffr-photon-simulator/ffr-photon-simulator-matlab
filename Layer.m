@@ -8,8 +8,6 @@ classdef Layer
     properties
       length
       width
-      bottomBoundCoordArray
-      photonPathsCoordArray
       lattice
     end
 
