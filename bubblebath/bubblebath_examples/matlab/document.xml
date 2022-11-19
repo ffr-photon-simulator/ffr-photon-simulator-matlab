@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:pPr><w:pStyle w:val="title"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>bubblebath()</w:t></w:r><w:r><w:t> examples</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:b/></w:rPr><w:t>Examples of use cases for </w:t></w:r><w:r><w:rPr><w:b/><w:rFonts w:cs="monospace"/></w:rPr><w:t>bubblebath()</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Source: </w:t></w:r><w:hyperlink w:docLocation="https://www.mathworks.com/matlabcentral/fileexchange/70348"><w:r><w:t>File Exchange</w:t></w:r></w:hyperlink></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Author: </w:t></w:r><w:hyperlink w:docLocation="https://www.mathworks.com/matlabcentral/profile/authors/3753776"><w:r><w:t>Adam Danz</w:t></w:r></w:hyperlink></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Last update: 22-Jan-2021 with bubblebath vs 2.3.0 </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>bubblebath() </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr/><w:t>Default values are used for all parameters when no inputs are specified and the figure is produced internally. Warnings appear to indicate that the algorithm gave up trying to find space for some circles from some radii.  </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+bubblebath()]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Specify radii</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>All parameters are optional and are defined along with their default values in the help section of </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>bubblebath</w:t></w:r><w:r><w:rPr/><w:t>.  </w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:rPr/><w:t>Specify a range of radii</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr/><w:t>Attempt to create circles from 3 radii (r) that span from r=1 to r=3.  Set flag to suppress internal warnings for the remaining examples.  </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+S.circSize = [1 2];
+S.nSizes = 3;
+S.supressWarning = true;
+bubblebath(S)]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Specify a vector of radii</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>nSizes</w:t></w:r><w:r><w:rPr/><w:t> must be set to </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>NaN</w:t></w:r><w:r><w:rPr/><w:t> when </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>circSize</w:t></w:r><w:r><w:rPr/><w:t> is not a 1x2 range of radii.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+S.circSize = [0.4 0.8 1.6 3.2 6.4];
+S.nSizes = NaN; 
+S.supressWarning = true;
+bubblebath(S)]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Specify a single radius</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>nSize</w:t></w:r><w:r><w:rPr/><w:t> must be set to </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>NaN</w:t></w:r><w:r><w:rPr/><w:t> when </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>circSize</w:t></w:r><w:r><w:rPr/><w:t> is not a 1x2 range of radii.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+S.circSize = 2;
+S.nSizes = NaN; 
+S.supressWarning = true;
+bubblebath(S)]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Specify frame size and bubble behavior at the frame edges</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>edgeType</w:t></w:r><w:r><w:rPr/><w:t> has 4 options.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>edgeType=0</w:t></w:r><w:r><w:rPr/><w:t> circles at the frame edges expand outside of the frame.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>edgeType=1</w:t></w:r><w:r><w:rPr/><w:t> all circles will be entirely within the frame. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>edgeType=2</w:t></w:r><w:r><w:rPr/><w:t> circles are cut off by the frame.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>edgeType=3</w:t></w:r><w:r><w:rPr/><w:t> circles that intersect the frame are wrapped to the other side of the frame.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>frameSize</w:t></w:r><w:r><w:rPr/><w:t> specifies the width and height of the frame, centered at (0,0).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>drawFrame</w:t></w:r><w:r><w:rPr/><w:t> draws the rectangular frame when </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>true</w:t></w:r><w:r><w:rPr/><w:t> (default) or does not draw the frame when </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>false</w:t></w:r><w:r><w:rPr/><w:t>. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>axisHandle</w:t></w:r><w:r><w:rPr/><w:t> specifies the axis. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+figure(); 
+tiledlayout(3,2)
+S.axisHandle = nexttile();
+S.frameSize = [30,20];
+S.circSize = 4; 
+S.nSizes = NaN; 
+S.edgeType = 0;
+S.supressWarning = true;
+bubblebath(S)
+xlim(S.axisHandle, [-19 19])
+ylim(S.axisHandle, [-14 14])
+title(S.axisHandle, 'edgeType 0')
+
+S.axisHandle = nexttile();
+S.frameSize = [40,60];
+S.edgeType = 1;
+bubblebath(S)
+xlim(S.axisHandle, [-25 25])
+ylim(S.axisHandle, [-35 35])
+title(S.axisHandle, 'edgeType 1')
+
+S.axisHandle = nexttile();
+S.frameSize = [40 40];
+S.edgeType = 2;
+bubblebath(S)
+xlim(S.axisHandle, [-25 25])
+ylim(S.axisHandle, [-25 25])
+title(S.axisHandle, 'edgeType 2')
+
+S.axisHandle = nexttile();
+S.frameSize = [30 30];
+S.edgeType = 3;
+bubblebath(S)
+xlim(S.axisHandle, [-16 16])
+ylim(S.axisHandle, [-16 16])
+title(S.axisHandle, 'edgeType 3')
+
+rng('default')
+S.axisHandle = nexttile();
+S.frameSize = [30 20];
+S.circSize = 4; 
+S.edgeType = 0;
+S.drawFrame = false;
+bubblebath(S)
+xlim(S.axisHandle, [-19 19])
+ylim(S.axisHandle, [-14 14])
+title(S.axisHandle, 'edgeType 0; drawFrame false')
+]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Set </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap</w:t></w:r><w:r><w:t> flag and </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlapType</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Overlap is specified by one of the following scalar values</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap=true</w:t></w:r><w:r><w:rPr/><w:t> circles can overlap by any amount.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap=false</w:t></w:r><w:r><w:rPr/><w:t> circles will not overlap (default).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap=[a positive value]</w:t></w:r><w:r><w:rPr/><w:t> sets the minimum distance between bubbles (see </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlapType</w:t></w:r><w:r><w:rPr/><w:t>).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap=[a negative value]</w:t></w:r><w:r><w:rPr/><w:t> sets the maximum overlap between bubbles (see </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlapType</w:t></w:r><w:r><w:rPr/><w:t>).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:rPr/><w:t>OverlapType specifies how overlap is defined when </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap</w:t></w:r><w:r><w:rPr/><w:t> is a positive or negative numeric value.  </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlapType='absolute'</w:t></w:r><w:r><w:rPr/><w:t> the </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap</w:t></w:r><w:r><w:rPr/><w:t> distance is the same for all radii. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlapType='relative'</w:t></w:r><w:r><w:rPr/><w:t> the </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>overlap</w:t></w:r><w:r><w:rPr/><w:t> distance is </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>r*overlap</w:t></w:r><w:r><w:rPr/><w:t> where </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>r</w:t></w:r><w:r><w:rPr/><w:t> is the radius (default).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+figure(); 
+tiledlayout(3,2)
+S.axisHandle = nexttile();
+S.frameSize = [40 40];
+S.circSize = [1 2 4]; 
+S.nSizes = NaN; 
+S.overlap = true; 
+S.supressWarning = true;
+bubblebath(S)
+title(S.axisHandle, 'overlap true')
+
+S.axisHandle = nexttile();
+S.overlap = false; 
+bubblebath(S)
+title(S.axisHandle, 'overlap false')
+
+S.axisHandle = nexttile();
+S.overlap = 1; 
+S.overlapType = 'absolute';
+bubblebath(S)
+title(S.axisHandle, 'overlap 1, absolute')
+
+S.axisHandle = nexttile();
+S.overlap = 1; 
+S.overlapType = 'relative';
+bubblebath(S)
+title(S.axisHandle, 'overlap 1, relative')
+
+S.axisHandle = nexttile();
+S.circSize = [4,7]; 
+S.overlap = -4; 
+S.overlapType = 'absolute';
+bubblebath(S)
+title(S.axisHandle, 'overlap -4, absolute')
+
+S.axisHandle = nexttile();
+S.circSize = [4,8]; 
+S.overlap = -1; 
+S.overlapType = 'relative';
+bubblebath(S)
+title(S.axisHandle, 'overlap -1, relative')]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Set density</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Density is value [0 &lt; density &lt;= 1] with a default of 0.7 and controls the density of bubbles.  Note that there is a ceiling effect that prevents an increase in density as the plot becomes saturated with bubbles.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+figure(); 
+tiledlayout(1,3)
+S.axisHandle = nexttile();
+S.frameSize = [20 20];
+S.circSize = 1; 
+S.nSizes = NaN; 
+S.density = .05; 
+S.supressWarning = true;
+bubblebath(S)
+title(S.axisHandle, 'density 0.05')
+
+S.axisHandle = nexttile();
+S.density = .20;  
+bubblebath(S)
+title(S.axisHandle, 'density 0.20')
+
+S.axisHandle = nexttile();
+S.density = .90;  
+bubblebath(S)
+title(S.axisHandle, 'density 0.90')]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Control speed and number of attempts</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>The algorithm makes iterative attempts the set randomized circles while meeting the parameter specifications.  The following parameters will affect the algorithm's speed and outcome. </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>maxCircsPerRad</w:t></w:r><w:r><w:rPr/><w:t> sets the maximum number of bubbles per radius (default 5000, unless the radii are small, this upper limit will rarely be met).</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>circPoints</w:t></w:r><w:r><w:rPr/><w:t> sets the number of coordinates in each circle (default 628).  Reducing the value greatly decreases the size of the figure file.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="ListParagraph"/><w:numPr><w:numId w:val="1"/></w:numPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>maxIt</w:t></w:r><w:r><w:rPr/><w:t> sets the maximum number of attempts to find available circle locations for each radius (default 200).  Increasing this value increases the chance of filling available space and increase the computation time.  </w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default') % for reproducibility 
+clear S
+figure(); 
+tiledlayout(2,3)
+S.axisHandle = nexttile();
+S.frameSize = [20 20];
+S.circSize = [.7 2 8]; 
+S.nSizes = NaN; 
+S.maxIt = 5; 
+S.supressWarning = true;
+bubblebath(S)
+title(S.axisHandle, 'maxIt 5 attempts')
+
+rng('default')
+S.axisHandle = nexttile();
+S.maxIt = 100;
+bubblebath(S)
+title(S.axisHandle, 'maxIt 100 attempts')
+
+rng('default')
+S.axisHandle = nexttile();
+S.maxIt = 3000;
+bubblebath(S)
+title(S.axisHandle, 'maxIt 5000 attempts')
+
+rng('default')
+S.axisHandle = nexttile();
+S.circSize = [1,2,3];
+S.circPoints = 5;
+S.edgeType = 1;
+S.maxIt = 200;
+bubblebath(S)
+title(S.axisHandle, 'circPoints 5')
+
+rng('default')
+S.axisHandle = nexttile();
+S.circPoints = 9;
+bubblebath(S)
+title(S.axisHandle, 'circPoints 9')
+
+rng('default')
+S.axisHandle = nexttile();
+S.circPoints = 50;
+bubblebath(S)
+title(S.axisHandle, 'circPoints 50')]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Use outputs</w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Reproduce a bubblebath plot</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>Set the seed to the random number generator to reproduce a plot.  Due to algorithm changes between releases of </w:t></w:r><w:r><w:rPr><w:rFonts w:cs="monospace"/></w:rPr><w:t>bubblebath.m</w:t></w:r><w:r><w:rPr/><w:t>, reproducibility may require using the same version.</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('shuffle')
+figure()
+tiledlayout(1,2)
+clear S
+S.axisHandle = nexttile();
+S.supressWarning = true; 
+[~, ~, ~, bbStruct] = bubblebath(S);
+
+% reproduce plot
+rng(bbStruct.rng)
+bbStruct.axisHandle = nexttile();
+bubblebath(bbStruct)]]></w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="text"/><w:jc w:val="left"/></w:pPr><w:r><w:t>View parameters</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[disp(bbStruct)]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Calculate and plot the area of each circle</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default')
+figure()
+tiledlayout(1,2)
+clear S
+S.axisHandle = nexttile();
+S.circSize = [2 4 8];
+S.nSizes = NaN; 
+S.edgeType = 1;
+S.supressWarning = true;
+circData = bubblebath(S); 
+
+circArea = pi * circData(:,3).^2; 
+[radiusID, radii] = findgroups(circData(:,3));
+totalArea = splitapply(@sum,circArea,radiusID);
+nexttile()
+bar(categorical(radii), totalArea); 
+axis square
+xlabel('radius')
+ylabel('Total area')]]></w:t></w:r></w:p><w:p><mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice Requires="R2018b"><w:pPr><w:pStyle w:val="heading2"/><w:jc w:val="left"/></w:pPr></mc:Choice><mc:Fallback><w:pPr><w:pStyle w:val="heading"/><w:jc w:val="left"/></w:pPr></mc:Fallback></mc:AlternateContent><w:r><w:t>Fill bubbles with color</w:t></w:r></w:p><w:p><w:pPr><w:pStyle w:val="code"/></w:pPr><w:r><w:t><![CDATA[rng('default')
+clear S
+S.circSize = [1 2 4 6];
+S.nSizes = NaN; 
+S.edgeType = 1;
+S.overlap = .2;
+S.supressWarning = true;
+[circData, circHandles] = bubblebath(S); 
+radiusID = findgroups(circData(:,3));
+colors = jet(max(radiusID)); 
+arrayfun(@(i)rectangle('Position',[circData(i,1:2)-circData(i,3),circData(i,3).*[2,2]],...
+    'FaceColor',colors(radiusID(i),:),'Curvature',[1,1]), 1:size(circData,1))
+delete(circHandles)
+]]></w:t></w:r></w:p></w:body></w:document>
