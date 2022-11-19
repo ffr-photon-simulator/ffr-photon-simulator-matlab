@@ -23,14 +23,16 @@ classdef BoundedLattice
     fiber_lattice % the lattice array
 
     % Dimensions in units of fibers
-    number_fibers_in_length
+    number_fibers_in_length % integer
     number_fibers_in_width
     x_padding
     y_padding
-    lattice_fibers_length
+    lattice_fibers_length % leftmost fiber to rightmost fiber length
     lattice_fibers_width
-    lattice_length
+    lattice_length % add padding
     lattice_width
+    % num fibers per quadrant
+    lattice_quadrant_density_avg = floor(((BoundedLattice.i^2)/(BoundedLattice.fiber_diameter*pi))/2); % (quadrant area / fiber area) / 2
 
     % Boundary dictionary
     % We need to keep track of how many photons impact each boundary. The boundaries
@@ -65,7 +67,9 @@ classdef BoundedLattice
       obj.lattice_length = obj.lattice_fibers_length + (2 * obj.x_padding);
       obj.lattice_width = obj.lattice_fibers_width + obj.y_padding;
 
-      obj.fiber_lattice = initializeFiberLattice(obj);
+      obj.fiber_lattice = initializeRandomLattice(obj);
+      disp(obj.fiber_lattice)
+      %obj.fiber_lattice = initializeFiberLattice(obj);
       %disp("Fiber lattice:\n" + obj.fiber_lattice)
       % Boundary dictionary
       % We need to keep track of how many photons impact each boundary. The boundaries
@@ -96,7 +100,7 @@ classdef BoundedLattice
             [reflected, reflectedFiberCoords] = obj.checkIfReflected(photonCoords);
             [atBoundary, boundary] = checkIfAtBoundary(obj, photonCoords);
             if atBoundary == true
-              %disp("At boundary.")
+              disp("At boundary.")
               if boundary == "Inner"
                   innerBoundCoordArray = [innerBoundCoordArray; photonCoords]; % store only inner boundary coords
               end
@@ -121,6 +125,27 @@ classdef BoundedLattice
 
 
     % Fiber latice init methods
+    function lattice = initializeRandomLattice(obj)
+        lattice = [];
+        w = obj.number_fibers_in_width;
+        l = obj.number_fibers_in_length;
+        for row = -w:w      % -2 -1 0 1 2
+            for col = -l:l  % -4 -3 -2 -1 0 1 2 3 4
+                qXlow = row * obj.i; % lower x bound of quadrant
+                qYlow = col * obj.i; % lower y bound of quadrant
+                qXup  = qXlow + obj.i;
+                qYup  = qYlow + obj.i;
+                xrands = qXlow + (qXup - qXlow).*rand(obj.lattice_quadrant_density_avg, 1); % generate l_q_d_avg rands between x low and high
+                yrands = qYlow + (qYup - qYlow).*rand(obj.lattice_quadrant_density_avg, 1);
+                for f = 1:size(xrands)
+                    fiber = [xrands(f), yrands(f)];
+                    disp(fiber)
+                    lattice = [lattice; fiber];
+                end
+            end
+        end
+    end
+
     function lattice = initializeFiberLattice(obj)
         lattice = [];
       for fiber = 1:obj.number_fibers_in_width
@@ -269,6 +294,10 @@ classdef BoundedLattice
         atBoundary = false;
         boundary = '';
       end
+
+        function count = boundaryCount(obj, boundaryName)
+            count = obj.boundary_impacts_dict(boundaryName);
+        end
     end
 
     function coordString = coordToString(obj, coord)
@@ -284,6 +313,7 @@ classdef BoundedLattice
       summary = summary + "\nNumber photons reached OUTER bound: " + string(obj.boundary_impacts_dict('Outer'));
       summary = summary + "\nNumber photons reached LEFT bound: " + string(obj.boundary_impacts_dict('Left'));
       summary = summary + "\nNumber photons reached RIGHT bound: " + string(obj.boundary_impacts_dict('Right')) + "\n";
+      fprintf(summary)
     end
   end % methods
 end
