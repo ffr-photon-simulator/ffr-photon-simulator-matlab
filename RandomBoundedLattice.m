@@ -1,39 +1,55 @@
-classdef BoundedLattice
+classdef RandomBoundedLattice
 	% Make the lattice using bubblebath()
   properties (Constant)
     % Units in meters, seconds unless otherwise specified
-    incident_photon_wavelength = 2.5 * 10^(-7); % 254nm
+    incident_photon_wavelength = 2.5 * 10^(-7);
 
     fiber_diameter             = 4 * 10^(-6); % 4 microns
-    fiber_radius               = BoundedLattice.fiber_diameter/2;
-    fiber_reflection_radius    = BoundedLattice.fiber_radius + BoundedLattice.incident_photon_wavelength/2;
+    fiber_radius               = RandomBoundedLattice.fiber_diameter/2;
+    fiber_min_radius           = RandomBoundedLattice.fiber_radius;
+    fiber_max_radius           = RandomBoundedLattice.fiber_radius * 1.01; % bubblebath needs min ≠ max
+    % Add this to the radius to get the reflection radius for all fibers
+    fiber_refl_rad_delta       = RandomBoundedLattice.fiber_radius + RandomBoundedLattice.incident_photon_wavelength/2; % add half-wavelength
+    fiber_min_separation       = 2*10^(-6);
 
-    fibers_x_separation_basis  = 7.0711 * 10^(-6); % i
-    fibers_y_separation_basis  = 7.0711 * 10^(-6); % j
-    i = BoundedLattice.fibers_x_separation_basis;
-    j = BoundedLattice.fibers_y_separation_basis;
-    x_basis_multiplier = 2; % twice the basis is the horizontal distance between fibers
+    i                         = 10*10^(-6);
+    j                         = 10*10^(-6);
+    %x_basis_multiplier        = 2; % twice the basis is the horizontal distance between fibers
   end
   properties
     general_photon_step
 
-      % Fiber Lattice
+    % Fiber Lattice
     % 10μm diagonal separation means about 14μm horizontal and vertical separation
     % Divide the horizontal and vertical separation in half, and let these be
     % a basis for laying out the lattice.
-    fiber_lattice % the lattice array
+    fiber_data % the lattice array
 
-    % Dimensions in units of fibers
+    % Bubblebath struct params
+    bb_frameSize
+    bb_circSize
+    bb_nSizes
+    bb_maxCircsPerRad
+    bb_maxIt
+    bb_edgeType
+    bb_density
+    bb_overlap
+    bb_overlapType
+    bb_drawFrame
+    bb_frame % handle to rectangular boundary frame
+
+    bb_struct
+
+ % Dimensions in units of fibers
     number_fibers_in_length % integer
     number_fibers_in_width
     x_padding
     y_padding
-    lattice_fibers_length % leftmost fiber to rightmost fiber length
-    lattice_fibers_width
+    lattice_fibers_length % leftmost fiber to rightmost fiber length. Bubblebath frame length.
+    lattice_fibers_width  % Bubblebath frame width.
     lattice_length % add padding
     lattice_width
     % num fibers per quadrant
-    lattice_quadrant_density_avg = floor(((BoundedLattice.i^2)/(BoundedLattice.fiber_diameter*pi))/2); % (quadrant area / fiber area) / 2
 
     % Boundary dictionary
     % We need to keep track of how many photons impact each boundary. The boundaries
@@ -53,30 +69,67 @@ classdef BoundedLattice
   end % properties
 
   methods
-      function obj = BoundedLattice(length, width, generalStepMultiplier)
+    % Constructor
+      function obj = RandomBoundedLattice(lengthMultiplier, widthMultiplier, generalStepMultiplier)
+        % Length and width multipliers multiply i and j.
+        % Hardcode bubblebath params here for now.
       obj.general_photon_step = (obj.incident_photon_wavelength / 2) / generalStepMultiplier;
       obj.incident_photon_y_step = -obj.general_photon_step;
-
       obj.photonXStep = obj.incident_photon_x_step;
       obj.photonYStep = obj.incident_photon_y_step;
-      obj.number_fibers_in_length = length;
-      obj.number_fibers_in_width = width;
+
+      %obj.number_fibers_in_length = length;
+      %obj.number_fibers_in_width = width;
       obj.x_padding = obj.i;
       obj.y_padding = obj.j;
-      obj.lattice_fibers_length = (2 * obj.number_fibers_in_length * obj.i); % lattice length w/o padding
-      obj.lattice_fibers_width = (obj.number_fibers_in_width * obj.j); % lattice width w/o padding
-      obj.lattice_length = obj.lattice_fibers_length + (2 * obj.x_padding);
-      obj.lattice_width = obj.lattice_fibers_width + obj.y_padding;
+      obj.lattice_fibers_length = (lengthMultiplier * obj.i); % lattice length w/o padding
+      obj.lattice_fibers_width = (widthMultiplier * obj.j); % lattice width w/o padding
+      obj.lattice_length = obj.lattice_fibers_length; %obj.lattice_fibers_length + (2 * obj.x_padding);
+      obj.lattice_width = obj.lattice_fibers_width; %obj.lattice_fibers_width + (2 * obj.y_padding);
 
-      obj.fiber_lattice = initializeRandomLattice(obj);
-      disp(obj.fiber_lattice)
-      %obj.fiber_lattice = initializeFiberLattice(obj);
-      %disp("Fiber lattice:\n" + obj.fiber_lattice)
+      obj.bb_frameSize   = [obj.lattice_fibers_length obj.lattice_fibers_width]; % [xlength ylength]
+      obj.bb_circSize = [RandomBoundedLattice.fiber_radius RandomBoundedLattice.fiber_radius*1.01];
+      obj.bb_nSizes = 25; % default 25
+      obj.bb_maxCircsPerRad = 5000;
+      obj.bb_maxIt = 400;
+      obj.bb_edgeType = 1; % all inside frame
+      obj.bb_density = 0.001; % not yet sure what the "density" does in bubblebath.m
+      obj.bb_overlap = RandomBoundedLattice.fiber_min_separation;
+      obj.bb_overlapType = 'absolute';
+      obj.bb_drawFrame = true;
+
+      s = struct();
+      s.frameSize = obj.bb_frameSize;
+      s.circSize = obj.bb_circSize;
+      s.nSizes = obj.bb_nSizes;
+      s.maxCircsPerRad = obj.bb_maxCircsPerRad;
+      s.maxIt = obj.bb_maxIt;
+      s.edgeType = obj.bb_edgeType;
+      s.density = obj.bb_density;
+      s.overlap = obj.bb_overlap;
+      s.overlapType = obj.bb_overlapType;
+      s.drawFrame = obj.bb_drawFrame;
+
+      obj.bb_struct = s;
+
+	    % Use bubblebath() by Adam Danz
+	    % at https://www.mathworks.com/matlabcentral/answers/446114-non-overlapping-random-circles
+      % Copied from bubblebath.m documentation:
+      % Outputs
+      %   * circData: [m x 3] matrix of m circles data showing [xCenter, yCenter, radius].
+      %   * circHandles: [m x 1] vector of handles for each line object / circle.
+      %   * frame: handle to 'frame' rectangle (GraphicsPlaceHolder if drawFrame is false).
+      %   * S: A structure with fields listing all parameters used to reproduce the figure
+      %       also including S.rng which is the random number generator state you can use
+      %       to reproduce a figure.
+      % fiber_data is [xCoord yCoord radius] row for each fiber
+      [obj.fiber_data, circHandles, obj.bb_frame, S] = bubblebath(obj.bb_struct);
+      %disp("Fiber lattice:\n" + obj.fiber_data)
       % Boundary dictionary
       % We need to keep track of how many photons impact each boundary. The boundaries
       % are either defined by a constant x-value or constant y-value.
       obj.boundary_names  = {'Outer', 'Inner', 'Left', 'Right'};
-      obj.boundary_coords = {obj.lattice_width, 0, -obj.lattice_length/2, obj.lattice_length/2};
+      obj.boundary_coords = {obj.lattice_width / 2, -obj.lattice_width / 2, -obj.lattice_length/2, obj.lattice_length/2};
       obj.boundary_dict   = containers.Map(obj.boundary_names, obj.boundary_coords);
       obj.boundary_impacts = {0,0,0,0}; % count of number of impacts on each boundary
       obj.boundary_impacts_dict = containers.Map(obj.boundary_names, obj.boundary_impacts);
@@ -89,7 +142,7 @@ classdef BoundedLattice
           photonCoords = [ initialCoordsArray(row,1), initialCoordsArray(row,2) ];
           disp("Photon " + photonTracker + " initial coords: " + coordToString(obj, photonCoords))
           photonReflectionTracker = 0;
-          reflected = false;
+          % reflected = false;
           atBoundary = false;
           while (atBoundary == false)
             previousPhotonCoords = photonCoords;
@@ -124,69 +177,16 @@ classdef BoundedLattice
         end
     end
 
-
-    % Fiber latice init methods
-    function lattice = initializeRandomLattice(obj)
-        lattice = [];
-        w = obj.number_fibers_in_width;
-        l = obj.number_fibers_in_length;
-        for row = -w:w      % -2 -1 0 1 2
-            for col = -l:l  % -4 -3 -2 -1 0 1 2 3 4
-                qXlow = row * obj.i; % lower x bound of quadrant
-                qYlow = col * obj.i; % lower y bound of quadrant
-                qXup  = qXlow + obj.i;
-                qYup  = qYlow + obj.i;
-                xrands = qXlow + (qXup - qXlow).*rand(obj.lattice_quadrant_density_avg, 1); % generate l_q_d_avg rands between x low and high
-                yrands = qYlow + (qYup - qYlow).*rand(obj.lattice_quadrant_density_avg, 1);
-                for f = 1:size(xrands)
-                    fiber = [xrands(f), yrands(f)];
-                    disp(fiber)
-                    lattice = [lattice; fiber];
-                end
-            end
-        end
-    end
-
-    function lattice = initializeFiberLattice(obj)
-        lattice = [];
-      for fiber = 1:obj.number_fibers_in_width
-        if isOdd(obj, fiber)
-          oddRow = makeOddFibersRow(obj, fiber*obj.j);
-          lattice = [lattice; oddRow];
-        else
-          evenRow = makeEvenFibersRow(obj, fiber*obj.j);
-          lattice = [lattice; evenRow];
-        end
-      end
-    end
-
-    function oddRow = makeOddFibersRow(obj, height)
-      leftmostFiber = [ (-obj.lattice_fibers_length / 2), height];
-      oddRow  = leftmostFiber;
-      for step = 1:(obj.number_fibers_in_length-1)
-        nextFiber = [ leftmostFiber(1) + (step * obj.x_basis_multiplier * obj.i), height];
-        oddRow = [oddRow ; nextFiber];
-      end
-    end
-
-    function evenRow = makeEvenFibersRow(obj, height)
-      leftmostFiber = [ ((-obj.lattice_fibers_length + 2*obj.i) / 2), height];
-      evenRow  = leftmostFiber;
-      for step = 1:(obj.number_fibers_in_length-2)
-        nextFiber = [leftmostFiber(1) + (step * obj.x_basis_multiplier * obj.i), height];
-        evenRow = [evenRow; nextFiber];
-      end
-    end
-
-    function isodd = isOdd(obj, number)
-      % Odd has remainder 1 = true
-      % Even has remainder 0 = false
-      isodd = rem(number, 2);
-    end
-
     % Photon motion methods
     function [newXStep, newYStep] = calculateNewSteps(obj, reflectionPoint, previousPhotonCoords, reflectedFiberCoords)
      % Find the xstep and ystep of a reflected photon.
+     %
+     % Reflect the previous photon coordinates across the radius. 
+     % Find the line F that goes through the previous photon coordinates and is perpendicular to the radius
+     % G which goes through the reflection point on the fiber. The x and y
+     % distance from the previous photon coordinates to the intersection point
+     % of F and G are the same x and y distances from the intersection point
+     % to the new reflected point, by symmetry.
       x_i = previousPhotonCoords(1);
       y_i = previousPhotonCoords(2);
       a = reflectionPoint(1);
@@ -194,14 +194,14 @@ classdef BoundedLattice
       fibera = reflectedFiberCoords(1);
       fiberb = reflectedFiberCoords(2);
 
-      m = (b -fiberb)/(a - fibera);
-      i = b - (m*a);
-      n = -1/m;
-      j = y_i - (n*x_i);
+      m = (b - fiberb)/(a - fibera); % slope of line between reflection point and fiber coords
+      %i = b - (m*a); % 
+      n = -1/m;                      % slope perpendicular to the radius through the reflection point
+      j = y_i - (n*x_i);             % y value to add after reflection
 
-      C = b + (n*x_i) - (m*a) - y_i;
+      C = b + (n*x_i) - (m*a) - y_i; % 
 
-      t = obj.fibers_x_separation_basis;
+      %t = obj.fibers_x_separation_basis;
 
       %o = linspace(-3*t,3*t,100);
       %p = m*o + i;
@@ -209,12 +209,12 @@ classdef BoundedLattice
       %plot(o,p,'k.','MarkerSize',5);
       % Plot the radius to the point of reflection.
       %plot([reflectionPoint(1) reflectedFiberCoords(1)], [reflectionPoint(2) reflectedFiberCoords(2)],'k.','MarkerSize',15);
-      c= (-m*C)/(m^2 + 1);
-      d = (n*c) + j;
+      c= (-m*C)/(m^2 + 1);   % x coord of intersection point
+      d = (n*c) + j;         % y coord of intersection point
 
-      xNew = x_i + 2*(c-x_i);
-      yNew = y_i + 2*(d-y_i);
-      plot([xNew, yNew ],'k.','MarkerSize',10)
+      xNew = x_i + 2*(c-x_i); % x coord of reflected point
+      yNew = y_i + 2*(d-y_i); % y coord of reflected point
+      %plot([xNew, yNew ],'k.','MarkerSize',10)
 
       newXStep = xNew - a;
       newYStep = yNew - b;
@@ -232,13 +232,14 @@ classdef BoundedLattice
     % RETURNS
     % reflected: tells the loop whether the photon has reflected; either true or false.
     % reflectedFiberCoords: the coordinates of the fiber off which the photon reflected.
-      for latticeRow = 1:obj.number_fibers_in_width
-        for row = 1:size(obj.fiber_lattice)
-            fiberXCoord = obj.fiber_lattice(row,1);
-          fiberYCoord = obj.fiber_lattice(row,2);
+      %for latticeRow = 1:obj.number_fibers_in_width
+        for row = 1:size(obj.fiber_data)
+          fiberXCoord = obj.fiber_data(row,1);
+          fiberYCoord = obj.fiber_data(row,2);
           fiberCoords = [fiberXCoord fiberYCoord];
+          fiberReflectionRadius = obj.fiber_data(row,3) + RandomBoundedLattice.fiber_refl_rad_delta;
           photonDistanceToFiber = calculatePhotonDistanceToFiber(obj, photonCoords, fiberCoords);
-          if photonDistanceToFiber < obj.fiber_reflection_radius
+          if photonDistanceToFiber < fiberReflectionRadius
             %disp("  Photon distance to fiber: " + photonDistanceToFiber)
             reflected = true;
             reflectedFiberCoords = fiberCoords;
@@ -247,7 +248,7 @@ classdef BoundedLattice
         end
         reflected = false;
         reflectedFiberCoords = [];
-      end
+      %end
     end
 
     function newCoords = movePhoton(obj, xStep, yStep, previousCoords)
