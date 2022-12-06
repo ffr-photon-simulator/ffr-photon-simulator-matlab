@@ -11,16 +11,12 @@ classdef Photon
 
   methods
     function obj = Photon(x, y, xStep, yStep)
-      % The photon must be assigned coordinates and
-      % x and y steps. At Layer 1, the x step is usually 0 and
-      % the y step is usually +- WAVELENGTH/2.
+      % The photon must be assigned coordinates and x and y steps. At Layer 1,
+      % the x step is usually 0 and the y step is usually +- WAVELENGTH/2.
       obj.x = x;
       obj.y = y;
       obj.xStep = xStep;
       obj.yStep = yStep;
-      %disp("New photon made with: ")
-      %disp(obj.x)
-      %disp(obj.y)
     end
 
     function obj = move(obj)
@@ -29,19 +25,11 @@ classdef Photon
     end
 
     function obj = moveX(obj)
-      %disp("Photon obj:")
-      %disp(obj)
-      %obj.xStep
-      %disp("Old x: " + obj.x)
       obj.x = obj.x + obj.xStep;
-      %disp("New x: " + obj.x)
     end
 
     function obj = moveY(obj)
-      %disp("Old y: " + obj.y)
-      %disp(obj.yStep)
       obj.y = obj.y + obj.yStep;
-      %disp("New y: " + obj.y)
     end
 
     function coords = getCoords(obj)

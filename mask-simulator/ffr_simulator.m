@@ -1,49 +1,68 @@
-% Multipliers
-separationMultiplier = 100; % multiplies separation between each initial photon
-yStepMultiplier = 1; % multiplies y step
+%%% The "main" function or script to run the simulator.
 
-% Photon step information
+% This script defines the variables necessary to run ray tracing simulations
+% on groups of Layers. A ray tracing method is called, and the output is displayed.
+
+%%% USER CONFIGURATION
+% Initial photon multipliers
+% Change the x-separation between each initial photon:
+%  >1 decreases the number of photons
+%  <1 increases the number of photons
+separationMultiplier = 100;
+% Change the length of the initial photons' y step:
+%  >1 increases the y step
+%  <1 decreases the y step
+yStepMultiplier = 1;
+
+% Layers
+nLayers = 2; % the number of layers
+
+%%% CONSTANTS
+% Initial photons
 initialXStep = 0;
+% Define two initial y steps, one for ray tracing from the outer layer to
+% the inner layer of the FFR, the other for the opposite direction. This
+% is the only change necessary to ray trace in the opposite direction.
 outerToInnerYStep = -(Photon.WAVELENGTH/2)*yStepMultiplier;
 innerToOuterYStep = -outerToInnerYStep;
-
+% The x-separation between each initial photon.
 separation = abs(outerToInnerYStep)*separationMultiplier;
 
-% Iteratively create layers
-nLayers = 2;
+% Layer parameter arrays. The value at index i in these arrays
+% will be the value supplied to the ith layer. Thus each array
+% must be the same length.
 lengths = [10, 10]; % multiply by 10 microns
 widths  = [10, 10]; % multiply by 10 microns
-minRadii  = [0, 0];
-maxRadii  = [0, 0];
-densities = [0, 0]; % density per layer
+minRadii  = [0, 0]; % will be overridden
+maxRadii  = [0, 0]; % will be overridden
+densities = [0, 0]; % density per layer, will be overridden
 
-% Cell array to store layers
+%%% GENERATION
+% Make a cell array to the store layers.
 layersCell = cell(1,nLayers);
 for i = 1:nLayers
   layersCell{i} = Layer(lengths(i), widths(i), minRadii(i), maxRadii(i), densities(i));
 end
-%disp("Layers: ")
-%disp(layersCell)
 
+% Make a plain array from the cell array.
 layersArray = [layersCell{:}];
-disp(layersArray)
-layerStack = LayerStack(layersArray); % convert cell array to array
 
+% Make an array of the initial photons.
 initialPhotons = makeInitialPhotons(-3*BubblebathFiberLattice.LATTICE_I, 3*BubblebathFiberLattice.LATTICE_I, separation, layersArray(1), initialXStep, outerToInnerYStep);
 %disp(initialPhotons)
 
-% Boundary information storage
+% Make the boundary map.
 boundNames = {'inner','outer','left','right'};
 boundArrays = {[],[],[],[]};
 iterativeLeftRightBoundsMap = containers.Map(boundNames, boundArrays);
 
-%%% Do the ray tracing
+%%% RAY TRACING
 transmittedToInteriorLayer = iterativeRayTrace(initialPhotons, layersArray, iterativeLeftRightBoundsMap);
 
-%%% Display Outputs
+%%% OUTPUTS
 disp("Number of photons that traversed each layer to reach and then escape the interior layer: " + size(transmittedToInteriorLayer,1))
-%disp(transmittedToInteriorLayer)
 
+%%% Helper functions
 function photons = makeInitialPhotons(xStart, xEnd, separation, exteriorLayer, initialXStep, outerToInnerYStep)
   % The photons' x-axis range is from xStart to xEnd. Their y coordinate is
   % equal to half the first layer's width.
@@ -52,7 +71,6 @@ function photons = makeInitialPhotons(xStart, xEnd, separation, exteriorLayer, i
   photons = [];
   for m = 1:nPhotons
     nextPhoton = Photon(xStart + m*separation, exteriorLayer.latticeWidth/2, initialXStep, outerToInnerYStep);
-    %disp(nextPhoton)
     photons = [photons; nextPhoton];
   end
 end
@@ -62,12 +80,6 @@ function transmittedPhotons = prepareIncomingPhotons(nextLayer, transmittedPhoto
   for i = 1:nTransmittedPhotons
     transmittedPhotons(i).setY(nextLayer.latticeWidth/2);
   end
-  %incomingPhotons = nan(nTransmittedPhotons, 1); % pre-allocate
-  %for i = 1:nTransmittedPhotons
-    %photon = transmittedPhotons(i);
-    %newPhoton = Photon(photon.x, nextLayer.latticeWidth/2, photon.xStep, photon.yStep);
-    %incomingPhotons(i) = newPhoton;
-  %end
 end
 
 function iterativeSummary(layerNum, photonsAtBoundsMap)
@@ -90,7 +102,6 @@ function transmittedToInterior = iterativeRayTrace(initialPhotons, layersArray, 
   % the incoming photons for the next layer.
   rayTracer = RayTracer();
   incomingPhotons = initialPhotons;
-  %disp(incomingPhotons)
   for i = 1:size(layersArray,2)
     layer = layersArray(i);
     % Ray trace and receive a map of {boundary -> [photons]}.

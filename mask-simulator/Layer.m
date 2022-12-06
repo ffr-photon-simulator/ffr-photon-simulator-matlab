@@ -1,7 +1,5 @@
 classdef Layer
   properties
-    % Anything here does not have a getter. Access these directly,
-    % but use getters to access what they contain (e.g. attributes).
     latticeLength
     latticeWidth
     lattice

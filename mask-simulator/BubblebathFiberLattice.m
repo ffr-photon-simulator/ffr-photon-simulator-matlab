@@ -51,10 +51,6 @@ classdef BubblebathFiberLattice
       obj.outerBound =  obj.bb_struct.frameSize(2) / 2;
       obj.leftBound  = -obj.bb_struct.frameSize(1) / 2;
       obj.rightBound =  obj.bb_struct.frameSize(1) / 2;
-      %disp(obj.innerBound)
-      %disp(obj.outerBound)
-      %disp(obj.leftBound)
-      %disp(obj.rightBound)
     end
 
     function minRadius = get.minRadius(obj)

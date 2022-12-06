@@ -1,4 +1,7 @@
 classdef LayerStack
+  % A data class for an array of layers. When the simulator
+  % runs on the combined stack of layers, this class stores
+  % information about that combined stack.
   properties
     layers
     width

@@ -1,44 +1,47 @@
 classdef RayTracer
-    % Performs ray tracing on a given Layer (fiber lattice).
+    % Performs ray tracing on a given Layer (a fiber lattice).
     % The primary method, rayTrace(layer, incomingPhotons), returns the necessary output.
-
+    %
+    % rayTrace(layer, incomingPhotons) returns a Map of each boundary name to an array
+    % of the Photon objects which crossed each boundary. rayTrace() iterates through
+    % each photon in the incomingPhotons array. Because each Photon stores its coordinates
+    % and x-y steps, rayTrace() does not have to keep up with the current coordinates and
+    % steps, a major design improvement. It simply calls the Photon's methods to move it
+    % and set new x-y steps. After the Photon moves, rayTrace() checks if it has crossed
+    % a boundary or if it has reflected off of a fiber. If not, the Photon is moved again.
+    % If it's at a boundary, the relevant output information is stored and the iteration
+    % proceeds to the next photon. If the Photon has reflected, its new x-y steps are
+    % calculated and the loop continues.
     properties
     end
 
     methods
         function obj = RayTracer()
-            % Plain constructor because rayTrace() will handle the actual
-            % ray tracing.
+            % Plain constructor because the methods will handle the actual ray tracing.
         end
 
         function movedPhoton = movePhoton(obj, photon)
-          %disp("> Move photon.")
-          % Move the photon by both its xStep and yStep.
-          %photon.moveX();
-          %photon.moveY();
-          %disp(photon)
-          movedPhoton = photon.move();
+          movedPhoton = photon.move(); % returns a new Photon object for now
         end
 
         function distance = distanceToFiber(obj, photon, fiberCoords)
-          %disp(">> Get distance to fiber.")
           % Calculate the photon's distance to the center of a fiber
           % with the Pythagorean Theorem.
+          % disp(">> Get distance to fiber.")
           xDistance = abs(fiberCoords(1) - photon.x);
           yDistance = abs(fiberCoords(2) - photon.y);
           distance = sqrt(xDistance^2 + yDistance^2);
         end
 
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, layer)
-          %disp("> Check if reflected.")
           % For each fiber in the lattice, calculate the photon's distance to it. If the distance
           % is less than that fiber's reflection radius, the photon has reflected.
+          % disp("> Check if reflected.")
           fibers = layer.getFiberData();
           for row = 1:size(fibers)
             fiberCoords = [fibers(row,1), fibers(row,2)];
             fiberReflectionRadius = fibers(row, 3) + (Photon.WAVELENGTH / 2);
             distanceToFiber = obj.distanceToFiber(photon, fiberCoords);
-            %disp(distanceToFiber)
             if distanceToFiber < fiberReflectionRadius
               hasReflected = true;
               reflectedFiberCoords = fiberCoords;
@@ -51,10 +54,10 @@ classdef RayTracer
         end
 
         function [atBoundary, boundary] = checkIfAtBoundary(obj, layer, photon)
-          %disp("> Check if at boundary.")
           % Check if a photon has passed a boundary, in the order: inner,
           % outer, left, right. We could check both the x and y coords of
           % the photon, but only checking one is accurate enough.
+          % disp("> Check if at boundary.")
           atBoundary = true;
           if photon.y <= layer.getInnerBound() % negative bound
             boundary = 'inner';
@@ -65,7 +68,7 @@ classdef RayTracer
           elseif photon.x >= layer.getRightBound() % positive bound
             boundary = 'right';
           else
-            boundary = '';
+            boundary = 'BOUNDARY_ERROR';
             atBoundary = false;
           end
         end
@@ -83,8 +86,8 @@ classdef RayTracer
           %
           % First, find the intersection point I of R and P. Then, calculate the x and y distances from the incident coords to I.
           % Add double these distance to the incident coords to get the reflected coords.
-          %
-          %disp(">> Calculating new steps.")
+          
+          % disp(">> Calculating new steps.")
           inc_x = incidentPhoton.x;
           inc_y = incidentPhoton.y;
           refl_x = reflectionPoint(1);
@@ -92,31 +95,34 @@ classdef RayTracer
           fiber_x = reflectedFiberCoords(1);
           fiber_y = reflectedFiberCoords(2);
 
-          % m is the slope of R
+          % m is the slope of line R
           m = (refl_y - fiber_y)/(refl_x - fiber_x);
-          n = -1/m; % slope of P
-          yIntP = inc_y - (n*inc_x); % y-intercept of P
+          n = -1/m; % slope of line P
+          yIntP = inc_y - (n*inc_x); % y-intercept of line P
 
-          % Set R = P and get (-x/m) - mx = C. Solve for x to get the x coord of the intersection point I.
-          C = refl_y + (n*inc_x) - (m*refl_x) - inc_y; % constant
-          inter_x = (-m*C)/(m^2 + 1); % intersection x coord
-          inter_y = (n*inter_x) + yIntP;  % calculate y coord
+          % Set R = P and solve for x to get (-x/m) - mx = C, where C is a constant.
+          % Solve for x to get the x coord of the intersection point I.
+          C = refl_y + (n*inc_x) - (m*refl_x) - inc_y; % the constant
+          inter_x = (-m*C)/(m^2 + 1); % intersection point x coord
+          inter_y = (n*inter_x) + yIntP;  % calculate y coord with equation of line P
 
-          % Add to the incident coords double the difference of the incident coords and the intersection point
-          % to get the reflected coords.
-          new_x = inc_x + 2*(inter_x-inc_x); % new photon x coord
-          new_y = inc_y + 2*(inter_y-inc_y); % new photon y coord
+          % To get the reflected coords, add to the incident coords double the
+          % difference of the incident coords and the intersection point.
+          new_x = inc_x + 2*(inter_x-inc_x);
+          new_y = inc_y + 2*(inter_y-inc_y);
 
-          % Subtract the coords of the reflection point to get the x and y steps between the reflection point
-          % and the reflected photon.
+          % Subtract the coords of the reflection point to get the x and y steps
+          % between the reflection point and the reflected photon.
           newXStep = new_x - refl_x;
           newYStep = new_y - refl_y;
         end
 
         function photonsAtBoundsMap = rayTrace(obj, layer, incomingPhotons)
-          % Ray traces photons starting from initialCoords through a layer
+          % Ray traces photons starting from initialCoords through a layer.
+          %
+
           nPhotons = size(incomingPhotons, 1); % get number of rows in first col
-          %disp("Number of photons: " + nPhotons)
+          % disp("Number of photons: " + nPhotons)
           % Map keys: 'inner', 'outer', 'left', 'right'
           % Map values are arrays of photons: [transmitted], [reflected back], [reflected left], [reflected right]
           boundNames = {'inner','outer','left','right'};
@@ -124,36 +130,31 @@ classdef RayTracer
           photonsAtBoundsMap = containers.Map(boundNames, boundArrays); % will store arrays of photons
           photonCount = 1;
 
-          hold on;
+          %hold on;
           % Iterate through each incoming photon.
           for i = 1:nPhotons
-            %disp("Ray trace method at photon " + photonCount)
             photon = incomingPhotons(i);
-            %disp(photon)
+            % Initialize values:
             atBoundary = false;
-            movedPhoton = photon; % starting value
+            movedPhoton = photon;
             % Reflect the photon until it reaches a boundary.
             while atBoundary == false
-              %prevcoords = previousPhoton.getCoords();
-              %disp(obj.coordToString(prevcoords))
               previousPhoton = movedPhoton;
+              % Plot the photon's paths with:
               plot(previousPhoton.x, previousPhoton.y, 'r.','MarkerSize',3)
+              % Move the photon and check if it has reflected or has crossed a boundary
               movedPhoton = obj.movePhoton(previousPhoton);
-              %newcoords = movedPhoton.getCoords();
-              %disp(obj.coordToString(newcoords))
-              %disp(movedPhoton.getCoords())
               [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(movedPhoton, layer);
               [atBoundary, boundary] = obj.checkIfAtBoundary(layer, movedPhoton);
               if atBoundary == true
-                disp("Reached boundary: " + boundary)
+                % Update a Map of each boundary -> array of photons which crossed it.
                 photonsAtBoundsMap(boundary) = [photonsAtBoundsMap(boundary); movedPhoton];
-                % Do not reset the xy steps because each incoming photon already has them.
+                disp(">> Photon " + photonCount + " reached boundary: " + boundary)
               elseif hasReflected == true
-                disp("Photon " + photonCount + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
+                % Calculate the new steps and make a new Photon with those steps.
                 [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
                 movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
-                %movedPhoton.setXStep(newXStep);
-                %movedPhoton.setYStep(newYStep);
+                disp("Photon " + photonCount + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
               end
             end
             photonCount = photonCount + 1;
@@ -161,6 +162,7 @@ classdef RayTracer
         end
 
         function s = coordToString(obj, coords)
+          % Return a string representation of a coordinate pair.
           s = string(coords(1)) + ", " + string(coords(2));
         end
     end
