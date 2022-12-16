@@ -24,6 +24,10 @@ classdef Layer
       fiberData = obj.lattice.bb_data;
     end
 
+    function axisHandle = getAxisHandle(obj)
+      axisHandle = obj.lattice.bb_axisHandle;
+    end
+
     function innerBound = getInnerBound(obj)
       innerBound = obj.lattice.innerBound;
     end
