@@ -42,10 +42,10 @@ classdef BubblebathFiberLattice
       obj.bb_struct.overlapType    = 'absolute';
       obj.bb_struct.drawFrame      = true;
 
-      [obj.bb_data, ~, ~, obj.bb_axisHandle] = bubblebath(obj.bb_struct);
-      hold on
-      plot(obj.bb_data(:,1), obj.bb_data(:,2), 'k.','MarkerSize',5);
-
+      [obj.bb_data, ~, ~, obj.bb_struct_out] = bubblebath(obj.bb_struct);
+      obj.bb_axisHandle = obj.bb_struct_out.axisHandle;
+      % Plot the centers of the fibers as points.
+      plot(obj.bb_axisHandle, obj.bb_data(:,1), obj.bb_data(:,2), 'k.','MarkerSize',5);
 
       obj.innerBound = -obj.bb_struct.frameSize(2) / 2;
       obj.outerBound =  obj.bb_struct.frameSize(2) / 2;
