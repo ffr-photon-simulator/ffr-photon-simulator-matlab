@@ -6,14 +6,14 @@ classdef Layer
   end
 
   methods
-    function obj = Layer(length, width, minRadius, maxRadius, density)
+    function obj = Layer(length, width, minRadius, maxRadius, density, optional_fiberData)
       obj.latticeLength = length*BubblebathFiberLattice.LATTICE_I;
       obj.latticeWidth = width*BubblebathFiberLattice.LATTICE_J;
       frameSize = [obj.latticeLength, obj.latticeWidth];
       minRadius = 4*10^(-6);
       maxRadius = 4.01*10^(-6);
       density = 0.05;
-      obj.lattice = BubblebathFiberLattice(frameSize, minRadius, maxRadius, density);
+      obj.lattice = BubblebathFiberLattice(frameSize, minRadius, maxRadius, density, optional_fiberData);
     end
 
     % GETTERS

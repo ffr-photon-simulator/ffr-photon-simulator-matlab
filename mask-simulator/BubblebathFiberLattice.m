@@ -27,7 +27,7 @@ classdef BubblebathFiberLattice
 
   methods
     % Constructor
-    function obj = BubblebathFiberLattice(frameSize, minRadius, maxRadius, density)
+    function obj = BubblebathFiberLattice(frameSize, minRadius, maxRadius, density, optional_fiberData)
       obj.minRadius = minRadius;
       obj.maxRadius = maxRadius;
 
@@ -44,13 +44,18 @@ classdef BubblebathFiberLattice
 
       [obj.bb_data, ~, ~, obj.bb_struct_out] = bubblebath(obj.bb_struct);
       obj.bb_axisHandle = obj.bb_struct_out.axisHandle;
-      % Plot the centers of the fibers as points.
-      plot(obj.bb_axisHandle, obj.bb_data(:,1), obj.bb_data(:,2), 'k.','MarkerSize',5);
 
       obj.innerBound = -obj.bb_struct.frameSize(2) / 2;
       obj.outerBound =  obj.bb_struct.frameSize(2) / 2;
       obj.leftBound  = -obj.bb_struct.frameSize(1) / 2;
       obj.rightBound =  obj.bb_struct.frameSize(1) / 2;
+
+      % Overwrite the current fiberData if given other fiber data to use.
+      if ~isempty(optional_fiberData)
+        obj.bb_data = optional_fiberData;
+      end
+      % Plot the centers of the fibers as points.
+      plot(obj.bb_axisHandle, obj.bb_data(:,1), obj.bb_data(:,2), 'k.','MarkerSize',5);
     end
 
     function minRadius = get.minRadius(obj)

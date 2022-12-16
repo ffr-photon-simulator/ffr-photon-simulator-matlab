@@ -41,11 +41,16 @@ densities = [0, 0, 0]; % density per layer, will be overridden
 % Make a cell array to the store layers.
 layersCell = cell(1,nLayers);
 for i = 1:nLayers
-  layersCell{i} = Layer(lengths(i), widths(i), minRadii(i), maxRadii(i), densities(i));
+  layersCell{i} = Layer(lengths(i), widths(i), minRadii(i), maxRadii(i), densities(i), []);
 end
 
 % Make a plain array from the cell array.
 layersArray = [layersCell{:}];
+
+% Make a LayerStack
+%layerStack = LayerStack(layersArray);
+layerStacker = LayerStacker(layersArray);
+layerStack = layerStacker.makeLayerStack();
 
 % Make an array of the initial photons.
 initialPhotons = makeInitialPhotons(-3*BubblebathFiberLattice.LATTICE_I, 3*BubblebathFiberLattice.LATTICE_I, separation, layersArray(1), initialXStep, outerToInnerYStep);
@@ -56,11 +61,12 @@ boundArrays = {[],[],[],[]}; % empty arrays to hold the photon object which cros
 iterativeLeftRightBoundsMap = containers.Map(boundNames, boundArrays);
 
 %%% RAY TRACING
-transmittedToInteriorLayer = sequentialRayTrace(initialPhotons, layersArray, iterativeLeftRightBoundsMap);
-%singleRayTrace(initialPhotons, 1, layersArray);
+%transmittedSequential = rayTraceSequentialLayers(initialPhotons, layersArray, iterativeLeftRightBoundsMap);
+%transmittedSingle = rayTraceSingleLayer(initialPhotons, 1, layersArray);
+transmittedStack = rayTraceLayerStack(initialPhotons, layerStack);
 
 %%% OUTPUTS
-%disp("Number of photons that traversed each layer to reach and then escape the interior layer: " + size(transmittedToInteriorLayer,1))
+%disp("Number of photons that traversed each layer to reach and then escape the interior layer: " + size(transmittedSequential,1))
 
 %%% Helper functions
 function photons = makeInitialPhotons(xStart, xEnd, separation, exteriorLayer, initialXStep, outerToInnerYStep)
@@ -99,16 +105,16 @@ function layerSummary(layerNum, photonsAtBoundsMap)
     reflectedBack = photonsAtBoundsMap('outer');
     reflectedLeft = photonsAtBoundsMap('left');
     reflectedRight = photonsAtBoundsMap('right');
-    disp("/===========================================================\")
+    disp("/===========================================================\ ")
     disp("Layer " + layerNum + " summary. List of photons reflected: ")
     disp("> through: " + size(transmittedPhotons,1) + " (transmitted)")
     disp(">    back: " + size(reflectedBack,1))
     disp(">    left: " + size(reflectedLeft,1))
     disp(">   right: " + size(reflectedRight,1))
-    disp("\===========================================================/")
+    disp("\===========================================================/ ")
 end
 
-function transmittedToInterior = sequentialRayTrace(initialPhotons, layersArray, leftRightAtBoundsMap)
+function transmittedToInterior = rayTraceSequentialLayers(initialPhotons, layersArray, leftRightAtBoundsMap)
   % Iterate and ray trace each layer in a LayerStack.
   % The photons transmitted through one layer become
   % the incoming photons for the next layer.
@@ -134,14 +140,23 @@ function transmittedToInterior = sequentialRayTrace(initialPhotons, layersArray,
   transmittedToInterior = transmittedPhotons;
 end
 
-function singleRayTrace(initialPhotons, layerNum, layersArray)
+function transmitted = rayTraceSingleLayer(initialPhotons, layerNum, layersArray)
   % Ray trace a single layer. Shows a summary of the
   % photons that arrived at each boundary.
   layer = layersArray(layerNum);
-  rayTracer = RayTracer(layer.getAxisHandle());
+  rayTracer = RayTracer();
   incomingPhotons = initialPhotons;
   photonsAtBoundsMap = rayTracer.rayTrace(layer, incomingPhotons);
+  transmitted = photonsAtBoundsMap('inner');
   layerSummary(layerNum, photonsAtBoundsMap);
+end
+
+function transmitted = rayTraceLayerStack(initialPhotons, layerStack)
+  rayTracer = RayTracer();
+  incomingPhotons = initialPhotons;
+  photonsAtBoundsMap = rayTracer.rayTrace(layerStack, incomingPhotons);
+  transmitted = photonsAtBoundsMap;
+  layerSummary(1, photonsAtBoundsMap);
 end
 
 function s = coordToString(coords)
