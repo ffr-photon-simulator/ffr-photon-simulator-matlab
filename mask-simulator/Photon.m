@@ -36,12 +36,12 @@ classdef Photon
       coords = [obj.x obj.y];
     end
 
-    function obj = setX(obj, x)
-      obj.x = x;
+    function obj = setX(obj, newX)
+      obj.x = newX;
     end
 
-    function obj = setY(obj, y)
-      obj.y = y;
+    function obj = setY(obj, newY)
+      obj.y = newY;
     end
 
     function obj = setSteps(obj, xStep, yStep)
