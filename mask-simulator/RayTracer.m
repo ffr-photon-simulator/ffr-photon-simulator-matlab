@@ -119,7 +119,6 @@ classdef RayTracer
 
         function photonsAtBoundsMap = rayTrace(obj, layer, incomingPhotons)
           % Ray traces photons starting from initialCoords through a layer.
-          %
 
           nPhotons = size(incomingPhotons, 1); % get number of rows in first col
           % disp("Number of photons: " + nPhotons)
@@ -128,12 +127,10 @@ classdef RayTracer
           boundNames = {'inner','outer','left','right'};
           boundArrays = {[],[],[],[]};
           photonsAtBoundsMap = containers.Map(boundNames, boundArrays); % will store arrays of photons
-          photonCount = 1;
 
-          %hold on;
           % Iterate through each incoming photon.
-          for i = 1:nPhotons
-            photon = incomingPhotons(i);
+          for photonNum = 1:nPhotons
+            photon = incomingPhotons(photonNum);
             % Initialize values:
             atBoundary = false;
             movedPhoton = photon;
@@ -141,7 +138,7 @@ classdef RayTracer
             while atBoundary == false
               previousPhoton = movedPhoton;
               % Plot the photon's paths with:
-              plot(previousPhoton.x, previousPhoton.y, 'r.','MarkerSize',3)
+              plot(layer.getAxisHandle(), previousPhoton.x, previousPhoton.y, 'r.','MarkerSize',3)
               % Move the photon and check if it has reflected or has crossed a boundary
               movedPhoton = obj.movePhoton(previousPhoton);
               [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(movedPhoton, layer);
@@ -149,15 +146,15 @@ classdef RayTracer
               if atBoundary == true
                 % Update a Map of each boundary -> array of photons which crossed it.
                 photonsAtBoundsMap(boundary) = [photonsAtBoundsMap(boundary); movedPhoton];
-                disp(">> Photon " + photonCount + " reached boundary: " + boundary)
+                disp(">> Photon " + photonNum + " reached boundary: " + boundary)
               elseif hasReflected == true
                 % Calculate the new steps and make a new Photon with those steps.
                 [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
                 movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
-                disp("Photon " + photonCount + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
+                disp("Photon " + photonNum + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
               end
             end
-            photonCount = photonCount + 1;
+            photonNum = photonNum + 1;
           end
         end
 
