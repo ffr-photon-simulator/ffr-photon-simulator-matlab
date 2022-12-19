@@ -1,6 +1,6 @@
 # ffr-photon-simulator-matlab
 
-`bubblebath.m` script from [mathworks.com/matlabcentral/fileexchange/70348](https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes)
+`bubblebath.m` script from [mathworks.com/matlabcentral/fileexchange/70348](https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes).
 
 # TODO
 
