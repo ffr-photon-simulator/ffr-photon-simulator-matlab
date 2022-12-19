@@ -1,4 +1,7 @@
-function [circData, circHandles, frame, S] = bubblebath_no_fig(S)
+function [circData, S] = bubblebath_noPlot(S)
+%%% A modified version of bubblebath.m which only returns the circData and the struct S.
+%%% No plotting is done and no other windows are opened. Seems to work as expected.
+
 % Create a 2D plot of circles (or 'bubbles') with random centers and varying radii. 
 % BUBBLEBATH() uses default parameter values.
 % BUBBLEBATH(S) uses a structure S with the following fields, all of which are optional. 
@@ -112,11 +115,11 @@ function [circData, circHandles, frame, S] = bubblebath_no_fig(S)
 if nargin == 0
     S = struct();
 end
-%if ~isfield(S,'axisHandle') || isempty(S.axisHandle)
-%    % Create figure & axes
-%    fh = figure();
-%    S.axisHandle = axes(fh); % r2016a or later
-%end
+if ~isfield(S,'axisHandle') || isempty(S.axisHandle)
+    % Create figure & axes
+    %%% fh = figure();
+    %%% S.axisHandle = axes(fh); % r2016a or later
+end
 if ~isfield(S,'frameSize') || isempty(S.frameSize)
     % Frame size (arbitrary units): size of axes, centered at (0,0).
     S.frameSize = [50, 50]; %[width, height]
@@ -188,14 +191,14 @@ if ~isfield(S,'supressWarning') || isempty(S.supressWarning)
     % When true, the internal warning will be supressed.
     S.supressWarning = false;
 end
-%if ~isfield(S,'drawFrame') || isempty(S.drawFrame)
-%    % Draw the defined frame around the bubble plot.
-%    S.drawFrame = true;
-%end
+if ~isfield(S,'drawFrame') || isempty(S.drawFrame)
+    % Draw the defined frame around the bubble plot.
+    S.drawFrame = true;
+end
 
 % input validation
-%assert(ishghandle(S.axisHandle,'axes'),'axisHandle must be an axis handle.')
-%validateattributes(S.frameSize,{'double'},{'size',[1,2],'>',0},mfilename,'frameSize')
+%%% assert(ishghandle(S.axisHandle,'axes'),'axisHandle must be an axis handle.')
+validateattributes(S.frameSize,{'double'},{'size',[1,2],'>',0},mfilename,'frameSize')
 assert(isnumeric(S.nSizes) && isscalar(S.nSizes) && (isnan(S.nSizes) || mod(S.nSizes,1)==0),...
     'nSizes is expected to be a scalar, nonzero, positive integer or NaN.')
 if isnan(S.nSizes)
@@ -215,7 +218,7 @@ validateattributes(S.density,{'double'},{'numel',1,'>',0,'<=',1},mfilename,'dens
 assert((islogical(S.overlap)||isnumeric(S.overlap))&&numel(S.overlap),'overlap must be true, false, or a numeric scalar value.')
 assert(any(strcmpi(S.overlapType,{'absolute','relative'})),'overlapType must be either ''relative'' or ''absolute''.')
 validateattributes(S.supressWarning,{'logical'},{'numel',1},mfilename,'supressWarning')
-%validateattributes(S.drawFrame,{'logical'},{'numel',1},mfilename,'drawFrame')
+validateattributes(S.drawFrame,{'logical'},{'numel',1},mfilename,'drawFrame')
 
 % Check for included parameters (fields of S) that are not recognized.
 acceptedFields = {'axisHandle','frameSize','circSize','nSizes','circPoints','maxIt','edgeType','density',...
@@ -230,10 +233,10 @@ end
 S.rng = rng();
 
 %% Add soap
-%hold(S.axisHandle,'on')
-%axis(S.axisHandle,'equal') %set aspect ratio to 1:1
-%xlim(S.axisHandle, S.frameSize(1)/2 * [-1.05, 1.05]) %with some extra space
-%ylim(S.axisHandle, S.frameSize(2)/2 * [-1.05, 1.05]) %with some extra space
+%%% hold(S.axisHandle,'on')
+%%% axis(S.axisHandle,'equal') %set aspect ratio to 1:1
+%%% xlim(S.axisHandle, S.frameSize(1)/2 * [-1.05, 1.05]) %with some extra space
+%%% ylim(S.axisHandle, S.frameSize(2)/2 * [-1.05, 1.05]) %with some extra space
 
 % determine minimum distance between circles allowed
 if islogical(S.overlap) && ~S.overlap
@@ -256,10 +259,10 @@ end
 % Identify the internal frame of possible circle centers (intlFrame)
 switch S.edgeType
     case 0  % Cirlce edges can expand outside of the frame
-        intlFrame = repmat(S.frameSize(:), 1, nSizes);
+        intlFrame = repmat(S.frameSize(:), 1, nSizes); %%% make 1 copy of frameSize(:) array
         clearBorder = 0;
     case 1  % Circle must be entirely inside of the frame
-        intlFrame = bsxfun(@minus, S.frameSize(:), r*2);
+        intlFrame = bsxfun(@minus, S.frameSize(:), r*2); %%% apply @minus binary operation
         clearBorder = 0;
     case 2  % Circle edges end at the frame
         intlFrame = repmat(S.frameSize(:), 1, nSizes);
@@ -270,7 +273,7 @@ switch S.edgeType
 end
 
 % adjust min distance between circles based on overlap type
-if strcmpi(S.overlapType,'absolute')
+if strcmpi(S.overlapType,'absolute') %%% compare strings case insensitive
     minDist = repmat(minDist,size(r));
 elseif strcmpi(S.overlapType,'relative')
     minDist = r*minDist;
@@ -293,7 +296,7 @@ assert(max(circAreas) <= frameArea, 'The area of the largest circle (%.1f) is la
 % Loop through each circle size
 circdata = []; %[xCenter, yCenter, radius] of each drawn circle
 h = cell(nSizes,1); % handles to the line objects for each circle
-%wb = waitbar(0,'initializing...','name',mfilename);
+%%% wb = waitbar(0,'initializing...','name',mfilename);
 originalWarnState = warning('backtrace');
 warning backtrace off
 for i = 1:nSizes
@@ -324,9 +327,9 @@ for i = 1:nSizes
         
         iCount = iCount + 1; %iteration count
         % Update waitbar
-%        if ishghandle(wb)
-%            waitbar(max(iCount/S.maxIt,cCount >= nCirc(i)),wb,sprintf('Trying to find space for up to %d circles with radius = %.2f\nFinal radius: %.2f',nCirc(i),r(i),r(end)));
-%        end
+        %%% if ishghandle(wb)
+            %%% waitbar(max(iCount/S.maxIt,cCount >= nCirc(i)),wb,sprintf('Trying to find space for up to %d circles with radius = %.2f\nFinal radius: %.2f',nCirc(i),r(i),r(end)));
+        %%% end
     end
     % If we had to quit searching, throw warning.
     if iCount >= S.maxIt && ~S.supressWarning
@@ -335,24 +338,24 @@ for i = 1:nSizes
     % Store all final circle data
     circdata = [circdata; [xRand(isOK), yRand(isOK), repmat(r(i), sum(isOK), 1)]]; %#ok<AGROW>
     % Draw circles
-    %if any(isOK)
-    %    h{i} = drawcircles([xRand(isOK), yRand(isOK), repmat(r(i), sum(isOK), 1)], clearBorder, S);
-    %end
+    %%% if any(isOK)
+        %%% h{i} = drawcircles([xRand(isOK), yRand(isOK), repmat(r(i), sum(isOK), 1)], clearBorder, S);
+    %%% end
     
 end
 warning(originalWarnState) %return original warning state
 % Draw frame
-%if S.drawFrame
-%    frame = rectangle(S.axisHandle, 'position', [-S.frameSize/2, S.frameSize], 'LineWidth', 2);
-%else
-%    frame = gobjects(1);
-%end
-circHandles = [h{:}]';
+%%% if S.drawFrame
+    %%% frame = rectangle(S.axisHandle, 'position', [-S.frameSize/2, S.frameSize], 'LineWidth', 2);
+%%% else
+    %%% frame = gobjects(1);
+%%% end
+%%% circHandles = [h{:}]';
 
 % Remove waitbar
-%if ishghandle(wb)
-%    delete(wb)
-%end
+%%% if ishghandle(wb)
+    %%% delete(wb)
+%%% end
 
 if nargout > 0
     % Produce output only when requested
@@ -360,22 +363,22 @@ if nargout > 0
 end
 
 %% Helper functions
-function peakAtCircle(xyr,S) %#ok<DEFNU>
+%%% function peakAtCircle(xyr,S) %#ok<DEFNU>
 % For development and troubleshooting only; creates a rough plot of circles and labels them.
 % xyr is mx3, [x,y,radius]; S is input struct.
-%figure('Name',mfilename)
-%hold on
-nanIdx = any(isnan(xyr),2);
-%rectangle('Position',[-S.frameSize(1)/2,-S.frameSize(2)/2,S.frameSize],'LineWidth',2)
-%arrayfun(@(x,y,r)rectangle('Position',...
-    %[x-r,y-r,r.*[2,2]],'Curvature',[1,1],'EdgeColor','r',...
-    %'LineStyle','--'),xyr(~nanIdx,1),xyr(~nanIdx,2),xyr(~nanIdx,3));
-%text(xyr(:,1),xyr(:,2),compose('%d',1:size(xyr,1)),'Vert','Middle','Horiz','Center','FontSize',8)
-%axis equal; grid on;
-%xlim(S.frameSize./[-1.6,1.6]);
-%ylim(xlim);
-%set(gca,'xtick',get(gca,'ytick'))
-%title(sprintf('%s.m test & development', mfilename))
+%%% figure('Name',mfilename)
+%%% hold on
+%%% nanIdx = any(isnan(xyr),2);
+%%% rectangle('Position',[-S.frameSize(1)/2,-S.frameSize(2)/2,S.frameSize],'LineWidth',2)
+%%% arrayfun(@(x,y,r)rectangle('Position',...
+    %%% [x-r,y-r,r.*[2,2]],'Curvature',[1,1],'EdgeColor','r',...
+    %%% 'LineStyle','--'),xyr(~nanIdx,1),xyr(~nanIdx,2),xyr(~nanIdx,3));
+%%% text(xyr(:,1),xyr(:,2),compose('%d',1:size(xyr,1)),'Vert','Middle','Horiz','Center','FontSize',8)
+%%% axis equal; grid on;
+%%% xlim(S.frameSize./[-1.6,1.6]);
+%%% ylim(xlim);
+%%% set(gca,'xtick',get(gca,'ytick'))
+%%% title(sprintf('%s.m test & development', mfilename))
 
 function [x, y, isOK, cCount] = wrapEdges(circdata, xyr, minDist, minCount, doNotCopy, S)
 % Detects circles that cross the frame and produces a second set of circles
@@ -462,17 +465,17 @@ cCount = sum(isOK);  %cirlce count for current radius
 xRand = xyr(:,1);
 yRand = xyr(:,2);
 
-function h = drawcircles(xyr, clearBorder, S)
+%%% function h = drawcircles(xyr, clearBorder, S)
 % Draw circle given center and radius
-ang = linspace(0, 2*pi, S.circPoints+1);
-xp = xyr(:,3)*cos(ang) + repmat(xyr(:,1),1,numel(ang)); %changed 190901 to work with r2016a
-yp = xyr(:,3)*sin(ang) + repmat(xyr(:,2),1,numel(ang)); %changed 190901 to work with r2016a
-if clearBorder==1 || clearBorder==2
-    % remove data outside of frame, if requested
-    xp(abs(xp) > S.frameSize(1)/2) = NaN;
-    yp(abs(yp) > S.frameSize(2)/2) = NaN;
-end
-h = plot(S.axisHandle, xp', yp', 'k')';
+%%% ang = linspace(0, 2*pi, S.circPoints+1);
+%%% xp = xyr(:,3)*cos(ang) + repmat(xyr(:,1),1,numel(ang)); %changed 190901 to work with r2016a
+%%% yp = xyr(:,3)*sin(ang) + repmat(xyr(:,2),1,numel(ang)); %changed 190901 to work with r2016a
+%%% if clearBorder==1 || clearBorder==2
+    %%% % remove data outside of frame, if requested
+    %%% xp(abs(xp) > S.frameSize(1)/2) = NaN;
+    %%% yp(abs(yp) > S.frameSize(2)/2) = NaN;
+%%% end
+%%% h = plot(S.axisHandle, xp', yp', 'k')';
 
 %% Footnotes
 % [1] nCirc used to be named 'd' and was defined by (2:nSizes+1).^2; Then prior

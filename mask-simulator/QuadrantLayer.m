@@ -1,4 +1,4 @@
-classdef Layer
+classdef QuadrantLayer
   properties
     latticeLength
     latticeWidth

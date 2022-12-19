@@ -1,19 +1,26 @@
 # ffr-photon-simulator-matlab
 
-bubblebath() function from https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes
+`bubblebath.m` script from [https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes](mathworks.com/matlabcentral/fileexchange/70348)
 
 # TODO
 
 1. Put parameter configuration in one place.
 2. Assemble bubblebath quadrants according to user input.
+3. Create system to parse user config files
+4. Define user config file
+  - ffr-oriented variables (exterior-- outer and inner-- and interior-- filtering and non-filtering-- layers)
+  - clear plotting options
+  - sane defaults
 
 # Visuals
+
 Black box  - bubble bath frame and lattice boundary.
 Circles    - representation of fibers with center coordinates (dot).
 Black dots - centers of the fibers
 Red dots   - paths of ray traced photons
 
 # `ffr_simulator.m`
+
 The method `rayTraceSequentialLayers()` ray traces photons through one layer, and makes
 the transmitted photons of that layer the incoming photons for the next layer. It
 repeats this process for an array of layers, with the first element in the array
@@ -41,12 +48,28 @@ The method `rayTraceLayerStack()` traces initial photons through a layer stack, 
 
 # Classes
 
-## `Layer`
+Some under development on the `layer_quadrants` branch.
+
+## `QuadrantLayer`
 
 Represents a layer of an N95 filter. Contains
-- a fiber lattice
-- axis handle to allow plotting
+- a QuadrantLattice
+- axis handle to allow plotting the layer
 
-Defines getters to access the 
+Methods
+- lattice attribute getters
+- plot layer (bounds, fiber centers, fiber circles)
+- plot photons (at bounds, ray traced paths)
 
-# Scripts
+## `QuadrantLattice`
+
+Represents the fibers in a single layer. Stores Quadrant objects and builds the lattice from the data in the Quadrants.
+
+## `Quadrant`
+
+Represents a quadrant in the fiber lattice. The following parameters used in `bubblebath_noPlot` can be configured:
+- size of the quadrant (length and width)
+- mininum and maximum radii of the quadrant's fibers
+- density of fibers throughout the quadrant
+
+Stores the fiber data and the config struct for `bubblebath_noPlot`.
