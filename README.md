@@ -1,6 +1,6 @@
 # ffr-photon-simulator-matlab
 
-`bubblebath.m` script from [https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes](mathworks.com/matlabcentral/fileexchange/70348)
+`bubblebath.m` script from [mathworks.com/matlabcentral/fileexchange/70348](https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes)
 
 # TODO
 
@@ -48,7 +48,7 @@ The method `rayTraceLayerStack()` traces initial photons through a layer stack, 
 
 # Classes
 
-Some under development on the `layer_quadrants` branch.
+Some under development on the `layer_quadrants` [branch](https://github.com/ffr-photon-simulator/ffr-photon-simulator-matlab/tree/layer_quadrants).
 
 ## `QuadrantLayer`
 
