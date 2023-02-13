@@ -1,6 +1,6 @@
 classdef Photon
   properties (Constant) % static
-    WAVELENGTH = 2.5*10^(-7);
+    WAVELENGTH = Defaults.photonWavelength;
   end
   properties
     x
