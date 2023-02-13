@@ -1,3 +1,36 @@
+classdef FFRLayer
+  properties
+    quadrantLayers = [];
+    lattice = []; % fiber data
+    latticeWidth
+    latticeLength
+  end
+
+  methods
+    function obj = FFRLayer(config)
+      % Uses a config to create quadrant layers. The config 'c' is a struct of the form:
+      % c.nQLayers = number of quadrant layers
+      % c.layerType = type of layer ('inner, interior, filtering, or exterior')
+      % c.qLayerConfigs = list of structs defining each quadrant layer
+
+      % Store list of structs which are the configs of the quadrant layers.
+      % Each quadrant layer struct holds the data to make that quadrant layer.
+      qLayerConfigs = config.qLayerConfigs; % [struct1, struct2, struct3, ...]
+
+      % Create QuadrantLayers
+      for q = 1:config.nQLayers
+        % if q == 3
+        %   disp("")
+        %   disp("> Create quadrant layer " + q)
+        % end
+        quadrantLayer = QuadrantLayer(qLayerConfigs(q));
+        % if q == 3
+        %   disp("> Quadrant layer 3 data")
+        %   disp(quadrantLayer.getFiberData())
+        % end
+        obj.quadrantLayers = [obj.quadrantLayers; quadrantLayer];
+      end
+
 
     %function obj = Layer(length, width, minRadius, maxRadius, density, optional_fiberData)
     %  obj.latticeLength = length*BubblebathFiberLattice.LATTICE_I;
