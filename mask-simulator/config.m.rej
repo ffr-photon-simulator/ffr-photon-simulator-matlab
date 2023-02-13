@@ -1,0 +1,23 @@
+diff a/mask-simulator/config.m b/mask-simulator/config.m	(rejected hunks)
+@@ -29,6 +29,21 @@
+ ffrConfig = struct();
+ ffrConfig = structInputOrDefault("How many FFR layers?", ffrConfig, 'nLayers', Defaults.nLayers);
+ 
++  % Iterate over each quadrant layer and build its config
++  for ql = 1:ls.nQLayers
++    disp("")
++    disp("## Configure quadrant layer " + ql + ".")
++    qls = struct();
++    qls = structInputOrDefault("How many quadrants?", qls, 'nQuadrants', Defaults.nQuadrants);
++    qls = structInputOrDefault("Width?", qls, 'width', Defaults.qlWidth);
++    % bubblebath_noPlot() is centered at [0,0], so add half ql width to actual offset.
++    qls.heightOffset = heightOffset + (qls.width * 0.5);
++    % Increment heightOffset by the full width of this layer for the next layer.
++    heightOffset = heightOffset + qls.width;
++    qls.length = 0; % starting value, add to it after making the quadrants
++    quadrantConfigsv1 = [];
++    quadrantConfigs = [];
++
+     % Iterate over each quadrant and build its config
+     for q = 1:qls.nQuadrants
+       disp("")
