@@ -19,6 +19,34 @@ classdef QuadrantLayer
       % Store list of structs which are the configs of the actual quadrants.
       quadrantConfigs = config.quadrantConfigs; % [qlist1, qlist2, qlist3, ...]
 
+      % Create quadrants
+      disp("Num quadrants: " + config.nQuadrants)
+      for q = 1:config.nQuadrants
+        disp(q)
+        % if q == 3
+        %   disp(">> Creating quadrant " + q)
+        % end
+        quadrant = Quadrant(quadrantConfigs(q));
+        % if q == 3
+        %   disp(">> Quadrant number 3 data")
+        %   disp(quadrant.getFiberData())
+        % end
+        obj.quadrants = [obj.quadrants; quadrant];
+      end
+
+      % Sum quadrant lengths and widths
+      %qlWidth = sumWidths();
+      qlLength = config.length; % FIXME: get length value from config
+
+      % Aggregate quadrant fiber data
+      obj.lattice = obj.makeLattice(config.nQuadrants);
+      %disp("Quadrant layer data size: " + size(obj.lattice))
+
+      % Adjust y-values of the fibers to account for:
+      %  - bubbblebath_noPlot() centers around [0,0]  -> add half this quadrant layer's width
+      %  - quadrant layers below this one             -> add the sum of the previous layers' widths
+      obj.lattice = obj.addHeightOffset(config.heightOffset);
+    end
     end
     end
 
