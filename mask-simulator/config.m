@@ -25,3 +25,7 @@
 %         qs.circSize = [minRadius, maxRadius]
 %
 
+% The FFR config
+ffrConfig = struct();
+ffrConfig = structInputOrDefault("How many FFR layers?", ffrConfig, 'nLayers', Defaults.nLayers);
+
