@@ -21,6 +21,7 @@ classdef RayTracer
         end
 
         function movedPhoton = movePhoton(obj, photon)
+          % Move the photon by the x and y steps it has stored.
           movedPhoton = photon.move(); % returns a new Photon object for now
         end
 
@@ -138,7 +139,7 @@ classdef RayTracer
             while atBoundary == false
               previousPhoton = movedPhoton;
               % Plot the photon's paths with:
-              plot(layer.getAxisHandle(), previousPhoton.x, previousPhoton.y, 'r.','MarkerSize',3)
+              %plot(layer.getAxisHandle(), previousPhoton.x, previousPhoton.y, 'r.','MarkerSize',3)
               % Move the photon and check if it has reflected or has crossed a boundary
               movedPhoton = obj.movePhoton(previousPhoton);
               [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(movedPhoton, layer);
