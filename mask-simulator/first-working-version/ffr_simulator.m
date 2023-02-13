@@ -1,3 +1,28 @@
+% A cell array stores the quadrant config for each layer.
+% Each quadrant config is a struct.
+layers = cell(1,nLayers);
+quadrants = cell(1,nQuadrants);
+for i = 1:nLayers
+  quadrantsConfig = struct();
+  for j = 1:nQuadrantsForLayer{i}
+    quadrantConfig.frameSize = [];
+    quadrantConfig.minRadius = [];
+    quadrantConfig.maxRadius = [];
+    quadrantConfig.density = [];
+  end
+  layers{i} = quadrantConfig;
+end
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 %%% The "main" function or script to run the simulator.
 
 % This script defines the variables necessary to run ray tracing simulations
