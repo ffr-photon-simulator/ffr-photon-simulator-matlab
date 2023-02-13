@@ -1,19 +1,25 @@
 classdef QuadrantLayer
+  % Stores fiber data representing several quadrants of variable fiber density or radial range.
   properties
-    latticeLength
-    latticeWidth
-    lattice
+    quadrants = [];
+    lattice = [];
+    qlWidth
+    qlLength
   end
 
   methods
-    function obj = Layer(length, width, minRadius, maxRadius, density, optional_fiberData)
-      obj.latticeLength = length*BubblebathFiberLattice.LATTICE_I;
-      obj.latticeWidth = width*BubblebathFiberLattice.LATTICE_J;
-      frameSize = [obj.latticeLength, obj.latticeWidth];
-      minRadius = 4*10^(-6);
-      maxRadius = 4.01*10^(-6);
-      density = 0.05;
-      obj.lattice = BubblebathFiberLattice(frameSize, minRadius, maxRadius, density, optional_fiberData);
+    function obj = QuadrantLayer(config)
+      % Uses a config to create a quadrant layer. The config 'c' is a struct of the form:
+      % c.length = quadrant layer length
+      % c.width  = quadrant layer width
+      % c.heightOffset = sum of widths of quadrant layers below this one
+      % c.nQuadrants = number of quadrants
+      % c.quadrantConfigs = list of structs defining each quadrant (left to right)
+
+      % Store list of structs which are the configs of the actual quadrants.
+      quadrantConfigs = config.quadrantConfigs; % [qlist1, qlist2, qlist3, ...]
+
+    end
     end
 
     % Plotting
