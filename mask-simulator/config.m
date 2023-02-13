@@ -29,6 +29,19 @@
 ffrConfig = struct();
 ffrConfig = structInputOrDefault("How many FFR layers?", ffrConfig, 'nLayers', Defaults.nLayers);
 
+% Iterate over nLayers to build the ffrLayerConfigs
+ffrLayerConfigs = []; % add the struct configs to this list
+disp("All layers are numbered from 1 (inner) to n (outer).")
+% Start the heightOffset at 0
+heightOffset = 0;
+for l = 1:ffrConfig.nLayers
+  disp("")
+  disp("# Configure FFR layer " + l + ".")
+  ls = struct();
+  ls = structInputOrDefault("How many quadrant layers?", ls, 'nQLayers', Defaults.nQLayers);
+  ls = structInputOrDefault("Layer type?", ls, 'layerType', Defaults.layerType);
+  qLayerConfigs = [];
+
   % Iterate over each quadrant layer and build its config
   for ql = 1:ls.nQLayers
     disp("")
@@ -76,4 +89,28 @@ ffrConfig = structInputOrDefault("How many FFR layers?", ffrConfig, 'nLayers', D
       disp(">>> Quadrant config")
       disp(qs)
     end
+
+    % Add the list of quadrant configs to the quadrant layer struct
+    qls.quadrantConfigs = quadrantConfigs;
+
+    % Add the quadrant layer config to the list of quadrant layer structs
+    qLayerConfigs = [qLayerConfigs; qls];
+    disp(">> Quadrant layer config:")
+    disp(qls)
+  end
+
+  % Add the quadrant layer config list to the ffr layer struct
+  ls.qLayerConfigs = qLayerConfigs;
+  disp("> FFR Layer config")
+  disp(ls)
+
+  % Add the ffr layer struct to the list
+  ffrLayerConfigs = [ffrLayerConfigs; ls];
+end
+
+% Add the ffrLayerConfigs list to the ffrConfig struct
+ffrConfig.ffrLayerConfigs = ffrLayerConfigs;
+
+disp("FFR Config")
+disp(ffrConfig)
 
