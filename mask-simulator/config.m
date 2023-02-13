@@ -114,3 +114,20 @@ ffrConfig.ffrLayerConfigs = ffrLayerConfigs;
 disp("FFR Config")
 disp(ffrConfig)
 
+function struct = structInputOrDefault(prompt, struct, fieldName, default)
+  % Read user input and append it (or default) to a given list.
+  var = input("> " + prompt + " (" + default + ") ");
+  if isempty(var)
+    var = default;
+  end
+  struct.(fieldName) = var;
+end
+
+function appendInputOrDefault(prompt, list, default)
+  % Read user input and append it (or default) to a given list.
+  var = input("> " + prompt + " (" + default + ") ");
+  if isempty(var)
+    var = default;
+  end
+  list = [list; var];
+end
