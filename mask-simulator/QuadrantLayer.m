@@ -52,9 +52,23 @@ classdef QuadrantLayer
     %  for q
     %end
 
-    end
+    function lattice = addHeightOffset(obj, offset)
+      % Add a height offset to this quadrant layer
+      lattice = obj.lattice;
+      lattice(:,2) = lattice(:,2) + offset;
     end
 
+    function lattice = makeLattice(obj, nQuadrants)
+      % Add the fiber data from each quadrant to this quadrant layer.
+      lattice = [];
+      for n = 1:nQuadrants
+        lattice = [lattice; obj.quadrants(n).getFiberData()];
+      end
+    end
+
+    function data = getFiberData(obj)
+      data = obj.lattice;
+    end
 
     %function obj = Layer(length, width, minRadius, maxRadius, density, optional_fiberData)
     %  obj.latticeLength = length*BubblebathFiberLattice.LATTICE_I;
