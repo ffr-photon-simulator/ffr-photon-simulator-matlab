@@ -31,6 +31,22 @@ classdef FFRLayer
         obj.quadrantLayers = [obj.quadrantLayers; quadrantLayer];
       end
 
+      % Aggregate fiber data from the quadrant layers
+      obj.lattice = obj.makeLattice(config.nQLayers);
+      disp("FFR Layer lattice")
+      disp(obj.lattice)
+      disp("")
+    end
+
+    function lattice = makeLattice(obj, nLayers)
+      % Add the fiber data from each quadrant layer to this ffr layer.
+      lattice = [];
+      for n = 1:nLayers
+        lattice = [lattice; obj.quadrantLayers(n).getFiberData()];
+        %disp("Quadrant layer " + n + " data:")
+        %disp(obj.quadrantLayers(n).getFiberData())
+      end
+    end
 
     %function obj = Layer(length, width, minRadius, maxRadius, density, optional_fiberData)
     %  obj.latticeLength = length*BubblebathFiberLattice.LATTICE_I;
@@ -79,3 +95,5 @@ classdef FFRLayer
     %function rightBound = getRightBound(obj)
     %  rightBound = obj.lattice.rightBound;
     %end
+  end
+end
