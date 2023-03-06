@@ -1,6 +1,10 @@
+%simulator_handler
 %% Simulates an FFR.
 % Generate the config
-config
+%defaultConfig
+%config
+n95config
+
 
 % Make the FFR
 ffr = FFR(ffrConfig);
