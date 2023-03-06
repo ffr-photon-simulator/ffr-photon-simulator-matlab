@@ -37,6 +37,58 @@
 % The qLayerConfigs list represents outer to inner layers.
 % The quadrantConfigs list represents left to right quadrants.
 
+% This N95 config is designed to replicate the __ N95 FFR as studied in the following paper:
+% https://groups.oist.jp/nnp/diy-face-mask.
+% A length is specified for the FFR (multiple of 20 microns).
+% A width (multiple of 20 microns), radius range, and density range is specified for each FFR Layer.
+% Each quadrant layer is one quadrant wide, and each quadrant is 20 microns wide. The number
+% of quadrant layers generated is the ql.width / 20. Each quadrant is 20 microns long, so the
+% number of quadrants per layer is ffr.length / 20. Each quadrant has a randomized radii range and
+% density.
+
+% Notes on scale:
+% It's simpler to note certain values as integers and put multipliers in the Defaults class.
+% For example, in addition to specifying the FFR length in microns, we specify "400" in the "lengthI"
+% variable, and then multiply that value by Defaults.micron later, if necessary. Any variable
+% with the "I" suffix is an integer variable, and the variable of the same name without the suffix
+% is the integer variable multiplied by Defaults.micron.
+%
+% The following variables have integer pairs:
+% 1. ffrConfig.length
+% 2. ffrConfig.width
+% 2. ffrConfig.layerWidths
+% 2. ffrConfig.layerRadii
+% 2. ffrConfig.layerDensities
+
+% The FFR config
+ffrConfig = struct();
+ffrConfig.nLayers = 3;
+% Length
+ffrConfig.lengthI = 800;
+ffrConfig.length = ffrConfig.lengthI * Defaults.micron; % 5 * 10^(-4);
+% Radii ranges: between 7 and 10 for layer 1, and so on
+ffrConfig.layerRadiiI = [7 10; 1  8; 7 10];
+ffrConfig.layerRadii = ffrConfig.layerRadiiI * Defaults.micron;
+% Density ranges: between 0.01 and 0.05 for layer 1, and so on (divide by 100 later)
+ffrConfig.layerDensitiesI = [1  3; 3 8; 1 3];
+ffrConfig.layerDensities = ffrConfig.layerDensitiesI * Defaults.micron;
+
+% Calculate FFR width
+ffrConfig.layerWidthsI = [80 160 80];
+ffrConfig.layerWidths = ffrConfig.layerWidthsI * Defaults.micron;
+% Total width
+widthI = 0;
+for w = ffrConfig.layerWidthsI;
+  widthI = widthI + w;
+end
+ffrConfig.widthI = widthI;
+ffrConfig.width = ffrConfig.widthI * Defaults.micron;
+
+% DONE: Make separate struct builder functions for each component of the FFR (FFR Layers, Q Layers, etc).
+% DONE: Set the FFR length at the beginning.
+% DONE: Randomly generate nQuadrant lengths (one for each quadrant). Use a for loop until the penultimate,
+%       quadrant length, which  just the ffr length minus the length so far.
+
 
 %%% FUNCTIONS
 
