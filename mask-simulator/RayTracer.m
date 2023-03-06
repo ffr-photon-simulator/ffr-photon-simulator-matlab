@@ -99,23 +99,38 @@ classdef RayTracer
           end
         end
 
-        function [atBoundary, boundary] = checkIfAtBoundary(obj, layer, photon)
-          % Check if a photon has passed a boundary, in the order: inner,
-          % outer, left, right. We could check both the x and y coords of
-          % the photon, but only checking one is accurate enough.
-          % disp("> Check if at boundary.")
-          atBoundary = true;
-          if photon.y <= layer.getInnerBound() % negative bound
-            boundary = 'inner';
-          elseif photon.y >= layer.getOuterBound() % positive bound
-            boundary = 'outer';
-          elseif photon.x <= layer.getLeftBound() % negative bound
-            boundary = 'left';
-          elseif photon.x >= layer.getRightBound() % positive bound
-            boundary = 'right';
-          else
-            boundary = 'BOUNDARY_ERROR';
-            atBoundary = false;
+        function [hasCrossed, crossedFFRBound] = checkIfAtFFRBound(obj, photon, ffr)
+          % Check if a photon has crossed an FFR boundary by iterating through the bounds.
+          ffrBounds = ffr.boundaries.ffrBounds; % TODO add this to FFR
+          hasCrossed = false;
+          crossedFFRBound = [];
+
+          % Iterate over FFR bounds
+          fields = fieldnames(ffrBounds);
+          for i = 1:numel(fields)
+            bound = ffrBounds.(fields{i});
+            %disp(b)
+            if photon.hasCrossedFFRBound(bound) == true
+              hasCrossed = true;
+              crossedFFRBound = bound;
+              return; % photon won't have crossed an interior bound, so we can skip it
+            end
+          end
+        end
+
+        function [hasCrossed, crossedInteriorBound] = checkIfAtInteriorBound(obj, photon, ffr)
+          % Check if a photon has crossed an interior boundary by iterating through the bounds.
+          interiorBounds = ffr.boundaries.interiorBounds;
+          hasCrossed = false;
+          crossedInteriorBound = [];
+
+          % Iterate over interior bounds
+          for i = 1:size(interiorBounds)
+            bound = interiorBounds(i);
+            if photon.hasCrossedInteriorBound(bound) == true
+              crossedInteriorBound = bound;
+              return;
+            end
           end
         end
 
