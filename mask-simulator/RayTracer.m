@@ -178,8 +178,8 @@ classdef RayTracer
           newYStep = new_y - refl_y;
         end
 
-        function photonsAtBoundsMap = rayTrace(obj, layer, incomingPhotons)
-          % Ray traces photons starting from initialCoords through a layer.
+        function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
+          % Ray traces photons starting from initialCoords through an entire FFR.
 
           nPhotons = size(incomingPhotons, 1); % get number of rows in first col
           % disp("Number of photons: " + nPhotons)
