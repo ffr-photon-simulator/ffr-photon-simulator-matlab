@@ -34,14 +34,59 @@ classdef RayTracer
           distance = sqrt(xDistance^2 + yDistance^2);
         end
 
-        function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, layer)
-          % For each fiber in the lattice, calculate the photon's distance to it. If the distance
-          % is less than that fiber's reflection radius, the photon has reflected.
+        function currentQuadrant = findCurrentQuadrant(obj, photon, ffr)
+          % Iterate through every quadrant and compare the photon's coordinates
+          % to the quadrant's boundaries to determine which quadrant the photon
+          % is currently in.
+          %disp("Photon " + photon.id + " coords: " + photon.x + "," + photon.y)
+          %disp("")
+          currentQuadrant = [];
+          ffrLayers = ffr.ffrLayers;
+          for i = 1:size(ffrLayers)
+            ffrLayer = ffrLayers(i);
+            quadrantLayers = ffrLayer.quadrantLayers;
+            %disp("Iterating through q layers: ")
+            %disp(quadrantLayers)
+            for j = size(quadrantLayers)
+              %disp("Iterating through q layer")
+              %disp(quadrantLayer)
+              quadrantLayer = quadrantLayers(j);
+              % Check quadrant layer's y-value first before iterating through its quadrants. -- TODO
+              quadrants = quadrantLayer.quadrants;
+              %disp(quadrants)
+              %for quadrant = quadrants
+              %disp("Iterating through quadrants")
+              for q = 1:size(quadrants)
+                quadrant = quadrants(q);
+                %disp(quadrant)
+                %disp("Quadrant bounds: ")
+                %disp(quadrant.leftBound)
+                %disp("x: " + quadrant.leftBound + " to " + quadrant.rightBound)
+                %disp("y: " + quadrant.innerBound + " to " + quadrant.outerBound)
+                if photon.x >= quadrant.leftBound && photon.x < quadrant.rightBound
+                  if photon.y >= quadrant.innerBound && photon.y < quadrant.outerBound
+                    currentQuadrant = quadrant;
+                    return;
+                  end
+                end
+              end
+            end
+          end
+          Defaults.debugMessage('ERROR: current quadrant not found.', 0)
+          Defaults.debugMessage('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0)
+          Defaults.debugMessage(ffr.printBounds(), 1)
+        end
+
+        function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
+          % Determine which Quadrant the photon is in. For each fiber in that quadrant,
+          % calculate the photon's distance to it. If the distance is less than that
+          % fiber's reflection radius, the photon has reflected off that fiber.
           % disp("> Check if reflected.")
-          fibers = layer.getFiberData();
-          for row = 1:size(fibers)
-            fiberCoords = [fibers(row,1), fibers(row,2)];
-            fiberReflectionRadius = fibers(row, 3) + (Photon.WAVELENGTH / 2);
+          fiberData = quadrant.getFiberData();
+
+          for row = 1:size(fiberData)
+            fiberCoords = [fiberData(row,1), fiberData(row,2)];
+            fiberReflectionRadius = fiberData(row, 3) + (Defaults.photonWavelength / 2); % fiber radius plus half wavelength
             distanceToFiber = obj.distanceToFiber(photon, fiberCoords);
             if distanceToFiber < fiberReflectionRadius
               hasReflected = true;
