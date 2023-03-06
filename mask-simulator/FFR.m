@@ -46,6 +46,36 @@ classdef FFR
       obj.fiberData = obj.buildFiberData();
     end
 
+    function fiberData = buildFiberData(obj)
+      % Iterate through all the quadrants and combine the fiber data
+      % into one large lattice. Because the quadrants already have
+      % the correct height and length offset with respect to their
+      % position in the FFR (centered at 0,0), the fiber coordinates
+      % do not need any manipulation.
+      %
+      % The quadrant fiber data matrices (n x 3) do not need to
+      % be combined with respect to the quadrant's position in
+      % the FFR because the ffrFiberData will only ever serve
+      % to represent the fibers in the FFR -- any information
+      % regarding e.g. a FiberLayer will be accessed through
+      % that respective object.
+      fiberData = [];
+      ffrLayers = obj.ffrLayers;
+      for i = 1:size(ffrLayers)
+        ffrLayer = ffrLayers(i);
+        quadrantLayers = ffrLayer.quadrantLayers;
+        for j = 1:size(quadrantLayers)
+          quadrantLayer = quadrantLayers(j);
+          quadrants = quadrantLayer.quadrants;
+          for q = 1:size(quadrants)
+            quadrant = quadrants(q);
+            fiberData = [fiberData; quadrant.getFiberData()];
+          end
+        end
+      end
+      %disp("FFR fiber data:")
+      %disp(fiberData)
+    end
 
     function bounds = printBounds(obj)
       bounds = "FFR Bounds:\n-> Left: " + string(obj.ffrBounds.leftBound.bound);

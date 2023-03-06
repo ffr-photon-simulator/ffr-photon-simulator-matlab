@@ -18,6 +18,27 @@ initialPhotons = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, ou
 disp("Starting ray tracing.")
 [photonPaths, boundInfo] = rt.rayTrace(ffr, initialPhotons);
 
+% Graph FFR fibers and photon paths
+clf; % clear current plot
+ax = axes;
+hold on; % don't overwrite plot
+axis equal; % make x and y axis scale the same
+% Plot fiber centers
+plot(ax, ffr.fiberData(:,1), ffr.fiberData(:,2), Defaults.fiberCenterStyle,'MarkerSize', Defaults.fiberCenterWeight);
+
+% Plot fiber circles
+ffrFiberData = ffr.fiberData;
+for i = 1:size(ffrFiberData, 1) % number of rows is the number of fibers
+  data = ffrFiberData(i,:);
+  x = data(1);
+  y = data(2);
+  r = data(3);
+  theta = linspace(0,2*pi,100);
+  xcoords = r * cos(theta) + x;
+  ycoords = r * sin(theta) + y;
+  plot(ax, xcoords, ycoords, Defaults.fiberCircleStyle,'MarkerSize',Defaults.fiberCircleWeight);
+end
+
 
 
 % FUNCTIONS
