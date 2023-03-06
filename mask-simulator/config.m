@@ -6,9 +6,17 @@
 
 % FFR Config (struct)
 %   ffrConfig.nLayers
+%   ffrConfig.width
+%   ffrConfig.boundaries (struct 'bs' with boundary data)
+%     bs.leftBound = -x
+%     bs.rightBound = +x
+%     bs.innerBound = 0
+%     bs.outerBound = height offset
+%     bs.interiorBounds = [y1, y2, ...]
 %   ffrConfig.ffrLayerConfigs (list of structs 'ls')
 %     ls.nQLayers
 %     ls.layerType
+%     ls.width
 %     ls.qLayerConfigs (list of structs 'qls')
 %       qls.nQuadrants
 %       qls.width
@@ -19,11 +27,15 @@
 %         qs.maxRadius
 %         qs.density
 %         qs.length
+%         qs.heightOffset
 %         qs.lengthOffset
 %         qs.width = qls.width
 %         qs.frameSize = [length, width]
 %         qs.circSize = [minRadius, maxRadius]
 %
+% The ffrLayerConfigs list represents outer to inner layers.
+% The qLayerConfigs list represents outer to inner layers.
+% The quadrantConfigs list represents left to right quadrants.
 
 % The FFR config
 ffrConfig = struct();
@@ -31,88 +43,125 @@ ffrConfig = structInputOrDefault("How many FFR layers?", ffrConfig, 'nLayers', D
 
 % Iterate over nLayers to build the ffrLayerConfigs
 ffrLayerConfigs = []; % add the struct configs to this list
-disp("All layers are numbered from 1 (inner) to n (outer).")
-% Start the heightOffset at 0
+%disp("All layers are numbered from 1 (inner) to n (outer).")
+% Start the heightOffset at 0. The height offset is the outer bound height of the previous layer.
+% The height offset is added to each quadrant layer's config while the quadrant layers are being generated.
+% Once each FFR layer is generated, the height offset is the width of that FFR Layer, and the height offset
+% becomes the y coordinate of the Boundary following that FFR layer.
 heightOffset = 0;
+% Iterate over number of FFR Layers and build their configs
 for l = 1:ffrConfig.nLayers
   disp("")
   disp("# Configure FFR layer " + l + ".")
-  ls = struct();
-  ls = structInputOrDefault("How many quadrant layers?", ls, 'nQLayers', Defaults.nQLayers);
-  ls = structInputOrDefault("Layer type?", ls, 'layerType', Defaults.layerType);
-  qLayerConfigs = [];
+  ffrLayerStruct = struct();
+  ffrLayerStruct = structInputOrDefault("How many quadrant layers?", ffrLayerStruct, 'nQLayers', Defaults.nQLayers);
+  ffrLayerStruct = structInputOrDefault("Layer type?", ffrLayerStruct, 'layerType', Defaults.layerType);
+  quadrantLayerConfigs = [];
 
   % Iterate over each quadrant layer and build its config
-  for ql = 1:ls.nQLayers
+  for ql = 1:ffrLayerStruct.nQLayers
     disp("")
     disp("## Configure quadrant layer " + ql + ".")
-    qls = struct();
-    qls = structInputOrDefault("How many quadrants?", qls, 'nQuadrants', Defaults.nQuadrants);
-    qls = structInputOrDefault("Width?", qls, 'width', Defaults.qlWidth);
-    % bubblebath_noPlot() is centered at [0,0], so add half ql width to actual offset.
-    qls.heightOffset = heightOffset + (qls.width * 0.5);
+    quadrantLayerStruct = struct();
+    quadrantLayerStruct = structInputOrDefault("How many quadrants?", quadrantLayerStruct, 'nQuadrants', Defaults.nQuadrants);
+    quadrantLayerStruct = structInputOrDefault("Width?", quadrantLayerStruct, 'width', Defaults.qlWidth);
+    % bubblebath_noPlot() is centered at [0,0], so add half ql width to the quadrant layer's height offset.
+    quadrantLayerStruct.heightOffset = heightOffset + (quadrantLayerStruct.width * 0.5);
     % Increment heightOffset by the full width of this layer for the next layer.
-    heightOffset = heightOffset + qls.width;
-    qls.length = 0; % starting value, add to it after making the quadrants
-    quadrantConfigsv1 = [];
+    heightOffset = heightOffset + quadrantLayerStruct.width;
+    quadrantLayerStruct.length = 0; % starting value, add to it after making the quadrants
+    quadrantConfigsNoLengthOffset = [];
     quadrantConfigs = [];
 
-    % Iterate over each quadrant and build its config
-    for q = 1:qls.nQuadrants
+    % Iterate over each quadrant and build its config.
+    % We can't know the length offset of the quadrants until we know how many
+    % there are and each of their lengths, since we build the quadrants left
+    % to right but center them around x = 0 when generating their lattice data.
+    % Thus, we have to go back and add a length offset to each quadrant's struct
+    % after this initial loop. The Quadrants will handle actually adding the
+    % length offset values to their data once they're instantiated.
+    for q = 1:quadrantLayerStruct.nQuadrants
       disp("")
       disp("### Configure quadrant " + q + ".")
-      qsv1 = struct();
-      qsv1 = structInputOrDefault("Length?", qsv1, 'length', Defaults.qLength);
-      qsv1 = structInputOrDefault("Min fiber radius?", qsv1, 'minRadius', Defaults.minRadius);
-      qsv1 = structInputOrDefault("Max fiber radius?", qsv1, 'maxRadius', Defaults.maxRadius);
-      qsv1 = structInputOrDefault("Density?", qsv1, 'density', Defaults.density);
-      qsv1.width = qls.width;
-      qsv1.frameSize = [qsv1.length, qsv1.width];
-      qsv1.circSize = [qsv1.minRadius, qsv1.maxRadius];
+      quadrantStructNoLengthOffset = struct(); % quadrant struct version 1
+      quadrantStructNoLengthOffset = structInputOrDefault("Length?", quadrantStructNoLengthOffset, 'length', Defaults.qLength);
+      quadrantStructNoLengthOffset = structInputOrDefault("Min fiber radius?", quadrantStructNoLengthOffset, 'minRadius', Defaults.minRadius);
+      quadrantStructNoLengthOffset = structInputOrDefault("Max fiber radius?", quadrantStructNoLengthOffset, 'maxRadius', Defaults.maxRadius);
+      quadrantStructNoLengthOffset = structInputOrDefault("Density?", quadrantStructNoLengthOffset, 'density', Defaults.density);
+      quadrantStructNoLengthOffset.heightOffset = quadrantLayerStruct.heightOffset;
+      quadrantStructNoLengthOffset.width = quadrantLayerStruct.width;
+      quadrantStructNoLengthOffset.frameSize = [quadrantStructNoLengthOffset.length, quadrantStructNoLengthOffset.width];
+      quadrantStructNoLengthOffset.circSize = [quadrantStructNoLengthOffset.minRadius, quadrantStructNoLengthOffset.maxRadius];
 
       % Add quadrant length to the quadrant layer length.
-      qls.length = qls.length + qsv1.length;
+      quadrantLayerStruct.length = quadrantLayerStruct.length + quadrantStructNoLengthOffset.length;
       % Add the quadrant struct to the list
-      quadrantConfigsv1 = [quadrantConfigsv1; qsv1];
+      quadrantConfigsNoLengthOffset = [quadrantConfigsNoLengthOffset; quadrantStructNoLengthOffset];
     end
+
     % Start the lengthOffset at half of the length (negative),
     % which centers the quadrant layer on the x-axis.
-    lengthOffset = -qls.length / 2;
+    lengthOffset = -quadrantLayerStruct.length / 2;
+
     % Iterate through the quadrants again to set their lengthOffset,
     % which is just the previous lengthOffset plus half its own length.
-    for q = 1:size(quadrantConfigsv1)
-      qs = quadrantConfigsv1(q);
-      qs.lengthOffset = lengthOffset + (qs.length / 2);
-      quadrantConfigs = [quadrantConfigs; qs];
+    for q = 1:size(quadrantConfigsNoLengthOffset)
+      quadrantStruct = quadrantConfigsNoLengthOffset(q);
+      quadrantStruct.lengthOffset = lengthOffset + (quadrantStruct.length / 2);
+      quadrantConfigs = [quadrantConfigs; quadrantStruct];
       % Increment the lengthOffset to set the new starting coordinate.
-      lengthOffset = lengthOffset + qs.length;
-      disp(">>> Quadrant config")
-      disp(qs)
+      lengthOffset = lengthOffset + quadrantStruct.length;
+      %disp(">>> Quadrant config")
+      %disp(quadrantStruct)
     end
 
     % Add the list of quadrant configs to the quadrant layer struct
-    qls.quadrantConfigs = quadrantConfigs;
+    quadrantLayerStruct.quadrantConfigs = quadrantConfigs;
 
     % Add the quadrant layer config to the list of quadrant layer structs
-    qLayerConfigs = [qLayerConfigs; qls];
-    disp(">> Quadrant layer config:")
-    disp(qls)
+    quadrantLayerConfigs = [quadrantLayerConfigs; quadrantLayerStruct];
+    %disp(">> Quadrant layer config:")
+    %disp(quadrantLayerStruct)
   end
 
   % Add the quadrant layer config list to the ffr layer struct
-  ls.qLayerConfigs = qLayerConfigs;
-  disp("> FFR Layer config")
-  disp(ls)
+  ffrLayerStruct.quadrantLayerConfigs = quadrantLayerConfigs;
+  %disp("> FFR Layer config")
+  %disp(ffrLayerStruct)
+
+  % The height offset is now equal to the width of the completed FFR Layer.
+  ffrLayerStruct.width = heightOffset;
 
   % Add the ffr layer struct to the list
-  ffrLayerConfigs = [ffrLayerConfigs; ls];
+  ffrLayerConfigs = [ffrLayerConfigs; ffrLayerStruct];
 end
 
 % Add the ffrLayerConfigs list to the ffrConfig struct
 ffrConfig.ffrLayerConfigs = ffrLayerConfigs;
 
-disp("FFR Config")
-disp(ffrConfig)
+% The height offset is now equal to the ffr's width.
+ffrConfig.width = heightOffset;
+ffrConfig.length = findGreatestQuadrantLayerLength(quadrantLayerConfigs);
+
+% Make the Boundary configs.
+% We always need four FFR boundaries: left, right, outer, inner
+boundaries = struct();
+boundaries.ffrBounds = struct();
+boundaries.ffrBounds.leftBound  = -ffrConfig.length / 2;
+boundaries.ffrBounds.rightBound =  ffrConfig.length / 2;
+boundaries.ffrBounds.innerBound = 0;
+boundaries.ffrBounds.outerBound = ffrConfig.width;
+boundaries.interiorBounds = [];
+
+% Make a list of interior bound y-values
+for l = ffrLayerConfigs
+  boundaries.interiorBounds = [boundaries.interiorBounds; l.width];
+end
+
+ffrConfig.boundaries = boundaries;
+
+%disp("FFR Config")
+%disp(ffrConfig)
 
 function struct = structInputOrDefault(prompt, struct, fieldName, default)
   % Read user input and append it (or default) to a given list.
@@ -130,4 +179,13 @@ function appendInputOrDefault(prompt, list, default)
     var = default;
   end
   list = [list; var];
+end
+
+function length = findGreatestQuadrantLayerLength(quadrantLayerConfigs)
+  length = 0;
+  for ql = quadrantLayerConfigs
+    if ql.length > length
+      length = ql.length;
+    end
+  end
 end
