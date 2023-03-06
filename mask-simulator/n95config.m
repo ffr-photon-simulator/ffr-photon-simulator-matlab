@@ -89,6 +89,71 @@ ffrConfig.width = ffrConfig.widthI * Defaults.micron;
 % DONE: Randomly generate nQuadrant lengths (one for each quadrant). Use a for loop until the penultimate,
 %       quadrant length, which  just the ffr length minus the length so far.
 
+% Make FFR Layer config structs
+ffrLayerConfigs = [];
+outerHeight = 0; % height of current outer layer (will increase to reach FFR width)
+for i = 1:ffrConfig.nLayers
+  l = buildFFRLayerConfig();
+  l.width = ffrConfig.layerWidths(i);
+  l.nQLayers = l.width / Defaults.qWidthN95; %
+  l.layerType = Defaults.layerType;
+  layerRadiiRange = ffrConfig.layerRadiiI(i, :); % we want integers here
+  layerDensityRange = ffrConfig.layerDensitiesI(i, :); % we want integers here
+
+  % Make Quadrant Layer config structs
+  quadrantLayerConfigs = [];
+  for j = 1:l.nQLayers
+    ql = buildQuadrantLayerConfig(ffrConfig, outerHeight);
+    outerHeight = outerHeight + ql.width;
+
+    % Make Quadrant config structs
+    quadrantConfigs = [];
+    lengthOffset = -ql.length / 2;
+    for k = 1:ql.nQuadrants
+      q = buildQuadrantConfig(ffrConfig, layerRadiiRange, layerDensityRange, ql.heightOffset, lengthOffset);
+      lengthOffset = lengthOffset + q.length;
+      quadrantConfigs = [quadrantConfigs; q];
+      %disp(" >> Quadrant config: ")
+      %disp(q)
+    end
+
+    ql.quadrantConfigs = quadrantConfigs;
+    quadrantLayerConfigs = [quadrantLayerConfigs; ql];
+    %disp(" >> Quadrant layer config: ")
+    %disp(ql)
+  end
+
+  l.quadrantLayerConfigs = quadrantLayerConfigs;
+  ffrLayerConfigs = [ffrLayerConfigs; l];
+  %disp(" > FFR Layer config:")
+  %disp(l)
+end
+
+ffrConfig.ffrLayerConfigs = ffrLayerConfigs;
+
+% Make the boundary configs.
+boundaries = struct();
+ffrBounds = struct();
+ffrBounds.leftBound  = -ffrConfig.length / 2;
+ffrBounds.rightBound =  ffrConfig.length / 2;
+ffrBounds.innerBound = 0;
+ffrBounds.outerBound = ffrConfig.width;
+Defaults.debugMessage("FFR Bounds:\n", 1);
+Defaults.debugStruct(ffrBounds, 1);
+boundaries.ffrBounds = ffrBounds; % nested struct for ffr bounds
+
+% Make a list of interior bound y-values. Use a list because the interior bound order is significant.
+interiorBounds = [];
+bound = 0;
+% There are n-1 interior bound for n FFR layers
+for i = 1:(size(ffrLayerConfigs) - 1)
+  bound = bound + ffrLayerConfigs(i).width;
+  interiorBounds = [interiorBounds; bound];
+end
+Defaults.debugMessage("Interior Bounds:\n", 1);
+
+boundaries.interiorBounds = interiorBounds;
+ffrConfig.boundaries = boundaries;
 
 %%% FUNCTIONS
 
