@@ -54,6 +54,20 @@ classdef Defaults
 
     DEBUG_LEVEL = 0;
 
+    % Plotting
+    photonPathStyle = 'r.';
+    photonPathWeight = 3;
+    % Fibers
+    fiberCircleStyle = 'k.';
+    fiberCircleWeight = 1;
+    fiberCenterStyle = 'k.';
+    fiberCenterWeight = 5;
+    % Interior bounds
+    interiorBoundStyle = 'b--';
+    interiorBoundWeight = 1;
+    % FFR bounds
+    ffrBoundStyle = 'k';
+    ffrBoundWeight = 2;
   end
 
   methods (Static)

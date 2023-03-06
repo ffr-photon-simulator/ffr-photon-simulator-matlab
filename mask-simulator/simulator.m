@@ -39,7 +39,29 @@ for i = 1:size(ffrFiberData, 1) % number of rows is the number of fibers
   plot(ax, xcoords, ycoords, Defaults.fiberCircleStyle,'MarkerSize',Defaults.fiberCircleWeight);
 end
 
+% Plot photon paths
+plot(ax, photonPaths(:,1), photonPaths(:,2), Defaults.photonPathStyle,'MarkerSize', Defaults.photonPathWeight);
 
+% Plot bounds
+ffrBounds = ffr.ffrBounds;
+fields = fieldnames(ffrBounds);
+for i = 1:numel(fields)
+  bound = ffrBounds.(fields{i});
+  bound.plot(ax);
+end
+
+interiorBounds = ffr.boundaries.interiorBounds;
+for i = 1:size(interiorBounds)
+  bound = interiorBounds(i);
+  Defaults.debugMessage("Interior bound at: " + string(bound.bound), 0);
+  bound.plot(ax);
+end
+
+% Set plot limits
+ax.XLim = [ffrBounds.leftBound.bound ffrBounds.rightBound.bound];
+ax.YLim = [ffrBounds.innerBound.bound ffrBounds.outerBound.bound];
+
+fprintf("\n")
 
 % FUNCTIONS
 function photons = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, initialXStep, outerToInnerYStep)
