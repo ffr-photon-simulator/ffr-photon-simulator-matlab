@@ -15,9 +15,9 @@ classdef FFR
       ffrLayerConfigs = config.ffrLayerConfigs;
 
       % Create FFRLayers
-      for q = 1:config.nLayers
+      for l = 1:config.nLayers
         %disp("Create FFRLayer " + q)
-        ffrLayer = FFRLayer(ffrLayerConfigs(q));
+        ffrLayer = FFRLayer(ffrLayerConfigs(l));
         obj.ffrLayers = [obj.ffrLayers; ffrLayer];
       end
     end

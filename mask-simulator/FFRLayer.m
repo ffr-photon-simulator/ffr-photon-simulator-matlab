@@ -15,7 +15,9 @@ classdef FFRLayer
 
       % Store list of structs which are the configs of the quadrant layers.
       % Each quadrant layer struct holds the data to make that quadrant layer.
-      qLayerConfigs = config.qLayerConfigs; % [struct1, struct2, struct3, ...]
+      qLayerConfigs = config.quadrantLayerConfigs; % [struct1, struct2, struct3, ...]
+      %disp("> ffr layer constructor qlayer configs")
+      %disp(qLayerConfigs)
 
       % Create QuadrantLayers
       for q = 1:config.nQLayers
