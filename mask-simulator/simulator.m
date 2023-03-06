@@ -5,12 +5,18 @@ config
 % Make the FFR
 ffr = FFR(ffrConfig);
 
+% Make a RayTracer
+rt = RayTracer();
 
 % Generate the incoming photons
 xStart = -Defaults.nQuadrants * Defaults.qLength / 2;
 xEnd = -xStart;
 outerBound = ffr.ffrBounds.outerBound;
 initialPhotons = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
+
+% Ray trace
+disp("Starting ray tracing.")
+[photonPaths, boundInfo] = rt.rayTrace(ffr, initialPhotons);
 
 
 
