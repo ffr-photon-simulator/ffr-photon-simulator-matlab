@@ -46,8 +46,24 @@ classdef Defaults
     maxRadius = 6*10^(-6);
     density = 0.3;
 
+    DEBUG_LEVEL = 0;
+
   end
 
-  methods
+  methods (Static)
+    function debugMessage(message, messageLevel)
+      % If the debug level is greater than or equal to the message level, then display the message.
+      if Defaults.DEBUG_LEVEL >= messageLevel
+        fprintf("\n" + "DEBUG: " + message)
+      end
+    end
+
+    function debugStruct(struct, messageLevel)
+      % If the debug level is greater than or equal to the message level, then display the struct.
+      if Defaults.DEBUG_LEVEL >= messageLevel
+        disp("DEBUG:")
+        disp(struct)
+      end
+    end
   end
 end

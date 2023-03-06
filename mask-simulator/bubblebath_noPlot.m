@@ -333,7 +333,7 @@ for i = 1:nSizes
     end
     % If we had to quit searching, throw warning.
     if iCount >= S.maxIt && ~S.supressWarning
-        warning('Max iteration reached. %d of the requested %d circles drawn for radius %.3f', cCount, nCirc(i), r(i))
+        warning('Max iteration reached. %d of the requested %d circles drawn for radius %.8f', cCount, nCirc(i), r(i))
     end
     % Store all final circle data
     circdata = [circdata; [xRand(isOK), yRand(isOK), repmat(r(i), sum(isOK), 1)]]; %#ok<AGROW>
