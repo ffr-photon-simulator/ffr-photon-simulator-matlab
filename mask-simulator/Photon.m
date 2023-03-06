@@ -7,6 +7,7 @@ classdef Photon
     y
     xStep
     yStep
+    id
   end
 
   methods
@@ -17,6 +18,9 @@ classdef Photon
       obj.y = y;
       obj.xStep = xStep;
       obj.yStep = yStep;
+      obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 9 char hash
+    end
+
     end
 
     function obj = move(obj)
