@@ -190,23 +190,53 @@ classdef RayTracer
 
           % Iterate through each incoming photon.
           for photonNum = 1:nPhotons
+            Defaults.debugMessage(' > New incident photon.', 1)
             photon = incomingPhotons(photonNum);
             % Initialize values:
-            atBoundary = false;
+            hasCrossedFFRBound = false;
             movedPhoton = photon;
             % Reflect the photon until it reaches a boundary.
-            while atBoundary == false
+            while hasCrossedFFRBound == false
+              %disp(" >> Moving photon.")
               previousPhoton = movedPhoton;
+              photonPaths = [photonPaths; previousPhoton.x previousPhoton.y];
               % Move the photon and check if it has reflected or has crossed a boundary
               movedPhoton = obj.movePhoton(previousPhoton);
-              [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(movedPhoton, layer);
-              [atBoundary, boundary] = obj.checkIfAtBoundary(layer, movedPhoton);
-              elseif hasReflected == true
-                % Calculate the new steps and make a new Photon with those steps.
-                [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
-                movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
-                disp("Photon " + photonNum + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
+              % We want to record any boundary crossings. The photon can either cross an FFR bound or
+              % an interior bound.
+              %  - If it crosses an FFR bound, we move to the next photon, and do not check for reflection.
+              %  - If it crosses an interior bound, it could also potentially have  reflected off a fiber
+              %    lying immediately past that bound.
+              %disp(" >> Check if at FFR bound.")
+              [hasCrossedFFRBound, crossedFFRBound] = obj.checkIfAtFFRBound(movedPhoton, ffr);
+              if hasCrossedFFRBound == true
+                % Move to the next incident photon if the current one has left the FFR.
+                crossedFFRBound.addCrossing(movedPhoton);
+                Defaults.debugMessage(' >>> Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0)
+              else
+                Defaults.debugMessage(' >>> Not at FFR bound. Check if at interior bound.', 1)
+                [hasCrossedInteriorBound, crossedInteriorBound] = obj.checkIfAtInteriorBound(movedPhoton, ffr);
+                if hasCrossedInteriorBound == true
+                  Defaults.debugMessage(' >>>> At interior bound.', 1)
+                  crossedInteriorBound.addCrossing(movedPhoton);
+                end
+                Defaults.debugMessage(' >>> Not at interior bound. Check if reflected.', 1)
+                Defaults.debugMessage(' >>>> Finding current quadrant.', 1)
+                currentQuadrant = obj.findCurrentQuadrant(movedPhoton, ffr);
+                [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(movedPhoton, currentQuadrant);
+                if hasReflected == true
+                  % Calculate the new steps and make a new Photon with those steps.
+                  [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
+                  movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
+                  Defaults.debugMessage('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1)
+                end
               end
+             %elseif hasReflected == true
+             %  % Calculate the new steps and make a new Photon with those steps.
+             %  [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
+             %  movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
+             %  disp("Photon " + photonNum + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
+             %end
             end
           end
         end
