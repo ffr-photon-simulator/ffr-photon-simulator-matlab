@@ -68,6 +68,7 @@ classdef Quadrant
       % Add the length offset to the x-values in bb_data and store the data.
       %disp(config)
       obj.bb_data = obj.addLengthOffset(config.lengthOffset);
+      obj.bb_data = obj.addHeightOffset(config.heightOffset);
       %disp(obj.bb_data)
       %disp("Quadrant data size")
       %disp(size(obj.bb_data))
@@ -101,9 +102,18 @@ classdef Quadrant
     end
 
     function data = addLengthOffset(obj, offset)
-      % Add a length offset to this quadrant
+      % Add a length offset to this quadrant. The offset is equal to
+      % the leftmost x coordinate of the quadrant layer, divided by 2
+      % and negated, then plus the length of any previous quadrants
+      % in the layer, and plus half the length of the current quadrant
+      % (because the current quadrant is _centered_ on [0,0]).
       data = obj.bb_data;
       data(:,1) = data(:,1) + offset;
+    end
+
+    function data = addHeightOffset(obj, offset)
+      data = obj.bb_data;
+      data(:,2) = data(:,2) + offset;
     end
 
     % GETTERS
