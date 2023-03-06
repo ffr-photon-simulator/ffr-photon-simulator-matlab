@@ -15,6 +15,21 @@ classdef FFRBoundary < Boundary
       obj.type = type;
     end
 
+    %function crossed = hasCrossed(obj, photon)
+    %  x = photon.x;
+    %  y = photon.y;
+    %  if obj.type == 'left' && x <= obj.bound
+    %    crossed = true;
+    %  elseif obj.type == 'right' && x >= obj.bound
+    %    crossed = true;
+    %  elseif obj.type == 'outer' && y >= obj.bound
+    %    crossed = true;
+    %  elseif obj.type == 'inner' && y <= obj.bound
+    %    crossed = true;
+    %  else
+    %    crossed = false;
+    %  end
+    %end
 
     function addCrossing(obj, photon)
       % Increment the following counts:
