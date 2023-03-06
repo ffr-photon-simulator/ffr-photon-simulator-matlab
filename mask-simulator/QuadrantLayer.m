@@ -20,9 +20,9 @@ classdef QuadrantLayer
       quadrantConfigs = config.quadrantConfigs; % [qlist1, qlist2, qlist3, ...]
 
       % Create quadrants
-      disp("Num quadrants: " + config.nQuadrants)
+      %disp("Num quadrants: " + config.nQuadrants)
       for q = 1:config.nQuadrants
-        disp(q)
+        %disp(q)
         % if q == 3
         %   disp(">> Creating quadrant " + q)
         % end

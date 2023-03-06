@@ -32,6 +32,8 @@ classdef Quadrant
       % c.maxRadius = maximum fiber radius
       % c.frameSize = quadrant size
       % c.density   = fiber density
+      % c.lengthOffset = left bound x coordinate
+      % c.heightOffset = bottom bound y coordinate
 
       % Store the user-defined values
       obj.minRadius = config.minRadius;
@@ -55,7 +57,7 @@ classdef Quadrant
       [obj.bb_data, obj.bb_struct_out] = bubblebath_noPlot(obj.bb_struct);
 
       % Add the length offset to the x-values in bb_data and store the data.
-      disp(config)
+      %disp(config)
       obj.bb_data = obj.addLengthOffset(config.lengthOffset);
       %disp(obj.bb_data)
       %disp("Quadrant data size")

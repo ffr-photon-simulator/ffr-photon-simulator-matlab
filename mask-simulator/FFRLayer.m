@@ -33,11 +33,14 @@ classdef FFRLayer
         obj.quadrantLayers = [obj.quadrantLayers; quadrantLayer];
       end
 
+      %disp("> ffrlayer constructor qlayers")
+      %disp(obj.quadrantLayers)
+
       % Aggregate fiber data from the quadrant layers
       obj.lattice = obj.makeLattice(config.nQLayers);
-      disp("FFR Layer lattice")
-      disp(obj.lattice)
-      disp("")
+      %disp("FFR Layer lattice")
+      %disp(obj.lattice)
+      %disp("")
     end
 
     function lattice = makeLattice(obj, nLayers)
