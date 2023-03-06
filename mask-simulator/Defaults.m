@@ -1,6 +1,8 @@
 classdef Defaults
   % A data class that provides default configuration values.
   properties (Constant)
+    %%% UNITS
+    micron = 10^(-6);
     %%% INITIAL PHOTONS
     % Multipliers
     % Change the x-separation between each initial photon:
@@ -48,6 +50,10 @@ classdef Defaults
 
     % Quadrant config
     qLength = 8*Defaults.LATTICE_I;
+    qLengthN95I = 80; %%% <--
+    qLengthN95 = Defaults.qLengthN95I * Defaults.micron; %%% <--
+    qWidthN95I = 80; %%% <--
+    qWidthN95 = Defaults.qWidthN95I * Defaults.micron; %%% <--
     minRadius = 3*10^(-6);
     maxRadius = 6*10^(-6);
     density = 0.3;
