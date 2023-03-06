@@ -21,6 +21,32 @@ classdef Photon
       obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 9 char hash
     end
 
+    function crossed = hasCrossedFFRBound(obj, bound)
+      if isequal(bound.type, 'left') && obj.x <= bound.bound
+        %disp('Crossed FFR bound: left')
+        crossed = true;
+      elseif isequal(bound.type, 'right') && obj.x >= bound.bound
+        %disp('Crossed FFR bound: right')
+        crossed = true;
+      elseif isequal(bound.type, 'outer') && obj.y >= bound.bound
+        %disp('Crossed FFR bound: outer')
+        crossed = true;
+      elseif isequal(bound.type, 'inner') && obj.y <= bound.bound
+        %disp('Crossed FFR bound: inner')
+        crossed = true;
+      else
+        %disp('NOT FFR BOUND')
+        crossed = false;
+      end
+    end
+
+    function crossed = hasCrossedInteriorBound(obj, bound)
+      % If the photon is in an Interior bound's range (between its upper and lower bounds),
+      % then it has crossed into the boundary.
+      crossed = false;
+      if obj.y <= bound.upperBound && obj.y >= bound.lowerBound
+        crossed = true;
+      end
     end
 
     function obj = move(obj)
