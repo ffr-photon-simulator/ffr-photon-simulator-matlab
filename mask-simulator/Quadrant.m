@@ -17,12 +17,19 @@ classdef Quadrant
     maxRadius
     density
     frameSize % quadrant size
+    length
+    width
 
     bb_struct = struct();
 
     % Output of bubblebath_noPlot()
     bb_struct_out % the struct returned from bubblebath_noPlot
     bb_data % ([xcoord ycoord radius])
+
+    leftBound
+    rightBound
+    outerBound
+    innerBound
   end
 
   methods
@@ -39,6 +46,8 @@ classdef Quadrant
       obj.minRadius = config.minRadius;
       obj.maxRadius = config.maxRadius;
       obj.frameSize = config.frameSize;
+      obj.length    = config.frameSize(1);
+      obj.width     = config.frameSize(2);
       obj.density   = config.density;
 
       % Set other values necessary for bubblebath_noPlot().
@@ -62,6 +71,33 @@ classdef Quadrant
       %disp(obj.bb_data)
       %disp("Quadrant data size")
       %disp(size(obj.bb_data))
+
+      % Determine the quadrant's boundary values
+
+      % Left bound: the length offset, as noted below, starts at the quadrant layer's left bound and
+      % adds the length of any previous quadrants along with half the length of this quadrant.
+      % The left bound of this quadrant is just the QL's left bound plus the length of evous
+      % quadrants, so we subtract half the length of this quadrant from the lengthOffset.
+      obj.leftBound = config.lengthOffset - (config.frameSize(1) / 2);
+      %disp("left bound")
+      %disp(obj.leftBound)
+
+      % Right bound: the left bound plus the quadrant's length
+      obj.rightBound = obj.leftBound + obj.length;
+      %disp("right bound")
+      %disp(obj.rightBound)
+
+      % Inner bound: the height offset, but minus half the quadrant's width because
+      % we've already added half the quadrant layer's width to the height offset
+      % (see config.m, about line 70).
+      obj.innerBound = config.heightOffset - (obj.width / 2);
+      %disp("inner bound")
+      %disp(obj.innerBound)
+
+      % Outer bound: the height offset plus the quadrant's width
+      obj.outerBound = obj.innerBound + obj.width;
+      %disp("outer bound")
+      %disp(obj.outerBound)
     end
 
     function data = addLengthOffset(obj, offset)
