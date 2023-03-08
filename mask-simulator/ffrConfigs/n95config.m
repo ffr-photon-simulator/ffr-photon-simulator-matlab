@@ -67,7 +67,7 @@ ffrConfig.nLayers = 3;
 ffrConfig.lengthI = 800;
 ffrConfig.length = ffrConfig.lengthI * Defaults.micron; % 5 * 10^(-4);
 % Radii ranges: between 7 and 10 for layer 1, and so on
-ffrConfig.layerRadiiI = [7 10; 1  8; 7 10];
+ffrConfig.layerRadiiI = [7 10; 1 8; 7 10];
 ffrConfig.layerRadii = ffrConfig.layerRadiiI * Defaults.micron;
 % Density: value between 0 and 1. Anything greater than 0.1 ends up being fairly high density,
 % so divide this value by 100 to make the densities a useful value (<= 0.1).
@@ -78,7 +78,7 @@ ffrConfig.layerWidthsI = [80 160 80];
 ffrConfig.layerWidths = ffrConfig.layerWidthsI * Defaults.micron;
 % Total width
 widthI = 0;
-for w = ffrConfig.layerWidthsI;
+for w = ffrConfig.layerWidthsI
   widthI = widthI + w;
 end
 ffrConfig.widthI = widthI;
