@@ -19,7 +19,7 @@ outerBound = ffr.ffrBounds.outerBound;
 initialPhotons = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
 
 % Ray trace
-disp("Starting ray tracing.")
+Defaults.debugMessage("Starting ray tracing", 0);
 [photonPaths, boundInfo] = rt.rayTrace(ffr, initialPhotons);
 
 % Graph FFR fibers and photon paths

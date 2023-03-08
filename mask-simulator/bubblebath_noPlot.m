@@ -110,6 +110,8 @@ function [circData, S] = bubblebath_noPlot(S)
 %                       with the same rng seed. 'd' renamed to 'nCirc' and redefined to consider
 %                       intlFrame and minDist [1]. Added bubblebath_examples.mlx.
 
+Defaults.debugMessage("Running bubblebath_noPlot\n", 1);
+
 %% Default inputs
 % Fill in missing params with default values.
 if nargin == 0
