@@ -69,9 +69,9 @@ ffrConfig.length = ffrConfig.lengthI * Defaults.micron; % 5 * 10^(-4);
 % Radii ranges: between 7 and 10 for layer 1, and so on
 ffrConfig.layerRadiiI = [7 10; 1  8; 7 10];
 ffrConfig.layerRadii = ffrConfig.layerRadiiI * Defaults.micron;
-% Density ranges: between 0.01 and 0.05 for layer 1, and so on (divide by 100 later)
-ffrConfig.layerDensitiesI = [1  3; 3 8; 1 3];
-ffrConfig.layerDensities = ffrConfig.layerDensitiesI * Defaults.micron;
+% Density: value between 0 and 1. Anything greater than 0.1 ends up being fairly high density,
+% so divide this value by 100 to make the densities a useful value (<= 0.1).
+ffrConfig.layerDensities = [1 3; 3 8; 1 3] / 100;
 
 % Calculate FFR width
 ffrConfig.layerWidthsI = [80 160 80];
@@ -177,8 +177,7 @@ function config = buildQuadrantConfig(ffrConfig, layerRadiiRange, layerDensityRa
   config.length = Defaults.qLengthN95;
   config.minRadius = layerRadiiRange(1) * Defaults.micron; % integer range
   config.maxRadius = layerRadiiRange(2) * Defaults.micron; % integer range
-  % Density: multiply to microns and then divide by 100 to make densities a useful value.
-  config.density = (randi([layerDensityRange(1) layerDensityRange(2)]) / 100) * Defaults.micron;
+  config.density = randi([layerDensityRange(1) layerDensityRange(2)]) / 100;
   config.heightOffset = heightOffset;
   config.lengthOffset = lengthOffset + (config.length / 2);
   config.width = Defaults.qWidthN95;
