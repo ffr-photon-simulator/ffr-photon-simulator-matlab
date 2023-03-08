@@ -52,7 +52,7 @@ classdef Defaults
     qLength = 8*Defaults.LATTICE_I;
     qLengthN95I = 80; %%% <--
     qLengthN95 = Defaults.qLengthN95I * Defaults.micron; %%% <--
-    qWidthN95I = 80; %%% <--
+    qWidthN95I = Defaults.qLengthN95I; %%% <--
     qWidthN95 = Defaults.qWidthN95I * Defaults.micron; %%% <--
     minRadius = 3*10^(-6);
     maxRadius = 6*10^(-6);
