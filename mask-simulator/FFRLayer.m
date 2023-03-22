@@ -4,6 +4,8 @@ classdef FFRLayer
     lattice = []; % fiber data
     latticeWidth
     latticeLength
+    outerBound
+    innerBound
   end
 
   methods
@@ -12,6 +14,10 @@ classdef FFRLayer
       % c.nQLayers = number of quadrant layers
       % c.layerType = type of layer ('inner, interior, filtering, or exterior')
       % c.qLayerConfigs = list of structs defining each quadrant layer
+
+      % Set the bounds of this layer.
+      obj.outerBound = config.outerBound;
+      obj.innerBound = config.innerBound;
 
       % Store list of structs which are the configs of the quadrant layers.
       % Each quadrant layer struct holds the data to make that quadrant layer.
@@ -100,5 +106,14 @@ classdef FFRLayer
     %function rightBound = getRightBound(obj)
     %  rightBound = obj.lattice.rightBound;
     %end
+    function bool = containsPhoton(obj, photon)
+      % Check if a photon is inside this layer.
+      bool = false;
+      if photon.y <= obj.outerBound.bound
+        if photon.y >= obj.innerBound.bound
+          bool = true;
+        end
+      end
+    end
   end
 end
