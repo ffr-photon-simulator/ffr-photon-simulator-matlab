@@ -8,7 +8,7 @@ classdef Defaults
     % Change the x-separation between each initial photon:
     %  >1 increases the number of photons
     %  <1 decreases the number of photons
-    separationMultiplier = 100;
+    separationMultiplier = 2000;
     % Change the length of the initial photons' y step:
     %  >1 increases the y step
     %  <1 decreases the y step
@@ -50,7 +50,7 @@ classdef Defaults
 
     % Quadrant config
     qLength = 8*Defaults.LATTICE_I;
-    qLengthN95I = 100; %%% <--
+    qLengthN95I = 80; %%% <--
     qLengthN95 = Defaults.qLengthN95I * Defaults.micron; %%% <--
     qWidthN95I = Defaults.qLengthN95I; %%% <--
     qWidthN95 = Defaults.qWidthN95I * Defaults.micron; %%% <--
@@ -80,15 +80,23 @@ classdef Defaults
     function debugMessage(message, messageLevel)
       % If the debug level is greater than or equal to the message level, then display the message.
       if Defaults.DEBUG_LEVEL >= messageLevel
-        fprintf("\n" + "DEBUG: " + message)
+        fprintf("\nDEBUG Message: " + message)
       end
     end
 
-    function debugStruct(struct, messageLevel)
+    function debugStruct(struct, message, messageLevel)
       % If the debug level is greater than or equal to the message level, then display the struct.
       if Defaults.DEBUG_LEVEL >= messageLevel
-        disp("DEBUG:")
+        fprintf("\nDEBUG Struct: " + message + "\n")
         disp(struct)
+      end
+    end
+
+    function debugArray(array, message, messageLevel)
+      % If the debug level is greater than or equal to the message level, then display the struct.
+      if Defaults.DEBUG_LEVEL >= messageLevel
+        fprintf("\nDEBUG Array: " + message + "\n")
+        disp(array)
       end
     end
   end
