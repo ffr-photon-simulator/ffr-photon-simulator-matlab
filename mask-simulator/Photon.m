@@ -40,14 +40,18 @@ classdef Photon
       end
     end
 
-    function crossed = hasCrossedInteriorBound(obj, bound)
-      % If the photon is in an Interior bound's range (between its upper and lower bounds),
-      % then it has crossed into the boundary.
-      crossed = false;
-      if obj.y <= bound.upperBound && obj.y >= bound.lowerBound
-        crossed = true;
-      end
-    end
+    %function crossed = hasCrossedInteriorBound(obj, bound)
+    %  % If the photon is in an Interior bound's range (between its upper and lower bounds),
+    %  % then it has crossed into the boundary.
+    %  crossed = false;
+    %  if obj.y <= bound.upperBound && obj.y >= bound.lowerBound
+    %    if obj.insideInteriorBound == false
+    %      crossed = true;
+    %    end
+    %  else
+    %    obj.insideInteriorBound == true;
+    %  end
+    %end
 
     function obj = move(obj)
       obj.x = obj.x + obj.xStep;
