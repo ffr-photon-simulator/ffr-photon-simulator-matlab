@@ -71,7 +71,7 @@ ffrConfig.layerRadiiI = [7 10; 1 8; 7 10];
 ffrConfig.layerRadii = ffrConfig.layerRadiiI * Defaults.micron;
 % Density: value between 0 and 1. Anything greater than 0.1 ends up being fairly high density,
 % so divide this value by 100 to make the densities a useful value (<= 0.1).
-ffrConfig.layerDensities = [1 3; 3 8; 1 3] / 100;
+ffrConfig.layerDensitiesI = [1 3; 3 8; 1 3];
 
 % Calculate FFR width
 ffrConfig.layerWidthsI = [80 160 80];
@@ -128,8 +128,6 @@ for i = 1:ffrConfig.nLayers
   %disp(" > FFR Layer config:")
   %disp(l)
 end
-
-ffrConfig.ffrLayerConfigs = ffrLayerConfigs;
 
 % Make the boundary configs.
 boundaries = struct();
