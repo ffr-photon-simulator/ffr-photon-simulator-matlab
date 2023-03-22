@@ -129,6 +129,8 @@ for i = 1:ffrConfig.nLayers
   %disp(l)
 end
 
+ffrConfig.ffrLayerConfigs = ffrLayerConfigsBounds;
+
 % Make the boundary configs.
 boundaries = struct();
 ffrBounds = struct();
