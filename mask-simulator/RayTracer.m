@@ -13,11 +13,14 @@ classdef RayTracer
     % proceeds to the next photon. If the Photon has reflected, its new x-y steps are
     % calculated and the loop continues.
     properties
+      currFFRLayer
+      prevFFRLayer
     end
 
     methods
-        function obj = RayTracer()
-            % Plain constructor because the methods will handle the actual ray tracing.
+        function obj = RayTracer(ffr)
+          % Set the current FFR layer to the outer FFR layer.
+          obj.currFFRLayer = ffr.ffrLayers(end);
         end
 
         function movedPhoton = movePhoton(obj, photon)
@@ -212,6 +215,33 @@ classdef RayTracer
           % between the reflection point and the reflected photon.
           newXStep = new_x - refl_x;
           newYStep = new_y - refl_y;
+        end
+
+        function layer = findCurrFFRLayer(obj, ffr, photon)
+          layer = [];
+          ffrLayers = ffr.ffrLayers;
+          for i = 1:size(ffrLayers)
+            if ffrLayers(i).containsPhoton(photon)
+              layer = ffrLayers(i);
+              return;
+            end
+          end
+        end
+
+        function bound = findCrossedInteriorBound(obj)
+          % The shared bound between the current and previous FFR layers
+          % is the bound that has been crossed.
+          curr = obj.currFFRLayer;
+          prev = obj.prevFFRLayer;
+          % Test case for outer -> inner photon travel direction:
+          % so curr is closer to inner and prev is closer to outer.
+          if isequal(curr, prev)
+            bound = curr.outerBound
+          % Test case for inner -> outer photon travel direction:
+          % so prev is closer to inner and curr is closer to outer.
+          elseif isequal(prev.outerBound, curr.innerBound)
+            bound = prev.outerBound
+          end
         end
 
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
