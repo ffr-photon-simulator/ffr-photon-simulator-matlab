@@ -39,8 +39,31 @@ classdef FFR
         interiorBounds = [interiorBounds; InteriorBoundary(config.boundaries.interiorBounds(i))];
       end
       Defaults.debugMessage("Interior bounds in FFR constructor", 1);
+
+      % Assemble obj.boundaries
       obj.boundaries.ffrBounds = ffrBounds;
       obj.boundaries.interiorBounds = interiorBounds;
+
+      % Store list of structs which are the configs of the FFRLayers.
+      % Each FFRLayer struct holds the data to make that FFR layer.
+      ffrLayerConfigs = config.ffrLayerConfigs;
+
+      % Create FFRLayers
+      for i = 1:obj.nLayers
+        ffrLayerConfig = ffrLayerConfigs(i);
+        if i == 1
+          ffrLayerConfig.innerBound = obj.boundaries.ffrBounds.innerBound;
+        else
+          ffrLayerConfig.innerBound = obj.boundaries.interiorBounds(i - 1);
+        end
+        if i == obj.nLayers
+          ffrLayerConfig.outerBound = obj.boundaries.ffrBounds.outerBound;
+        else
+          ffrLayerConfig.outerBound = obj.boundaries.interiorBounds(i);
+        end
+        ffrLayer = FFRLayer(ffrLayerConfig);
+        obj.ffrLayers = [obj.ffrLayers; ffrLayer];
+      end
 
       % Aggregate entire FFR fiber data
       obj.fiberData = obj.buildFiberData();
