@@ -53,8 +53,8 @@ classdef Quadrant
       % Set other values necessary for bubblebath_noPlot().
       obj.bb_struct.frameSize      = obj.frameSize; % [length, width], centered at [0,0].
       obj.bb_struct.circSize       = [obj.minRadius, obj.maxRadius];
-      obj.bb_struct.nSizes         = 10; % number of discrete radii in interval
-      obj.bb_struct.maxCircsPerRad = 500;
+      obj.bb_struct.nSizes         = 5; % number of discrete radii in interval
+      obj.bb_struct.maxCircsPerRad = 3;
       obj.bb_struct.maxIt          = 200;
       obj.bb_struct.edgeType       = 1; % all inside frame
       obj.bb_struct.density        = obj.density; % not yet sure what the "density" does in bubblebath.m
