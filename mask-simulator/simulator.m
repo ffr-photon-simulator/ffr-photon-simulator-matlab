@@ -13,12 +13,12 @@ config_3M1860
 ffr = FFR(ffrConfig);
 
 % Make a RayTracer
-rt = RayTracer();
+rt = RayTracer(ffr);
 
 % Generate the incoming photons
-xStart = -Defaults.nQuadrants * Defaults.qLength / 2;
+xStart = -ffrConfig.length / 2;
 xEnd = -xStart;
-outerBound = ffr.ffrBounds.outerBound;
+outerBound = ffr.ffrBounds.outerBound; % should be the boundary object
 [initialPhotons, nPhotons] = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
 
 % Ray trace
