@@ -51,12 +51,19 @@ classdef FFRLayer < handle
 
     function bool = containsPhoton(obj, photon)
       % Check if a photon is inside this layer.
-      bool = false;
-      if photon.y <= obj.outerBound.bound
-        if photon.y >= obj.innerBound.bound
-          bool = true;
-        end
-      end
+      outer = obj.outerBound.bound;
+      inner = obj.innerBound.bound;
+      Defaults.debugMessage("outer: " + outer, 1);
+      Defaults.debugMessage("inner: " + inner, 1);
+      bool = photon.y <= outer && photon.y > inner;
+      %bool = false;
+      %if photon.y <= obj.outerBound.bound
+      %  if photon.y > obj.innerBound.bound
+      %    bool = true;
+      %  end
+      %end
+    end
+
     end
   end
 end
