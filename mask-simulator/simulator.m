@@ -79,19 +79,24 @@ end
 % Plot photon paths
 plot(ax, photonPaths(:,1), photonPaths(:,2), Defaults.photonPathStyle,'MarkerSize', Defaults.photonPathWeight);
 
-% Plot bounds
+% Plot bounds and print crossing info
+disp("")
 ffrBounds = ffr.ffrBounds;
 fields = fieldnames(ffrBounds);
 for i = 1:numel(fields)
   bound = ffrBounds.(fields{i});
   bound.plot(ax);
+  bound.printCrossingInfo();
 end
+
+disp("")
 
 interiorBounds = ffr.boundaries.interiorBounds;
 for i = 1:size(interiorBounds)
   bound = interiorBounds(i);
   Defaults.debugMessage("Interior bound at: " + string(bound.bound), 0);
   bound.plot(ax);
+  bound.printCrossingInfo();
 end
 
 % Set plot limits

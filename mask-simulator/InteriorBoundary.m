@@ -79,6 +79,15 @@ classdef InteriorBoundary < Boundary
       %data.repeats = data.repeatsToInner + data.repeatsToOuter;
     end
 
+    function printCrossingInfo(obj)
+      m1 = "Interior Bound at " + obj.bound + " w/ total crossings = " + obj.count;
+      Defaults.debugMessage(m1, 1);
+      m2 = " - outer to inner crossings: " + obj.toInner;
+      Defaults.debugMessage(m2, 1);
+      %m2 = "- outer to inner crossings: " + data.toInner + "\n  - repeated: " + data.repeatsToInner;
+      %m3 = "- inner to outer crossings: " + data.toOuter + "\n  - repeated: " + data.repeatsToOuter;
+      %Defaults.debugMessage(m2, 0);
+      %Defaults.debugMessage(m3, 0);
     end
   end
 end

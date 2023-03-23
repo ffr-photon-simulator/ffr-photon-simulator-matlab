@@ -50,6 +50,14 @@ classdef FFRBoundary < Boundary
     function data = getCountData(obj)
       data = struct();
       data.count = obj.count;
+      data.type = obj.type;
+    end
+
+    function printCrossingInfo(obj)
+      msg = "\nFFRBound type: " + obj.type + "\n - total crossings: " + obj.count;
+      Defaults.debugMessage(msg, 1);
+      %Defaults.debugMessage("\nFFR Bound type: " + obj.type, 0);
+      %Defaults.debugMessage("- total crossings: " + obj.count, 0);
     end
   end
 end
