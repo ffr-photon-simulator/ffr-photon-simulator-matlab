@@ -1,8 +1,13 @@
+clear all; % clear workspace
+% Add the configs to the path
+%cwd = pwd % current working directory
+%configDir = cwd + "mask-simulator/ffrConfigs"
+%addpath(configDir)
 % Generate the config
 %defaultConfig
 %config
-n95config
-
+config_3M1860
+%n95config
 
 % Make the FFR
 ffr = FFR(ffrConfig);
