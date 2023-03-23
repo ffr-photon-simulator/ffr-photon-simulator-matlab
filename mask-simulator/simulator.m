@@ -19,7 +19,7 @@ rt = RayTracer();
 xStart = -Defaults.nQuadrants * Defaults.qLength / 2;
 xEnd = -xStart;
 outerBound = ffr.ffrBounds.outerBound;
-initialPhotons = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
+[initialPhotons, nPhotons] = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
 
 % Ray trace
 Defaults.debugMessage("Starting ray tracing...", 0);
@@ -110,7 +110,7 @@ ax.YLim = [ffrBounds.innerBound.bound ffrBounds.outerBound.bound];
 fprintf("\n")
 
 % FUNCTIONS
-function photons = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, initialXStep, outerToInnerYStep)
+function [photons, nPhotons] = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, initialXStep, outerToInnerYStep)
   % The photons' x-axis range is from xStart to xEnd. Their y coordinate is
   % equal to the value of the outer boundary. The initial photons are
   % separated by the value of the "separation" variable.
