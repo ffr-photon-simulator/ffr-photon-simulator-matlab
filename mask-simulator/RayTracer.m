@@ -25,9 +25,9 @@ classdef RayTracer
           %disp(obj.currFFRLayer)
         end
 
-        function movedPhoton = movePhoton(obj, photon)
+        function movePhoton(obj, photon)
           % Move the photon by the x and y steps it has stored.
-          movedPhoton = photon.move(); % returns a new Photon object for now
+          photon.move(); % returns a new Photon object for now
         end
 
         function distance = distanceToFiber(obj, photon, fiberCoords)
@@ -283,7 +283,8 @@ classdef RayTracer
               previousPhoton = movedPhoton;
               photonPaths = [photonPaths; previousPhoton.x previousPhoton.y];
               % Move the photon and check if it has reflected or has crossed a boundary
-              movedPhoton = obj.movePhoton(previousPhoton);
+              %%%movedPhoton = obj.movePhoton(previousPhoton);
+              obj.movePhoton(photon);
               % We want to record any boundary crossings. The photon can either cross an FFR bound or
               % an interior bound.
               %  - If it crosses an FFR bound, we move to the next photon, and do not check for reflection.
@@ -313,6 +314,8 @@ classdef RayTracer
                   % Calculate the new steps and make a new Photon with those steps.
                   [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
                   movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
+                  %movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
+                  photon.setSteps(newXStep, newYStep);
                   Defaults.debugMessage('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1)
                 end
               end

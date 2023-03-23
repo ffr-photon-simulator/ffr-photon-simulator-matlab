@@ -1,4 +1,4 @@
-classdef Photon
+classdef Photon < handle
   properties (Constant) % static
     WAVELENGTH = Defaults.photonWavelength;
   end
@@ -53,7 +53,8 @@ classdef Photon
     %  end
     %end
 
-    function obj = move(obj)
+    
+    function move(obj)
       obj.x = obj.x + obj.xStep;
       obj.y = obj.y + obj.yStep;
     end
@@ -70,8 +71,9 @@ classdef Photon
       coords = [obj.x obj.y];
     end
 
-    function obj = setX(obj, newX)
-      obj.x = newX;
+    function setSteps(obj, newXStep, newYStep)
+      obj.xStep = newXStep;
+      obj.yStep = newYStep;
     end
 
     function obj = setY(obj, newY)
