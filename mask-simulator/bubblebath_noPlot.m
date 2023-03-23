@@ -148,7 +148,7 @@ if ~isfield(S,'maxCircsPerRad') || isempty(S.maxCircsPerRad)
     % Set the maximum number of circles per radius.  The squareform
     % function may cause memory problems as this number gets larger
     % (eg ~12000 for 64bit Windows 10).  Use inf for unlimited.
-    S.maxCircsPerRad = 5000;
+    S.maxCircsPerRad = 200;
 end
 if ~isfield(S,'circPoints') || isempty(S.circPoints)
     % Set the number of coordinates used to draw each circle [0,2*pi].
@@ -282,7 +282,7 @@ elseif strcmpi(S.overlapType,'relative')
 end
 
 % determine approximate number of circles to draw for each size (see [1])
-nCirc = ceil(prod(intlFrame,1)./nSizes ./ (pi * r.^2) * S.density);
+nCirc = ceil(prod(intlFrame,1)./nSizes ./ (pi * r.^2) * S.density); % the density is a multiplier
 
 if any(nCirc > S.maxCircsPerRad) && ~S.supressWarning
     warning('The maximum number of circles for radii [%s] have been limited to %d.', ...
