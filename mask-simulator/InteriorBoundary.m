@@ -9,18 +9,7 @@ classdef InteriorBoundary < Boundary
   % of the number of repeats, instead add the sizes
   % of the two repeated photon ID hash sets when
   % the user requests the data.
-
-  properties (Constant)
-    % The abs(y step) of reflected photons can never be greater than the
-    % initial abs(y step). So make this range half of the default y step.
-    range = Defaults.innerToOuterYStep / 2; % already positive
-  end
-
   properties
-    % The boundary's coordinate. Only one (x or y) will have a value
-    %lowerBound
-    %upperBound
-
     % Sets of the IDs of each photon that crossed the boundary in either direction
     % at least once. Use this to know whether to count a crossing as a repeat, and
     % benefit from the O(1) access since there are many photons.
@@ -30,10 +19,7 @@ classdef InteriorBoundary < Boundary
 
   methods
     function obj = InteriorBoundary(bound)
-      % TODO Verify constructors work this way (assign value to superclass properties)
       obj = obj@Boundary(bound);
-      %obj.lowerBound = bound - obj.range;
-      %obj.upperBound = bound + obj.range;
     end
 
     function addCrossing(obj, photon, direction)
