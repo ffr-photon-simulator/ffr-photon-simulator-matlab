@@ -235,19 +235,24 @@ classdef RayTracer
           end
         end
 
-        function bound = findCrossedInteriorBound(obj)
+        function [bound, direction] = findCrossedBound(obj, photon)
           % The shared bound between the current and previous FFR layers
           % is the bound that has been crossed.
           curr = obj.currFFRLayer;
           prev = obj.prevFFRLayer;
+          direction = +1; % inner -> outer (positive y movement)
           % Test case for outer -> inner photon travel direction:
           % so curr is closer to inner and prev is closer to outer.
-          if isequal(curr, prev)
-            bound = curr.outerBound
+          if curr.outerBound == prev.innerBound
+            bound = curr.outerBound;
+            direction = -direction; %
           % Test case for inner -> outer photon travel direction:
           % so prev is closer to inner and curr is closer to outer.
-          elseif isequal(prev.outerBound, curr.innerBound)
-            bound = prev.outerBound
+          elseif prev.outerBound == curr.innerBound
+            bound = prev.outerBound;
+          else
+            Defaults.debugMessage("Unknown crossed bound. Photon at y = " + photon.y, 0);
+            bound = "unknown crossed bound";
           end
         end
 
