@@ -191,8 +191,8 @@ classdef RayTracer
           % Add double these distance to the incident coords to get the reflected coords.
           
           % disp(">> Calculating new steps.")
-          inc_x = incidentPhoton.x;
-          inc_y = incidentPhoton.y;
+          inc_x = incidentPhotonCoords(1);
+          inc_y = incidentPhotonCoords(2);
           refl_x = reflectionPoint(1);
           refl_y = reflectionPoint(2);
           fiber_x = reflectedFiberCoords(1);
@@ -315,8 +315,7 @@ classdef RayTracer
                 [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(photon, currentQuadrant);
                 if hasReflected == true
                   % Calculate the new steps and make a new Photon with those steps.
-                  [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
-                  movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
+                  reflectionPoint = [photon.x, photon.y];
                   [newXStep, newYStep] = obj.calculateNewSteps(reflectionPoint, previousPhotonCoords, reflectedFiberCoords);
                   %movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
                   photon.setSteps(newXStep, newYStep);
