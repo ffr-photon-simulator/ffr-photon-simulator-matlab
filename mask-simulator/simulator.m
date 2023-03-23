@@ -1,5 +1,3 @@
-%simulator_handler
-%% Simulates an FFR.
 % Generate the config
 %defaultConfig
 %config
@@ -19,8 +17,9 @@ outerBound = ffr.ffrBounds.outerBound;
 initialPhotons = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
 
 % Ray trace
-Defaults.debugMessage("Starting ray tracing", 0);
+Defaults.debugMessage("Starting ray tracing...", 0);
 [photonPaths, boundInfo] = rt.rayTrace(ffr, initialPhotons);
+Defaults.debugMessage("Finished ray tracing.", 0);
 
 % Calculate and store photon crossing information.
 % Each photon that enters an FFR Layer is considered available for decontamination.
@@ -61,7 +60,7 @@ ax = axes;
 hold on; % don't overwrite plot
 axis equal; % make x and y axis scale the same
 % Plot fiber centers
-plot(ax, ffr.fiberData(:,1), ffr.fiberData(:,2), Defaults.fiberCenterStyle,'MarkerSize', Defaults.fiberCenterWeight);
+%plot(ax, ffr.fiberData(:,1), ffr.fiberData(:,2), Defaults.fiberCenterStyle,'MarkerSize', Defaults.fiberCenterWeight);
 
 % Plot fiber circles
 ffrFiberData = ffr.fiberData;
@@ -94,7 +93,7 @@ disp("")
 interiorBounds = ffr.boundaries.interiorBounds;
 for i = 1:size(interiorBounds)
   bound = interiorBounds(i);
-  Defaults.debugMessage("Interior bound at: " + string(bound.bound), 0);
+  Defaults.debugMessage("Interior bound at: " + string(bound.bound), 1);
   bound.plot(ax);
   bound.printCrossingInfo();
 end
@@ -111,7 +110,7 @@ function photons = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, i
   % equal to the value of the outer boundary. The initial photons are
   % separated by the value of the "separation" variable.
   nPhotons = (xEnd-xStart) / separation;
-  disp("Num photons: " + nPhotons)
+  Defaults.debugMessage("Num photons: " + nPhotons, 0);
   photons = [];
   bound = outerBoundary.bound;
   for m = 1:nPhotons

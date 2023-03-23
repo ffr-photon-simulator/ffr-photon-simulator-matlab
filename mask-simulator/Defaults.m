@@ -80,7 +80,7 @@ classdef Defaults
     function debugMessage(message, messageLevel)
       % If the debug level is greater than or equal to the message level, then display the message.
       if Defaults.DEBUG_LEVEL >= messageLevel
-        fprintf("\nDEBUG Message: " + message)
+        fprintf("\nDEBUG: " + message)
       end
     end
 

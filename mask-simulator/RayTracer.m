@@ -21,6 +21,8 @@ classdef RayTracer
         function obj = RayTracer(ffr)
           % Set the current FFR layer to the outer FFR layer.
           obj.currFFRLayer = ffr.ffrLayers(end);
+          Defaults.debugMessage("RT constructor curr ffr layer: ", 1);
+          %disp(obj.currFFRLayer)
         end
 
         function movedPhoton = movePhoton(obj, photon)
@@ -221,9 +223,13 @@ classdef RayTracer
         function layer = findCurrFFRLayer(obj, ffr, photon)
           layer = [];
           ffrLayers = ffr.ffrLayers;
+          Defaults.debugMessage("photon y: " + photon.y, 1);
           for i = 1:size(ffrLayers)
+            Defaults.debugMessage("\n", 1);
+            Defaults.debugMessage("i = " + i, 1);
             if ffrLayers(i).containsPhoton(photon)
               layer = ffrLayers(i);
+              Defaults.debugMessage("Curr ffr layer i = " + i, 1);
               return;
             end
           end
@@ -276,9 +282,8 @@ classdef RayTracer
               if hasCrossedFFRBound == true
                 % Move to the next incident photon if the current one has left the FFR.
                 crossedFFRBound.addCrossing(movedPhoton);
-                Defaults.debugMessage('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 1);
+                Defaults.debugMessage('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0);
               else
-                % The photon could be inside a bound, a needs to move enough to get outside.
                 Defaults.debugMessage('Not at FFR bound. Check if at interior bound.', 1);
                 % Update the previous and current FFR Layer
                 obj.prevFFRLayer = obj.currFFRLayer;

@@ -102,12 +102,6 @@ classdef FFR
 
     function bounds = printBounds(obj)
       bounds = "FFR Bounds:\n-> Left: " + string(obj.ffrBounds.leftBound.bound);
-      %disp("FFR Bounds:")
-      %disp("-> Left: "  + obj.ffrBounds.leftBound.bound)
-      %disp("-> Right: " + obj.ffrBounds.rightBound.bound)
-      %disp("-> Outer: " + obj.ffrBounds.outerBound.bound)
-      %disp("-> Inner: " + obj.ffrBounds.innerBound.bound)
-      %disp("")
     end
   end
 end
