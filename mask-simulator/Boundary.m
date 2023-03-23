@@ -24,6 +24,10 @@ classdef Boundary < handle
   properties
     bound
     count = 0; % total crossings count
+    % Counts of photons traveling from outer layer to inner layer (negative y step).
+    toInner = 0;
+    % Counts of photons traveling from inner layer to outer layer (positive y step).
+    toOuter = 0;
   end
 
   methods
@@ -35,6 +39,13 @@ classdef Boundary < handle
       % Avoid the verbosity that comes with:
       % obj.toOuter = obj.toOuter + 1;
       value = value + 1;
+
+    function incrementToInner(obj)
+      obj.toInner = obj.toInner + 1;
+    end
+
+    function incrementToOuter(obj)
+      obj.toOuter = obj.toOuter + 1;
     end
 
     % GETTERS

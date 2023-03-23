@@ -22,6 +22,39 @@ initialPhotons = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, ou
 Defaults.debugMessage("Starting ray tracing", 0);
 [photonPaths, boundInfo] = rt.rayTrace(ffr, initialPhotons);
 
+% Calculate and store photon crossing information.
+% Each photon that enters an FFR Layer is considered available for decontamination.
+% This is because the photon's energy is independent of how many times it reflects off of fibers.
+% Because the photon's path length (distance traveled) increases if it reflects back into a layer
+% (toOuter direction on inner bound), we need to count it as available for decontamination.
+% To track every photon entering a layer, we total the toInner count for the upper bound and the
+% toOuter count for the inner bound.
+ffrLayers = ffr.ffrLayers;
+interiorBounds = ffr.boundaries.interiorBounds;
+ffrBounds = ffr.boundaries.ffrBounds;
+for i = 1:ffr.nLayers
+  layer = ffrLayers(i);
+  if i == 1 % inner, exterior layer
+    %layer.nPhotonsOut = ffrBounds.innerBound.count;
+    layer.nPhotonsIn  = interiorBounds(i).toInner;
+  elseif i == ffr.nLayers
+    %layer.nPhotonsOut = interiorBounds(i - 1).toInner;
+    layer.nPhotonsIn  = interiorBounds(i - 1).toOuter + 3;
+  else
+    layer.nPhotonsIn  = interiorBounds(i).toInner + interiorBounds(i-1).toOuter;
+    %layer.nPhotonsOut = interiorBounds(i - 1).toInner;
+  end
+end
+
+Defaults.debugMessage("\nPHOTON PERCENTAGES", 0);
+
+% Calculate photon percentage in each layer.
+for i = 1:ffr.nLayers
+  layer = ffrLayers(i);
+  Defaults.debugMessage("FFR Layer " + i, 0);
+  layer.showPhotonPercentage(nPhotons);
+end
+
 % Graph FFR fibers and photon paths
 clf; % clear current plot
 ax = axes;

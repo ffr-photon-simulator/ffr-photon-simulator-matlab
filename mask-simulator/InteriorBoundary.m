@@ -21,10 +21,6 @@ classdef InteriorBoundary < Boundary
     lowerBound
     upperBound
 
-    % Counts of photons traveling from outer layer to inner layer (negative y step).
-    toInner = 0;
-    % Counts of photons traveling from inner layer to outer layer (positive y step).
-    toOuter = 0;
     % Sets of the IDs of each photon that crossed the boundary in either direction
     % at least once. Use this to know whether to count a crossing as a repeat, and
     % benefit from the O(1) access since there are many photons.
@@ -40,7 +36,7 @@ classdef InteriorBoundary < Boundary
       obj.upperBound = bound + obj.range;
     end
 
-    function addCrossing(obj, photon)
+    function addCrossing(obj, photon, direction)
       % Increment the following counts:
       %  - total count
       %  - toInner or toOuter
