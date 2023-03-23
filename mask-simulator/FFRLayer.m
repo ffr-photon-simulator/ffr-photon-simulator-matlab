@@ -7,6 +7,13 @@ classdef FFRLayer < handle
     latticeLength
     outerBound
     innerBound
+    % The photons going IN (aka "entering") are those which
+    % cross the layer's upper bound from outer -> inner.
+    % The photons going OUT (aka "exiting") are those which
+    % cross the layer's inner bound from outer -> inner.
+    % These values will be set only after the ray tracing finishes.
+    nPhotonsIn
+    nPhotonsOut
   end
 
   methods
