@@ -256,6 +256,10 @@ classdef RayTracer
           end
         end
 
+        function resetCurrFFRLayer(obj, outerLayer)
+          obj.currFFRLayer = outerLayer;
+        end
+
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
           % Ray traces photons starting from initialCoords through an entire FFR.
 
@@ -272,8 +276,10 @@ classdef RayTracer
             % Initialize values:
             hasCrossedFFRBound = false;
             movedPhoton = photon;
+            obj.resetCurrFFRLayer(ffr.ffrLayers(end));
             % Reflect the photon until it reaches a boundary.
             while hasCrossedFFRBound == false
+              obj.prevFFRLayer = obj.currFFRLayer;
               previousPhoton = movedPhoton;
               photonPaths = [photonPaths; previousPhoton.x previousPhoton.y];
               % Move the photon and check if it has reflected or has crossed a boundary
@@ -290,16 +296,14 @@ classdef RayTracer
                 Defaults.debugMessage('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0);
               else
                 Defaults.debugMessage('Not at FFR bound. Check if at interior bound.', 1);
-                % Update the previous and current FFR Layer
-                obj.prevFFRLayer = obj.currFFRLayer;
-                Defaults.debugMessage("prev ffr layer: ", 1);
-                obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
-                if ~ isequal(obj.currFFRLayer, obj.prevFFRLayer)
-                  Defaults.debugMessage('At interior bound.', 1);
-                  crossedInteriorBound = obj.findCrossedInteriorBound();
-                  crossedInteriorBound.addCrossing(movedPhoton);
-                else
+                % Update the current FFR Layer
+                obj.currFFRLayer = obj.findCurrFFRLayer(ffr, movedPhoton);
+                if isequal(obj.currFFRLayer, obj.prevFFRLayer) == 1
                   Defaults.debugMessage('Not at interior bound.', 1);
+                else
+                  Defaults.debugMessage("At interior bound.", 0);
+                  [crossedInteriorBound, direction] = obj.findCrossedBound(movedPhoton);
+                  crossedInteriorBound.addCrossing(movedPhoton, direction);
                 end
                 Defaults.debugMessage('Check if reflected.', 1);
                 Defaults.debugMessage('Finding current quadrant.', 1);
