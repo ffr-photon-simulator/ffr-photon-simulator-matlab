@@ -176,7 +176,7 @@ classdef RayTracer
           %end
         end
 
-        function [newXStep, newYStep] = calculateNewSteps(obj, reflectionPoint, incidentPhoton, reflectedFiberCoords)
+        function [newXStep, newYStep] = calculateNewSteps(obj, reflectionPoint, incidentPhotonCoords, reflectedFiberCoords)
           % Find the slope of the line of the reflected photon.
           %
           % The incident photon's last point before reflection is (inc_x, inc_y). The reflection point is (refl_x, refl_y).
