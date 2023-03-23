@@ -64,6 +64,15 @@ classdef FFRLayer < handle
       %end
     end
 
+    function showPhotonPercentage(obj, nPhotons)
+      in = obj.nPhotonsIn;
+      %inMinusOut = obj.nPhotonsIn - obj.nPhotonsOut;
+      %pct = inMinusOut / nPhotons;
+      %pct = in / nPhotons;
+      Defaults.debugMessage(" - photons in: " + in, 0);
+      %Defaults.debugMessage(" - as pct: " + pct, 1);
+      %Defaults.debugMessage(" - photons out: " + obj.nPhotonsOut, 0);
+      %Defaults.debugMessage(" - photons: " + inMinusOut, 0);
     end
   end
 end
