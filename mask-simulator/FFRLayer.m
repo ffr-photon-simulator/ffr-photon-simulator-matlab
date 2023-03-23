@@ -1,4 +1,5 @@
-classdef FFRLayer
+classdef FFRLayer < handle
+  % Inherit from handle to set the nPhotons properties after the ray tracing finishes.
   properties
     quadrantLayers = [];
     lattice = []; % fiber data
