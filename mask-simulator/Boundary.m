@@ -35,10 +35,12 @@ classdef Boundary < handle
       obj.bound = bound;
     end
 
-    function increment(obj, value)
+    function incrementCount(obj)
       % Avoid the verbosity that comes with:
       % obj.toOuter = obj.toOuter + 1;
-      value = value + 1;
+      %value = value + 1;
+      obj.count = obj.count + 1;
+    end
 
     function incrementToInner(obj)
       obj.toInner = obj.toInner + 1;

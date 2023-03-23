@@ -18,22 +18,22 @@ classdef InteriorBoundary < Boundary
 
   properties
     % The boundary's coordinate. Only one (x or y) will have a value
-    lowerBound
-    upperBound
+    %lowerBound
+    %upperBound
 
     % Sets of the IDs of each photon that crossed the boundary in either direction
     % at least once. Use this to know whether to count a crossing as a repeat, and
     % benefit from the O(1) access since there are many photons.
-    repeatsToInnerIDs = java.util.HashSet;
-    repeatsToOuterIDs = java.util.HashSet;
+    %repeatsToInnerIDs = java.util.HashSet;
+    %repeatsToOuterIDs = java.util.HashSet;
   end
 
   methods
     function obj = InteriorBoundary(bound)
       % TODO Verify constructors work this way (assign value to superclass properties)
       obj = obj@Boundary(bound);
-      obj.lowerBound = bound - obj.range;
-      obj.upperBound = bound + obj.range;
+      %obj.lowerBound = bound - obj.range;
+      %obj.upperBound = bound + obj.range;
     end
 
     function addCrossing(obj, photon, direction)
@@ -43,17 +43,22 @@ classdef InteriorBoundary < Boundary
       %  - repeatsToInner or repeatsToOuter, if necessary
       id = photon.id;
       yStep = photon.yStep;
-      obj.increment(obj.count);
+      Defaults.debugMessage("Adding interior crossing.", 0);
+      Defaults.debugMessage("photon y step: " + yStep, 1);
+      %incrementCount@Boundary(obj);
+      obj.count = obj.count + 1;
       if yStep < 0 % crossing outer -> inner
-        obj.increment(obj.toInner);
-        if ~ obj.repeatsToInnerIDs.contains(id)
-          obj.repeatsToInnerIDs.add(id);
-        end
+        Defaults.debugMessage("inc to inner", 1);
+        obj.incrementToInner();
+        %if ~ obj.repeatsToInnerIDs.contains(id)
+          %obj.repeatsToInnerIDs.add(id);
+        %end
       else
-        obj.increment(obj.toOuter);
-        if ~ obj.repeatsToOuterIDs.contains(id)
-          obj.repeatsToOuterIDs.add(id);
-        end
+        Defaults.debugMessage("inc to outer", 1);
+        obj.incrementToOuter();
+        %if ~ obj.repeatsToOuterIDs.contains(id)
+          %obj.repeatsToOuterIDs.add(id);
+        %end
       end
     end
 
@@ -67,11 +72,13 @@ classdef InteriorBoundary < Boundary
       % Total counts
       data.count = obj.count;
       data.toInner = obj.toInner;
-      data.toOuter = obj.toOuter;
+      %data.toOuter = obj.toOuter;
       % Get size of repeats Hash Sets
-      data.repeatsToInner = obj.repeatsToInnerIDs.size;
-      data.repeatsToOuter = obj.repeatsToOuterIDs.size;
-      data.repeats = data.repeatsToInner + data.repeatsToOuter;
+      %data.repeatsToInner = obj.repeatsToInnerIDs.size;
+      %data.repeatsToOuter = obj.repeatsToOuterIDs.size;
+      %data.repeats = data.repeatsToInner + data.repeatsToOuter;
+    end
+
     end
   end
 end
