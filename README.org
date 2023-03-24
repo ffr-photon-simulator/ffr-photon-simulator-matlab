@@ -1,6 +1,59 @@
 * ffr-photon-simulator-matlab
 =bubblebath.m= script from [mathworks.com/matlabcentral/fileexchange/70348](https://www.mathworks.com/matlabcentral/fileexchange/70348-draw-randomly-centered-circles-of-various-sizes).
-* TODO
+* Configuration Files
+An FFR is represented by its configuration file, which defines properties such as the FFR's length, width, and number of layers. Several configuration files (just scripts) are included:
+1. =config_template=: template for predefined configs.
+2. =config_3M1860=: predefined to match the 3M1860 FFR.
+3. =config_3M1920=: predefined to match the 3M1860 FFR.
+4. =config_dynamic=: queries the user for certain values.
+
+To change which configuration file is used, just source its code in =simulator.m= (at the start of the script).
+
+The =Config.m= class provides static methods for the configuration files to use.
+** Configuration Data Structures
+All configuration options are packaged in structs or lists. The =ffrConfig= struct holds all the information necessary to construct the FFR object.
+1. *ffrConfig*
+   - nLayers: number of FFR layers
+   - length:  length of the FFR
+   - width:   width of the FFR
+   - layerRadii: ranges of radii sizes per FFR layer
+   - layerDensities: ranges of fiber density per FFR layer
+   - layerWidths: the width of each FFR layer
+   - =ffrLayerConfigs=: /list of FFR Layer config structs/ with elements:
+     - width
+     - nQLayers: number of Quadrant Layers
+     - radiiRange: range of radii sizes
+     - densityRange: range of densities
+     - layerType: 'inner', 'outer', or 'filtering'
+     - =quadrantLayerConfigs=: /list of Quadrant Layer config structs/ with elements:
+       - nQuadrants: number of quadrants
+       - width
+       - length
+       - heightOffset: y-axis transform distance for new fibers
+       - =quadrantConfigs=: /list of Quadrant config structs/ with elements:
+         - length
+         - width
+         - frameSize: [length, width]
+         - minRadius
+         - maxRadius
+         - circSize: [minRadius, maxRadius]
+         - density
+         - heightOffset
+         - lengthOffset: x-axis transform distance for new fibers
+   - *boundaries*: /struct of boundary configs/ with elements:
+     - *ffrBounds*: /struct of FFR bound configs/ with elements:
+       - leftBound: half FFR length, negative
+       - rightBound: half FFR length, positive
+       - innerBound: 0
+       - outerBound: FFR width
+     - =interiorBounds=: /list of y-values/, one per interior boundary
+
+
+Some of these values are randomized and some are calculated based on other values.
+** Limitations
+Eventually we'd like to move away from these limitations:
+1. Currently, the configs source some values from the =Defaults= data class.
+2. Also, the FFR's length and width must be multiples of the default quadrant length and width, respectively.
 * Visuals
 Black box  - bubble bath frame and lattice boundary.
 Circles    - representation of fibers with center coordinates (dot).
