@@ -286,7 +286,8 @@ classdef RayTracer
                 % Update the current FFR Layer
                 Debug.msg('Not at FFR bound. Check if at interior bound.', 1);
                 obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
-                if isequal(obj.currFFRLayer, obj.prevFFRLayer) == 1
+                % Check for interior bound crossings.
+                if obj.currFFRLayer.id == obj.prevFFRLayer.id
                   Debug.msg('Not at interior bound.', 1);
                 else
                   Debug.msg("At interior bound.", 1);

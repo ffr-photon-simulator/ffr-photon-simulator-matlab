@@ -14,6 +14,7 @@ classdef FFRLayer < handle
     % These values will be set only after the ray tracing finishes.
     nPhotonsIn
     nPhotonsOut
+    id
   end
 
   methods
@@ -22,6 +23,9 @@ classdef FFRLayer < handle
       % c.nQLayers = number of quadrant layers
       % c.layerType = type of layer ('inner, interior, filtering, or exterior')
       % c.qLayerConfigs = list of structs defining each quadrant layer
+
+      % Give the layer a unique ID to avoid handle/value comparison issues.
+      obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 8 char hash
 
       % Set the bounds of this layer.
       obj.outerBound = config.outerBound;
