@@ -5,6 +5,8 @@ classdef QuadrantLayer
     lattice = [];
     qlWidth
     qlLength
+    outerBound
+    innerBound
   end
 
   methods
@@ -35,8 +37,12 @@ classdef QuadrantLayer
       end
 
       % Sum quadrant lengths and widths
-      %qlWidth = sumWidths();
-      qlLength = config.length; % FIXME: get length value from config
+      obj.qlLength = config.length;
+      obj.qlWidth = config.width;
+
+      % Bound values
+      obj.innerBound = config.heightOffset;
+      obj.outerBound = obj.innerBound + obj.qlWidth;
 
       % Aggregate quadrant fiber data
       obj.lattice = obj.makeLattice(config.nQuadrants);
