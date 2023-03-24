@@ -40,27 +40,26 @@ classdef RayTracer < handle
           distance = sqrt(xDistance^2 + yDistance^2);
         end
 
-        function currentQuadrant = findCurrentQuadrant(obj, photon, ffr)
+        function currentQuadrant = findCurrentQuadrant(obj, photon)
           % Iterate through every quadrant in the current FFR layer and compare
           % the photon's coordinates to the quadrant's boundaries to determine
           % which quadrant the photon is currently in.
           currentQuadrant = [];
-          ffrLayers = ffr.ffrLayers;
-          for i = 1:size(ffrLayers)
-            ffrLayer = ffrLayers(i);
-            quadrantLayers = ffrLayer.quadrantLayers;
-            for j = 1:size(quadrantLayers)
-              quadrantLayer = quadrantLayers(j);
-              % Check quadrant layer's y-value first before iterating through its quadrants. -- TODO
+          quadrantLayers = obj.currFFRLayer.quadrantLayers;
+          for j = 1:size(quadrantLayers)
             Debug.msg("ffr layer j = " + j, 1);
+            quadrantLayer = quadrantLayers(j);
+            % Use the photon's y coordinate to narrow down which QuadrantLayer it's in.
+            % The quadrantLayers list goes in increasing innerBound height order, so check
+            % if photon.y is less than the outerBound during iteration (not greater than).
+            if photon.y <= quadrantLayer.outerBound
               quadrants = quadrantLayer.quadrants;
               for q = 1:size(quadrants)
                 quadrant = quadrants(q);
+                % We've narrowed down the y-values, so just check the x-values.
                 if photon.x >= quadrant.leftBound && photon.x < quadrant.rightBound
-                  if photon.y >= quadrant.innerBound && photon.y < quadrant.outerBound
                     currentQuadrant = quadrant;
                     return;
-                  end
                 end
               end
             end
