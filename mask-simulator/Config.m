@@ -1,5 +1,13 @@
 classdef Config
   properties (Constant)
+    % Keep user-defined values for each FFR here. The idea is
+    % to avoid the user having to edit the config_*.m file.
+    ffr_3M9210 = struct('qWidth', 100*Defaults.micron, ...
+                        'qLength', 100*Defaults.micron, ...
+                        'nLayers', 9, ...
+                        'lengthI', 6000, ...
+                        'layerRadiiI', [1 3; 1 3; 1 3; 1 3; 1 3; 1 3; 1 3; 1 3; 1 3], ...
+                        'layerWidthsI', [100 100 100 100 100 100 100 100 100]);
   end
   methods (Static)
     function config = addFFRLayerBounds(ffrLayerConfig, ffrConfig, boundaries, i)
@@ -14,11 +22,17 @@ classdef Config
       config = ffrLayerConfig;
     end
 
-    function config = buildFFRLayerConfig()
+    function config = buildFFRLayerConfig(width, nQLayers, radiiRange, densityRange, layerType)
       config = struct();
-      %config.nQLayers = randi([1 3]);
-      config.nQLayers = 1;
-      config.layerType = Defaults.layerType;
+      config.width = width;
+      if ~exist('nQLayers', 'var')
+        config.nQLayers = 1;
+      else
+        config.nQLayers = nQLayers;
+      end
+      config.radiiRange = radiiRange;
+      config.densityRange = densityRange;
+      config.layerType = layerType;
     end
 
     function config = buildQuadrantLayerConfig(ffrConfig, outerHeight, qLength, qWidth)
@@ -33,8 +47,8 @@ classdef Config
                                           layerRadiiRange, layerDensityRange, ...
                                           heightOffset, lengthOffset)
       config = struct();
-      config.length = Defaults.qLengthN95;
-      config.width = Defaults.qWidthN95;
+      config.length = length;
+      config.width = width;
       config.frameSize = [config.length config.width];
       config.minRadius = layerRadiiRange(1) * Defaults.micron; % integer range
       config.maxRadius = layerRadiiRange(2) * Defaults.micron; % integer range
