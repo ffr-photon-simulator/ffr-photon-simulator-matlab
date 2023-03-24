@@ -24,24 +24,15 @@ classdef InteriorBoundary < Boundary
 
     function addCrossing(obj, photon, direction)
       % Increment the following counts:
-      %  - total count
       %  - toInner or toOuter
-      %  - repeatsToInner or repeatsToOuter, if necessary
       id = photon.id;
       yStep = photon.yStep;
-      %incrementCount@Boundary(obj);
       Debug.msg("Adding interior crossing.", 1);
       obj.count = obj.count + 1;
       if yStep < 0 % crossing outer -> inner
         obj.incrementToInner();
-        %if ~ obj.repeatsToInnerIDs.contains(id)
-          %obj.repeatsToInnerIDs.add(id);
-        %end
       else
         obj.incrementToOuter();
-        %if ~ obj.repeatsToOuterIDs.contains(id)
-          %obj.repeatsToOuterIDs.add(id);
-        %end
       end
     end
 

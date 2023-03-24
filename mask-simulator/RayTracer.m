@@ -261,19 +261,15 @@ classdef RayTracer < handle
             photon = incomingPhotons(photonNum);
             % Initialize values:
             hasCrossedFFRBound = false;
-            %%%movedPhoton = photon;
             obj.resetCurrFFRLayer();
             % Reflect the photon until it reaches a boundary.
             while hasCrossedFFRBound == false
               % Update the previous FFR layer.
               obj.prevFFRLayer = obj.currFFRLayer;
               % We need to track the previous photon's coordinates to determine the reflected path.
-              %%%previousPhoton = movedPhoton;
               previousPhotonCoords = photon.getCoords; % [x y]
-              %%%photonPaths = [photonPaths; previousPhoton.x previousPhoton.y];
               photonPaths = [photonPaths; previousPhotonCoords(1) previousPhotonCoords(2)];
               % Move the photon and check if it has reflected or has crossed a boundary
-              %%%movedPhoton = obj.movePhoton(previousPhoton);
               obj.movePhoton(photon);
               % We want to record any boundary crossings. The photon can either cross an FFR bound or
               % an interior bound.
@@ -308,17 +304,10 @@ classdef RayTracer < handle
                   % Calculate the new steps and make a new Photon with those steps.
                   reflectionPoint = [photon.x, photon.y];
                   [newXStep, newYStep] = obj.calculateNewSteps(reflectionPoint, previousPhotonCoords, reflectedFiberCoords);
-                  %movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
                   photon.setSteps(newXStep, newYStep);
                   Debug.msg('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1);
                 end
               end
-             %elseif hasReflected == true
-             %  % Calculate the new steps and make a new Photon with those steps.
-             %  [newXStep, newYStep] = obj.calculateNewSteps([movedPhoton.x, movedPhoton.y], previousPhoton, reflectedFiberCoords);
-             %  movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
-             %  disp("Photon " + photonNum + " reflected at fiber: " + obj.coordToString(reflectedFiberCoords))
-             %end
             end
           end
         end

@@ -58,12 +58,6 @@ classdef FFRLayer < handle
       outer = obj.outerBound.bound;
       inner = obj.innerBound.bound;
       bool = photon.y <= outer && photon.y > inner;
-      %bool = false;
-      %if photon.y <= obj.outerBound.bound
-      %  if photon.y > obj.innerBound.bound
-      %    bool = true;
-      %  end
-      %end
       Debug.msg("Contains photon: " + bool, 1);
       Debug.msg("outer: " + outer, 1);
       Debug.msg("inner: " + inner, 1);

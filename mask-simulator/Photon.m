@@ -41,11 +41,6 @@ classdef Photon < handle
       obj.y = obj.y + obj.yStep;
     end
 
-    %function obj = move(obj)
-    %  obj.x = obj.x + obj.xStep;
-    %  obj.y = obj.y + obj.yStep;
-    %end
-
     function coords = getCoords(obj)
       coords = [obj.x obj.y];
     end
@@ -54,10 +49,5 @@ classdef Photon < handle
       obj.xStep = newXStep;
       obj.yStep = newYStep;
     end
-
-    %function obj = setSteps(obj, xStep, yStep)
-    %  obj.xStep = xStep;
-    %  obj.yStep = yStep;
-    %end
   end
 end
