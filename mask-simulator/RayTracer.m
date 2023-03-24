@@ -92,7 +92,7 @@ classdef RayTracer < handle
 
         function [hasCrossed, crossedFFRBound] = checkIfAtFFRBound(obj, photon, ffr)
           % Check if a photon has crossed an FFR boundary by iterating through the bounds.
-          ffrBounds = ffr.boundaries.ffrBounds; % TODO add this to FFR
+          ffrBounds = ffr.boundaries.ffrBounds;
           hasCrossed = false;
           crossedFFRBound = [];
 
@@ -104,7 +104,7 @@ classdef RayTracer < handle
               Debug.msgWithItem("Crossed FFR bound:", bound, 1);
               hasCrossed = true;
               crossedFFRBound = bound;
-              return; % photon won't have crossed an interior bound, so we can skip it
+              return; % photon won't have crossed an interior bound, so don't check those
             end
           end
         end
@@ -266,7 +266,7 @@ classdef RayTracer < handle
               % Update the previous FFR layer.
               obj.prevFFRLayer = obj.currFFRLayer;
               % We need to track the previous photon's coordinates to determine the reflected path.
-              previousPhotonCoords = photon.getCoords; % [x y]
+              previousPhotonCoords = photon.getCoords(); % [x y]
               photonPaths = [photonPaths; previousPhotonCoords(1) previousPhotonCoords(2)];
               % Move the photon and check if it has reflected or has crossed a boundary
               obj.movePhoton(photon);
@@ -295,9 +295,10 @@ classdef RayTracer < handle
                   [crossedInteriorBound, direction] = obj.findCrossedBound(photon);
                   crossedInteriorBound.addCrossing(photon, direction);
                 end
-                currentQuadrant = obj.findCurrentQuadrant(photon, ffr);
+                % Check for reflection off a fiber.
                 Debug.msg('Check if reflected.', 1);
                 Debug.msg('Finding current quadrant.', 1);
+                currentQuadrant = obj.findCurrentQuadrant(photon);
                 [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(photon, currentQuadrant);
                 if hasReflected == true
                   % Calculate the new steps and make a new Photon with those steps.
