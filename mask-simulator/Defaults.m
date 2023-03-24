@@ -8,7 +8,7 @@ classdef Defaults
     % Change the x-separation between each initial photon:
     %  >1 increases the number of photons
     %  <1 decreases the number of photons
-    separationMultiplier = 2000;
+    separationMultiplier = 1000;
     % Change the length of the initial photons' y step:
     %  >1 increases the y step
     %  <1 decreases the y step
@@ -98,6 +98,11 @@ classdef Defaults
         fprintf("\nDEBUG Array: " + message + "\n")
         disp(array)
       end
+    end
+
+    function s = coordToString(coords)
+      % Return a string representation of a coordinate pair.
+      s = string(coords(1)) + ", " + string(coords(2));
     end
   end
 end

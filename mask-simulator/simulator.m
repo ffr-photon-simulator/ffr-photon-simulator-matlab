@@ -4,6 +4,8 @@ clear all; % clear workspace
 %configDir = cwd + "mask-simulator/ffrConfigs"
 %addpath(configDir)
 % Generate the config
+%config_3M1860;
+config_3M9210;
 
 % Make the FFR
 ffr = FFR(ffrConfig);
@@ -39,7 +41,7 @@ for i = 1:ffr.nLayers
     layer.nPhotonsIn  = interiorBounds(i).toInner;
   elseif i == ffr.nLayers
     %layer.nPhotonsOut = interiorBounds(i - 1).toInner;
-    layer.nPhotonsIn  = interiorBounds(i - 1).toOuter + 3;
+    layer.nPhotonsIn  = interiorBounds(i - 1).toOuter + nPhotons;
   else
     layer.nPhotonsIn  = interiorBounds(i).toInner + interiorBounds(i-1).toOuter;
     %layer.nPhotonsOut = interiorBounds(i - 1).toInner;
@@ -110,7 +112,7 @@ function [photons, nPhotons] = makeInitialPhotons(xStart, xEnd, separation, oute
   % The photons' x-axis range is from xStart to xEnd. Their y coordinate is
   % equal to the value of the outer boundary. The initial photons are
   % separated by the value of the "separation" variable.
-  nPhotons = (xEnd-xStart) / separation;
+  nPhotons = fix((xEnd-xStart) / separation); % use 'fix' to round down to nearest integer
   Defaults.debugMessage("Num photons: " + nPhotons, 0);
   photons = [];
   bound = outerBoundary.bound;
