@@ -1,4 +1,4 @@
-classdef RayTracer
+classdef RayTracer < handle
     % Performs ray tracing on a given Layer (a fiber lattice).
     % The primary method, rayTrace(layer, incomingPhotons), returns the necessary output.
     %
@@ -15,12 +15,14 @@ classdef RayTracer
     properties
       currFFRLayer
       prevFFRLayer
+      outerLayer
     end
 
     methods
         function obj = RayTracer(ffr)
           % Set the current FFR layer to the outer FFR layer.
-          obj.currFFRLayer = ffr.ffrLayers(end);
+          obj.outerLayer = ffr.ffrLayers(end);
+          obj.currFFRLayer = obj.outerLayer;
           Debug.msg("RT constructor curr ffr layer: ", 1);
         end
 
@@ -260,9 +262,10 @@ classdef RayTracer
             % Initialize values:
             hasCrossedFFRBound = false;
             %%%movedPhoton = photon;
-            obj.resetCurrFFRLayer(ffr.ffrLayers(end));
+            obj.resetCurrFFRLayer();
             % Reflect the photon until it reaches a boundary.
             while hasCrossedFFRBound == false
+              % Update the previous FFR layer.
               obj.prevFFRLayer = obj.currFFRLayer;
               % We need to track the previous photon's coordinates to determine the reflected path.
               %%%previousPhoton = movedPhoton;
@@ -283,8 +286,8 @@ classdef RayTracer
                 crossedFFRBound.addCrossing(photon);
                 Debug.msg('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0);
               else
-                % Update the current FFR Layer
                 Debug.msg('Not at FFR bound. Check if at interior bound.', 1);
+                % Update the current FFR Layer.
                 obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
                 % Check for interior bound crossings.
                 if obj.currFFRLayer.id == obj.prevFFRLayer.id
