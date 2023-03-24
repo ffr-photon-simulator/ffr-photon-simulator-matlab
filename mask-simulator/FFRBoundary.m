@@ -10,7 +10,6 @@ classdef FFRBoundary < Boundary
 
   methods
     function obj = FFRBoundary(bound, type)
-      % TODO Verify constructors work this way (assign value to superclass properties)
       obj = obj@Boundary(bound);
       obj.type = type;
     end
@@ -19,13 +18,10 @@ classdef FFRBoundary < Boundary
       % Increment the following counts:
       %  - toInner or toOuter
       yStep = photon.yStep;
-      Defaults.debugMessage("Adding FFR bound crossing.", 0);
-      Defaults.debugMessage("photon y step: " + yStep, 1);
+      Debug.msg("Adding FFR bound crossing.", 1);
       if yStep < 0 % crossing outer -> inner
-        Defaults.debugMessage("inc to inner", 1);
         obj.incrementToInner();
       else
-        Defaults.debugMessage("inc to outer", 1);
         obj.incrementToOuter();
       end
     end
@@ -55,7 +51,7 @@ classdef FFRBoundary < Boundary
 
     function printCrossingInfo(obj)
       msg = "\nFFRBound type: " + obj.type + "\n - total crossings: " + obj.count;
-      Defaults.debugMessage(msg, 1);
+      Debug.msg(msg, 1);
       %Defaults.debugMessage("\nFFR Bound type: " + obj.type, 0);
       %Defaults.debugMessage("- total crossings: " + obj.count, 0);
     end

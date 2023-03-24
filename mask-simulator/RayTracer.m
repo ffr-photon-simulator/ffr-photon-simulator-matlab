@@ -21,8 +21,7 @@ classdef RayTracer
         function obj = RayTracer(ffr)
           % Set the current FFR layer to the outer FFR layer.
           obj.currFFRLayer = ffr.ffrLayers(end);
-          Defaults.debugMessage("RT constructor curr ffr layer: ", 1);
-          %disp(obj.currFFRLayer)
+          Debug.msg("RT constructor curr ffr layer: ", 1);
         end
 
         function movePhoton(obj, photon)
@@ -46,30 +45,15 @@ classdef RayTracer
           currentQuadrant = [];
           ffrLayers = ffr.ffrLayers;
           for i = 1:size(ffrLayers)
-            Defaults.debugMessage("ffr layer number " + i, 1);
             ffrLayer = ffrLayers(i);
             quadrantLayers = ffrLayer.quadrantLayers;
-            %disp("Iterating through q layers: ")
-            %disp(quadrantLayers)
             for j = 1:size(quadrantLayers)
-              Defaults.debugMessage("qlayer number " + j, 1);
-              %disp("Iterating through q layer")
-              %disp(quadrantLayer)
               quadrantLayer = quadrantLayers(j);
               % Check quadrant layer's y-value first before iterating through its quadrants. -- TODO
+            Debug.msg("ffr layer j = " + j, 1);
               quadrants = quadrantLayer.quadrants;
-              %disp(quadrants)
-              %for quadrant = quadrants
-              %disp("Iterating through quadrants")
               for q = 1:size(quadrants)
                 quadrant = quadrants(q);
-                %disp(quadrant)
-                %disp("Quadrant bounds: ")
-                %disp(quadrant.leftBound)
-                %disp("x: " + quadrant.leftBound + " to " + quadrant.rightBound)
-                %disp("y: " + quadrant.innerBound + " to " + quadrant.outerBound)
-                Defaults.debugMessage("quadrant inner bound: " + quadrant.innerBound, 1);
-                Defaults.debugMessage("quadrant outer bound: " + quadrant.outerBound, 1);
                 if photon.x >= quadrant.leftBound && photon.x < quadrant.rightBound
                   if photon.y >= quadrant.innerBound && photon.y < quadrant.outerBound
                     currentQuadrant = quadrant;
@@ -79,8 +63,8 @@ classdef RayTracer
               end
             end
           end
-        Defaults.debugMessage('Current quadrant not found.', 0)
-        Defaults.debugMessage('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0)
+          Debug.alert('Current quadrant not found.', 0);
+          Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
         end
 
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
@@ -115,8 +99,8 @@ classdef RayTracer
           fields = fieldnames(ffrBounds);
           for i = 1:numel(fields)
             bound = ffrBounds.(fields{i});
-            %disp(b)
             if photon.hasCrossedFFRBound(bound) == true
+              Debug.msgWithItem("Crossed FFR bound:", bound, 1);
               hasCrossed = true;
               crossedFFRBound = bound;
               return; % photon won't have crossed an interior bound, so we can skip it
@@ -223,13 +207,11 @@ classdef RayTracer
         function layer = findCurrFFRLayer(obj, ffr, photon)
           layer = [];
           ffrLayers = ffr.ffrLayers;
-          Defaults.debugMessage("photon y: " + photon.y, 1);
+          Debug.msg("Find curr ffr layer photon y: " + photon.y, 1);
           for i = 1:size(ffrLayers)
-            Defaults.debugMessage("\n", 1);
-            Defaults.debugMessage("i = " + i, 1);
             if ffrLayers(i).containsPhoton(photon)
               layer = ffrLayers(i);
-              Defaults.debugMessage("Curr ffr layer i = " + i, 1);
+              Debug.msg("Curr ffr layer i = " + i, 1);
               return;
             end
           end
@@ -251,18 +233,20 @@ classdef RayTracer
           elseif prev.outerBound == curr.innerBound
             bound = prev.outerBound;
           else
-            Defaults.debugMessage("Unknown crossed bound. Photon at y = " + photon.y, 0);
-            bound = "unknown crossed bound";
+            Debug.alert("Unknown crossed bound. Photon at y = " + photon.y);
+            Debug.msgWithItem("Current ffr layer: ", curr, 1);
+            Debug.msgWithItem("Previous ffr layer: ", prev, 1);
           end
         end
 
-        function resetCurrFFRLayer(obj, outerLayer)
-          obj.currFFRLayer = outerLayer;
+        function resetCurrFFRLayer(obj)
+          Debug.msgWithItem("Resetting curr ffr layer to:", obj.outerLayer, 1);
+          obj.currFFRLayer = obj.outerLayer;
+          Debug.msgWithItem("Curr ffr layer:", obj.currFFRLayer, 1);
         end
 
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
           % Ray traces photons starting from initialCoords through an entire FFR.
-
           boundInfo = [];
           photonPaths = [];
 
@@ -271,7 +255,7 @@ classdef RayTracer
 
           % Iterate through each incoming photon.
           for photonNum = 1:nPhotons
-            Defaults.debugMessage('New incident photon.', 1);
+            Debug.msg("Incident photon number " + photonNum, 0);
             photon = incomingPhotons(photonNum);
             % Initialize values:
             hasCrossedFFRBound = false;
@@ -297,21 +281,24 @@ classdef RayTracer
               if hasCrossedFFRBound == true
                 % Move to the next incident photon if the current one has left the FFR.
                 crossedFFRBound.addCrossing(photon);
-                Defaults.debugMessage('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0);
+                Debug.msg('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0);
               else
-                Defaults.debugMessage('Not at FFR bound. Check if at interior bound.', 1);
                 % Update the current FFR Layer
+                Debug.msg('Not at FFR bound. Check if at interior bound.', 1);
                 obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
                 if isequal(obj.currFFRLayer, obj.prevFFRLayer) == 1
-                  Defaults.debugMessage('Not at interior bound.', 1);
+                  Debug.msg('Not at interior bound.', 1);
                 else
-                  Defaults.debugMessage("At interior bound.", 0);
+                  Debug.msg("At interior bound.", 1);
+                  Debug.msgWithItem("Previous ffr layer:", obj.prevFFRLayer, 1);
+                  Debug.msgWithItem("Current ffr layer:", obj.currFFRLayer, 1);
+                  Debug.msg("Photon coords: " + obj.coordToString(photon.getCoords()), 1);
                   [crossedInteriorBound, direction] = obj.findCrossedBound(photon);
                   crossedInteriorBound.addCrossing(photon, direction);
                 end
-                Defaults.debugMessage('Check if reflected.', 1);
-                Defaults.debugMessage('Finding current quadrant.', 1);
                 currentQuadrant = obj.findCurrentQuadrant(photon, ffr);
+                Debug.msg('Check if reflected.', 1);
+                Debug.msg('Finding current quadrant.', 1);
                 [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(photon, currentQuadrant);
                 if hasReflected == true
                   % Calculate the new steps and make a new Photon with those steps.
@@ -319,7 +306,7 @@ classdef RayTracer
                   [newXStep, newYStep] = obj.calculateNewSteps(reflectionPoint, previousPhotonCoords, reflectedFiberCoords);
                   %movedPhoton = movedPhoton.setSteps(newXStep, newYStep);
                   photon.setSteps(newXStep, newYStep);
-                  Defaults.debugMessage('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1)
+                  Debug.msg('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1);
                 end
               end
              %elseif hasReflected == true

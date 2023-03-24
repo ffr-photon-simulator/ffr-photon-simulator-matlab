@@ -53,8 +53,6 @@ classdef FFRLayer < handle
       % Check if a photon is inside this layer.
       outer = obj.outerBound.bound;
       inner = obj.innerBound.bound;
-      Defaults.debugMessage("outer: " + outer, 1);
-      Defaults.debugMessage("inner: " + inner, 1);
       bool = photon.y <= outer && photon.y > inner;
       %bool = false;
       %if photon.y <= obj.outerBound.bound
@@ -62,6 +60,10 @@ classdef FFRLayer < handle
       %    bool = true;
       %  end
       %end
+      Debug.msg("Contains photon: " + bool, 1);
+      Debug.msg("outer: " + outer, 1);
+      Debug.msg("inner: " + inner, 1);
+      Debug.msg("photon at " + Debug.coordToString(photon.getCoords()), 1);
     end
 
     function showPhotonPercentage(obj, nPhotons)
@@ -69,7 +71,7 @@ classdef FFRLayer < handle
       %inMinusOut = obj.nPhotonsIn - obj.nPhotonsOut;
       %pct = inMinusOut / nPhotons;
       %pct = in / nPhotons;
-      Defaults.debugMessage(" - photons in: " + in, 0);
+      Debug.msg(" - photons in: " + in, 0);
       %Defaults.debugMessage(" - as pct: " + pct, 1);
       %Defaults.debugMessage(" - photons out: " + obj.nPhotonsOut, 0);
       %Defaults.debugMessage(" - photons: " + inMinusOut, 0);

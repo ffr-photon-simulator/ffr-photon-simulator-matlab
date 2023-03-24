@@ -29,6 +29,7 @@ classdef Photon < handle
       elseif isequal(bound.type, 'outer') && obj.y >= bound.bound
         crossed = true;
       elseif isequal(bound.type, 'inner') && obj.y <= bound.bound
+        Debug.msg("Crossed inner FFR bound with photon.y = " + obj.y, 1);
         crossed = true;
       else
         crossed = false;
