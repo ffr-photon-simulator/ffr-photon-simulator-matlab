@@ -19,21 +19,22 @@ classdef FFRLayer < handle
 
   methods
     function obj = FFRLayer(config)
-      % Uses a config to create quadrant layers. The config 'c' is a struct of the form:
-      % c.nQLayers = number of quadrant layers
-      % c.layerType = type of layer ('inner, interior, filtering, or exterior')
-      % c.qLayerConfigs = list of structs defining each quadrant layer
+      if nargin > 0
+        % Uses a config to create quadrant layers. The config 'c' is a struct of the form:
+        % c.nQLayers = number of quadrant layers
+        % c.layerType = type of layer ('inner, interior, filtering, or exterior')
+        % c.qLayerConfigs = list of structs defining each quadrant layer
 
-      % Give the layer a unique ID to avoid handle/value comparison issues.
-      obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 8 char hash
+        % Give the layer a unique ID to avoid handle/value comparison issues.
+        obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 8 char hash
 
-      % Set the bounds of this layer.
-      obj.outerBound = config.outerBound;
-      obj.innerBound = config.innerBound;
+        % Set the bounds of this layer.
+        obj.outerBound = config.outerBound;
+        obj.innerBound = config.innerBound;
 
-      % Store list of structs which are the configs of the quadrant layers.
-      % Each quadrant layer struct holds the data to make that quadrant layer.
-      qLayerConfigs = config.quadrantLayerConfigs; % [struct1, struct2, struct3, ...]
+        % Store list of structs which are the configs of the quadrant layers.
+        % Each quadrant layer struct holds the data to make that quadrant layer.
+        qLayerConfigs = config.quadrantLayerConfigs; % [struct1, struct2, struct3, ...]
 
       % Create QuadrantLayers
       for q = 1:config.nQLayers
@@ -41,8 +42,9 @@ classdef FFRLayer < handle
         obj.quadrantLayers = [obj.quadrantLayers; quadrantLayer];
       end
 
-      % Aggregate fiber data from the quadrant layers
-      obj.lattice = obj.makeLattice(config.nQLayers);
+        % Aggregate fiber data from the quadrant layers
+        obj.lattice = obj.makeLattice(config.nQLayers, config.nQuadrantsPerQLayer);
+      end
     end
 
     function lattice = makeLattice(obj, nLayers)

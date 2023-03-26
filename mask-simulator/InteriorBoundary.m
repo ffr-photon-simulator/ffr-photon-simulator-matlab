@@ -19,6 +19,9 @@ classdef InteriorBoundary < Boundary
 
   methods
     function obj = InteriorBoundary(bound)
+      if nargin == 0
+        bound = 0;
+      end
       obj = obj@Boundary(bound);
     end
 

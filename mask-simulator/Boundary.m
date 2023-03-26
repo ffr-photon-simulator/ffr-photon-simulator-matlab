@@ -32,7 +32,9 @@ classdef Boundary < handle
 
   methods
     function obj = Boundary(bound)
-      obj.bound = bound;
+      if nargin > 0
+        obj.bound = bound;
+      end
     end
 
     function incrementCount(obj)
