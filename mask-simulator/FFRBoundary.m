@@ -26,15 +26,6 @@ classdef FFRBoundary < Boundary
       end
     end
 
-    %function addCrossing(obj, photon, direction)
-    %  % Increment the following counts:
-    %  %  - total count
-    %  Defaults.debugMessage("FFR Bound Count: " + obj.count, 1);
-    %  %incrementCount@Boundary(obj);
-    %  obj.count = obj.count + 1;
-    %  Defaults.debugMessage("FFR Bound Count incremented: " + obj.count, 1);
-    %end
-
     function plot(obj, axisHandle)
       if isequal(obj.type, 'inner') || isequal(obj.type, 'outer')
         yline(axisHandle, obj.bound, Defaults.ffrBoundStyle, obj.bound, 'LineWidth', Defaults.ffrBoundWeight);
@@ -52,8 +43,6 @@ classdef FFRBoundary < Boundary
     function printCrossingInfo(obj)
       msg = "\nFFRBound type: " + obj.type + "\n - total crossings: " + obj.count;
       Debug.msg(msg, 1);
-      %Defaults.debugMessage("\nFFR Bound type: " + obj.type, 0);
-      %Defaults.debugMessage("- total crossings: " + obj.count, 0);
     end
   end
 end

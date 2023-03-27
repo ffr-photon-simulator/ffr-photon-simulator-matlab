@@ -91,12 +91,11 @@ for i = 1:numel(fields)
   bound.printCrossingInfo();
 end
 
-disp("")
+Debug.newline();
 
 interiorBounds = ffr.boundaries.interiorBounds;
 for i = 1:size(interiorBounds)
   bound = interiorBounds(i);
-  Defaults.debugMessage("Interior bound at: " + string(bound.bound), 1);
   bound.plot(ax);
   bound.printCrossingInfo();
 end
