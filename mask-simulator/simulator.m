@@ -13,10 +13,14 @@ ffr = FFR(ffrConfig);
 % Make a RayTracer
 rt = RayTracer(ffr);
 
-% Generate the incoming photons
-xStart = -ffrConfig.length / 2;
-xEnd = -xStart;
-outerBound = ffr.ffrBounds.outerBound; % should be the boundary object
+% Generate the incoming photons.
+% First, check if xStart is set in the Config struct. If not, set their values here.
+% Defaults to 1/4 the FFR length, centered about 0, so 1/8 on either side.
+if isempty(xStart)
+  xStart = -ffrConfig.length / 8;
+  xEnd = -xStart;
+end
+outerBound = ffr.ffrBounds.outerBound; % the boundary object, not the value
 [initialPhotons, nPhotons] = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
 
 % Ray trace

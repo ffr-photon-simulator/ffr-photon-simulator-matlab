@@ -24,6 +24,7 @@ c.layerDensitiesI = Config.ffr_3M9210.layerDensitiesI;
 % 0.9mm thick with 100μ FFR layer thickness
 c.layerWidthsI = Config.ffr_3M9210.layerWidthsI; % list, not 9-row matrix
 c.layerWidths = Config.toMicrons(c.layerWidthsI);
+
 % FFR width.
 widthI = 0;
 for w = c.layerWidthsI
@@ -31,6 +32,10 @@ for w = c.layerWidthsI
 end
 c.widthI = widthI;
 c.width = Config.toMicrons(c.widthI);
+
+% "Export" xStart and xEnd for simulator.makeInitialPhoton() to use.
+xStart = Config.ffr_3M9210.xStart;
+xEnd = Config.ffr_3M9210.xEnd;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %   FFR Layer Configs   %
