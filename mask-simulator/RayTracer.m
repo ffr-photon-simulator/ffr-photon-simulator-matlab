@@ -46,26 +46,32 @@ classdef RayTracer < handle
           Debug.msg('Finding current quadrant.', 1);
           currentQuadrant = [];
           quadrantLayers = obj.currFFRLayer.quadrantLayers;
-          for j = 1:size(quadrantLayers)
-            Debug.msg("ffr layer j = " + j, 1);
-            quadrantLayer = quadrantLayers(j);
-            % Use the photon's y coordinate to narrow down which QuadrantLayer it's in.
-            % The quadrantLayers list goes in increasing innerBound height order, so check
-            % if photon.y is less than the outerBound during iteration (not greater than).
-            if photon.y <= quadrantLayer.outerBound
-              quadrants = quadrantLayer.quadrants;
-              for q = 1:size(quadrants)
-                quadrant = quadrants(q);
-                % We've narrowed down the y-values, so just check the x-values.
-                if photon.x >= quadrant.leftBound && photon.x < quadrant.rightBound
-                    currentQuadrant = quadrant;
-                    return;
-                end
-              end
-            end
+
+          % Vectorize the iteration through the quadrant layers.
+          i = 1:obj.currFFRLayer.nQLayers;
+          % Use the photon's y coordinate to narrow down which QuadrantLayer it's in.
+          % The quadrantLayers list goes in increasing innerBound height order, so check
+          % if photon.y is less than the outerBound (not greater than). Use logical indexing.
+          quadrantLayer = quadrantLayers(quadrantLayers(i).outerBound > photon.y);
+
+          % Use logical indexing and vectorization to isolate the quadrant in the list which contains the photon.
+          % This means finding the common index between the left and right quadrant bounds which the photon can be in.
+          quadrants = quadrantLayer.quadrants;
+
+          % Get the left and right bounds of each quadrant.
+          j = 1:single(quadrantLayer.nQuadrants);
+          rightBounds = [quadrants(j).rightBound];
+          leftBounds = [quadrants(j).leftBound];
+
+          % Find the common index and get the value, i.e. quadrants([0 1 1] & [1 1 0]) -> quadrants([0 1 0])
+          % means the photon is in the middle quadrant.
+          currentQuadrant = quadrants(rightBounds >= photon.x & leftBounds < photon.x);
+
+          % Fail with a custom alert.
+          if isempty(currentQuadrant)
+            Debug.alert('Current quadrant not found.', 0);
+            Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
           end
-          Debug.alert('Current quadrant not found.', 0);
-          Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
         end
 
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
