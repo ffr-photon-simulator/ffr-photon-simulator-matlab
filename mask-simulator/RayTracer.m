@@ -30,13 +30,11 @@ classdef RayTracer < handle
           photon.move(); % returns a new Photon object for now
         end
 
-        function distance = distanceToFiber(obj, photon, fiberCoords)
-          % Calculate the photon's distance to the center of a fiber
-          % with the Pythagorean Theorem.
-          % disp(">> Get distance to fiber.")
-          xDistance = abs(fiberCoords(1) - photon.x);
-          yDistance = abs(fiberCoords(2) - photon.y);
-          distance = sqrt(xDistance^2 + yDistance^2);
+        function distances = distancesToFiber(obj, photon, fiberCoords)
+          % Calculate the photon's distance to the center of each fiber using vectorization.
+          xDistances = abs(fiberCoords(:,1) - photon.x);
+          yDistances = abs(fiberCoords(:,2) - photon.y);
+          distances = sqrt(xDistances.^2 + yDistances.^2);
         end
 
         function currentQuadrant = findCurrentQuadrant(obj, photon)
@@ -75,25 +73,24 @@ classdef RayTracer < handle
         end
 
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
-          % Determine which Quadrant the photon is in. For each fiber in that quadrant,
-          % calculate the photon's distance to it. If the distance is less than that
-          % fiber's reflection radius, the photon has reflected off that fiber.
-          % disp("> Check if reflected.")
+          % Use vectorization to calculate the distance of the photon to each fiber
+          % in the current quadrant. Then, use logical indexing to find a fiber whose
+          % reflection radius is greater than or equal to the respective (vectorized) distance.
           fiberData = quadrant.getFiberData();
 
-          for row = 1:size(fiberData)
-            fiberCoords = [fiberData(row,1), fiberData(row,2)];
-            fiberReflectionRadius = fiberData(row, 3) + (Defaults.photonWavelength / 2); % fiber radius plus half wavelength
-            distanceToFiber = obj.distanceToFiber(photon, fiberCoords);
-            if distanceToFiber < fiberReflectionRadius
-              hasReflected = true;
-              reflectedFiberCoords = fiberCoords;
-              return;
-            else
-              hasReflected = false;
-              reflectedFiberCoords = [];
-            end
-          end
+          % First two columns of all rows.
+          fiberCoords = fiberData(:,1:2);
+          % Fiber radius plus half wavelength.
+          % TODO: put a getReflRadius(radius) function in the Defaults class.
+          reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2);
+
+          % Calculate the distances.
+          distances = obj.distancesToFiber(photon, fiberCoords);
+          % The reflected fiber coords are the x and y columns of the nth row,
+          % where n corresponds to the row of distances whose value is less than
+          % the reflection radius of the same nth row.
+          reflectedFiberCoords = fiberCoords(distances(:) <= reflectionRadii(:),1:2);
+          hasReflected = ~isempty(reflectedFiberCoords);
         end
 
         function [hasCrossed, crossedFFRBound] = checkIfAtFFRBound(obj, photon, ffr)
