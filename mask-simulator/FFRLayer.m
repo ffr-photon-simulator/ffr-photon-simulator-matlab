@@ -2,6 +2,7 @@ classdef FFRLayer < handle
   % Inherit from handle to set the nPhotons properties after the ray tracing finishes.
   properties
     quadrantLayers = [];
+    nQLayers
     lattice = []; % fiber data
     latticeWidth
     latticeLength
@@ -15,6 +16,7 @@ classdef FFRLayer < handle
     nPhotonsIn
     nPhotonsOut
     id
+    nFibers
   end
 
   methods
@@ -35,24 +37,28 @@ classdef FFRLayer < handle
         % Store list of structs which are the configs of the quadrant layers.
         % Each quadrant layer struct holds the data to make that quadrant layer.
         qLayerConfigs = config.quadrantLayerConfigs; % [struct1, struct2, struct3, ...]
+        obj.nQLayers = config.nQLayers;
 
-      % Create QuadrantLayers
-      for q = 1:config.nQLayers
-        quadrantLayer = QuadrantLayer(qLayerConfigs(q));
-        obj.quadrantLayers = [obj.quadrantLayers; quadrantLayer];
-      end
+        % Create QuadrantLayers
+        q = 1:obj.nQLayers;
+        obj.quadrantLayers = QuadrantLayer(qLayerConfigs(q));
+
+        % Sum number of fibers in this FFR Layer
+        obj.nFibers = sum([obj.quadrantLayers.nFibers]);
 
         % Aggregate fiber data from the quadrant layers
         obj.lattice = obj.makeLattice(config.nQLayers, config.nQuadrantsPerQLayer);
       end
     end
 
-    function lattice = makeLattice(obj, nLayers)
+    function lattice = makeLattice(obj, nQLayers, nQuadrantsPerQLayer)
       % Add the fiber data from each quadrant layer to this ffr layer.
       lattice = [];
-      for n = 1:nLayers
-        lattice = [lattice; obj.quadrantLayers(n).getFiberData()];
-      end
+      %nFibers = single(nQLayers * nQuadrantsPerQLayer * 20); % assume 30 fibers per quadrant
+      % Pre-allocate the lattice
+      %lattice = nan(nFibers, 3);
+      n = 1:nQLayers;
+      lattice = obj.quadrantLayers(n).getFiberData();
     end
 
     function bool = containsPhoton(obj, photon)
