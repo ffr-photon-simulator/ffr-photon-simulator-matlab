@@ -115,11 +115,10 @@ classdef RayTracer < handle
           end
         end
 
-        function [hasCrossed, crossedInteriorBound] = checkIfAtInteriorBound(obj, photon, ffr)
-          % Check if a photon has crossed an interior boundary by iterating through the bounds.
-          % To detect an actual crossing, we need to track some representation of the photon's
-          % previous position, because the photon's current position alone cannot tell us
-          % whether a crossing occurred.
+        function hasCrossed = isAtInteriorBound(obj, photon, ffr)
+          % Check if a photon has crossed an interior boundary. To detect an actual crossing,
+          % we need to track some representation of the photon's previous position, because
+          % the photon's current position alone cannot tell us whether a crossing occurred.
           %
           % A first attempt involved keeping track of the photon's previous position in a boolean
           % value which is false and is set to true if the photon crosses into the interior bound's
@@ -131,40 +130,19 @@ classdef RayTracer < handle
           % keeps track of which two bounds the photon was between before it moved. If the photon
           % is between a different pair of bounds after it moves, then it has crossed an interior
           % bound. This new pair of bounds is stored and the process is repeated.
-          hasCrossed = false;
-          crossedInteriorBound = [];
-          %if photon.insideInteriorBound == true
-            %return;
-          %end
-          %interiorBounds = ffr.boundaries.interiorBounds;
-
-          % The photon was between bounds A and B (A is closer to the outer FFR bound),
-          % and now is between bounds C and D (C is closer to the outer FFR bound).
+          %
+          % Say the photon was between interior bounds A and B (A is closer to the outer FFR bound),
+          % and now is between interior bounds C and D (C is closer to the outer FFR bound).
           % Regardless of the direction of travel, this A/B -> C/D crossing necessarily
           % implies that bounds B and C are the same, and that this bound is the one
           % that was crossed.
           %
           % We abstract the bounds which the photon is between into the FFR Layer it
-          % is currently in. The current FFR layer is bounded by C and D, and the previous
-          % FFR layer is bounded by A and B.
-
-          % Find the FFR Layer with the current photon
-          if ~ isequal(obj.currFFRLayer, obj.prevFFRLayer) % [C D] != [A B]
-            hasCrossed = true;
-            % If we actually ran the simulation from both directions, the crossed interior
-            % bound would be currFFRLayer.innerBound for the inner -> outer direction.
-            crossedInteriorBound = obj.currFFRLayer.outerBound; % C
-          end
-
-          % Iterate over interior bounds
-          %for i = 1:size(interiorBounds)
-            %bound = interiorBounds(i);
-            %if photon.hasCrossedInteriorBound(bound) == true
-              %crossedInteriorBound = bound;
-              %hasCrossed = true;
-              %return;
-            %end
-          %end
+          % is currently in. In the line below, imagine the current FFR layer is
+          % bounded by C and D, and the previous FFR layer is bounded by A and B.
+          curr = obj.currFFRLayer;
+          prev = obj.prevFFRLayer;
+          hasCrossed = curr ~= prev; % [C D] ~= [A B]
         end
 
         function [newXStep, newYStep] = calculateNewSteps(obj, reflectionPoint, incidentPhotonCoords, reflectedFiberCoords)
@@ -240,6 +218,7 @@ classdef RayTracer < handle
           elseif prev.outerBound == curr.innerBound
             bound = prev.outerBound;
           else
+            bound = "Unknown crossed bound.";
             Debug.alert("Unknown crossed bound. Photon at y = " + photon.y);
             Debug.msgWithItem("Current ffr layer: ", curr, 1);
             Debug.msgWithItem("Previous ffr layer: ", prev, 1);
@@ -298,12 +277,12 @@ classdef RayTracer < handle
                 % Update the current FFR Layer.
                 obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
                 % Check for interior bound crossings.
-                if obj.currFFRLayer.id == obj.prevFFRLayer.id
-                  Debug.msg('Not at interior bound.', 1);
-                else
+                if obj.isAtInteriorBound(photon, ffr)
                   Debug.msg("At interior bound.", 1);
                   [crossedInteriorBound, direction] = obj.findCrossedBound(photon);
                   crossedInteriorBound.addCrossing(photon, direction);
+                else
+                  Debug.msg('Not at interior bound.', 1);
                 end
                 % Check for reflection off a fiber.
                 Debug.msg('Check if reflected.', 1);
