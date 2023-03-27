@@ -19,6 +19,7 @@ classdef Quadrant
     frameSize % quadrant size
     length
     width
+    nFibers
 
     bb_struct = struct();
 

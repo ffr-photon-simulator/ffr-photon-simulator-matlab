@@ -5,7 +5,7 @@ classdef Config
     ffr_3M9210 = struct('qWidth', 100*Defaults.micron, ...
                         'qLength', 100*Defaults.micron, ...
                         'nLayers', 9, ...
-                        'lengthI', 6000, ...
+                        'lengthI', 5000, ...
                         'layerRadiiI', [1 3; 1 3; 1 3; 1 3; 1 3; 1 3; 1 3; 1 3; 1 3], ...
                         'layerWidthsI', [100 100 100 100 100 100 100 100 100]);
   end
@@ -22,7 +22,7 @@ classdef Config
       config = ffrLayerConfig;
     end
 
-    function config = buildFFRLayerConfig(width, nQLayers, radiiRange, densityRange, layerType)
+    function config = buildFFRLayerConfig(width, nQLayers, radiiRange, densityRange, layerType, nQuadrantsPerQLayer)
       config = struct();
       config.width = width;
       if ~exist('nQLayers', 'var')
@@ -33,11 +33,12 @@ classdef Config
       config.radiiRange = radiiRange;
       config.densityRange = densityRange;
       config.layerType = layerType;
+      config.nQuadrantsPerQLayer = nQuadrantsPerQLayer;
     end
 
-    function config = buildQuadrantLayerConfig(ffrConfig, outerHeight, qLength, qWidth)
+    function config = buildQuadrantLayerConfig(ffrConfig, outerHeight, qLength, qWidth, nQuadrants)
       config = struct();
-      config.nQuadrants = ffrConfig.length / qLength;
+      config.nQuadrants = nQuadrants;
       config.width = qWidth;
       config.length = ffrConfig.length;
       config.heightOffset = outerHeight + (config.width * 0.5);

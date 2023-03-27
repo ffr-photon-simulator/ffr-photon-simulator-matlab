@@ -41,6 +41,8 @@ outerBoundHeight = 0;
 for i = 1:c.nLayers
   width = c.layerWidths(i);
   nQLayers = width / Config.ffr_3M9210.qWidth; % qLayers are same width as quadrants
+  % We use this to estimate the total number of fibers during array pre-allocation.
+  nQuadrantsPerQLayer = c.length / Config.ffr_3M9210.qLength;
   radiiRange = c.layerRadiiI(i, :); % want integers
   densityRange = c.layerDensitiesI(i, :); % want integers
   if i == 1
@@ -50,14 +52,14 @@ for i = 1:c.nLayers
   else
     layerType = 'filtering';
   end
-  l = Config.buildFFRLayerConfig(width, nQLayers, radiiRange, densityRange, layerType);
+  l = Config.buildFFRLayerConfig(width, nQLayers, radiiRange, densityRange, layerType, nQuadrantsPerQLayer);
 
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   %   Quadrant Layer Configs   %
   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   quadrantLayerConfigs = [];
   for j = 1:l.nQLayers
-    ql = Config.buildQuadrantLayerConfig(c, outerBoundHeight, Config.ffr_3M9210.qLength, Config.ffr_3M9210.qWidth);
+    ql = Config.buildQuadrantLayerConfig(c, outerBoundHeight, Config.ffr_3M9210.qLength, Config.ffr_3M9210.qWidth, nQuadrantsPerQLayer);
     % Add the quadrant layer's width to the outer bound height.
     outerBoundHeight = outerBoundHeight + ql.width;
 
