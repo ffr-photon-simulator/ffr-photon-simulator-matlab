@@ -15,9 +15,10 @@ c.layerRadii  = Config.toMicrons(c.layerRadiiI);
 % The density is a value between 0 and 1. It is altered later
 % (probably scaled down) to make it more appropriate for the
 % given quadrant size.
-low = [1 2];
-high = [9 10];
-c.layerDensitiesI = [low; high; low; high; low; high; low; high; low];
+%low = [1 2];
+%high = [9 10];
+%c.layerDensitiesI = [low; high; low; high; low; high; low; high; low];
+c.layerDensitiesI = Config.ffr_3M9210.layerDensitiesI;
 
 % FFR layer widths.
 % 0.9mm thick with 100μ FFR layer thickness
