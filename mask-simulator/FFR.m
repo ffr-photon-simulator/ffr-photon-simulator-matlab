@@ -26,11 +26,17 @@ classdef FFR
       obj.ffrBounds = ffrBounds;
 
       % Interior bounds
-      interiorBounds = [];
-      for i = 1:size(config.boundaries.interiorBounds)
-        interiorBounds = [interiorBounds; InteriorBoundary(config.boundaries.interiorBounds(i))];
+      nInteriorBounds = size(config.boundaries.interiorBounds, 1);
+      % Preallocate the array and create the last InteriorBoundary in the array.
+      interiorBounds(1,nInteriorBounds) = InteriorBoundary(config.boundaries.interiorBounds(end));
+      % Iterate through the interiorBounds array and create the other interior boundaries.
+      for i = 1:(nInteriorBounds - 1)
+        interiorBounds(i) = InteriorBoundary(config.boundaries.interiorBounds(i));
       end
-      Defaults.debugMessage("Interior bounds in FFR constructor", 1);
+      % We need to transpose interiorBounds because the preallocated interiorBounds is a row vector,
+      % while the prior, non-preallocated, interiorBounds was a column vector. Instead of going through
+      % all the instances in which, e.g. size(interiorBounds) is used and fixing it, just transpose it here.
+      interiorBounds = interiorBounds.';
 
       % Assemble obj.boundaries
       obj.boundaries.ffrBounds = ffrBounds;
@@ -61,6 +67,40 @@ classdef FFR
       obj.fiberData = obj.buildFiberData();
     end
 
+    % Attempt at pre-allocating handle objects (FFR Layers)
+%%%      % Create FFRLayers
+%%%      % Preallocate the ffrLayers array and create the last FFRLayer in the array.
+%%%      lastFFRLayerConfig = ffrLayerConfigs(end);
+%%%      % Add the appropriate bounds to the last FFRLayer's config.
+%%%      lastFFRLayerConfig.outerBound = obj.boundaries.ffrBounds.outerBound;
+%%%      lastFFRLayerConfig.innerBound = obj.boundaries.interiorBounds(end - 1);
+%%%      % Preallocate:
+%%%      ffrLayers(1, obj.nLayers) = FFRLayer(lastFFRLayerConfig);
+%%%      % Iterate through the ffrLayers array and create the other layers.
+%%%      for i = 1:(obj.nLayers - 1)
+%%%        ffrLayerConfig = ffrLayerConfigs(i);
+%%%        if i == 1
+%%%          ffrLayerConfig.innerBound = obj.boundaries.ffrBounds.innerBound;
+%%%        else
+%%%          ffrLayerConfig.innerBound = obj.boundaries.interiorBounds(i - 1);
+%%%        end
+%%%        %if i == obj.nLayers
+%%%          %ffrLayerConfig.outerBound = obj.boundaries.ffrBounds.outerBound;
+%%%        %else
+%%%        ffrLayerConfig.outerBound = obj.boundaries.interiorBounds(i);
+%%%        %end
+%%%        ffrLayer = FFRLayer(ffrLayerConfig);
+%%%        Debug.msgWithItem("ffrlayer i = " + i, ffrLayer, 1);
+%%%        ffrLayers(i) = ffrLayer;
+%%%      end
+%%%      Debug.msgWithItem("ffrlayer i = 9", ffrLayers(end), 1);
+%%%      %Debug.msgWithItem("ffr layers", ffrLayers, 0);
+%%%      obj.ffrLayers = ffrLayers;
+%%%      Debug.msgWithItem("obj.ffrLayers", obj.ffrLayers, 1);
+%%%
+%%%      % Aggregate entire FFR fiber data
+%%%      obj.fiberData = obj.buildFiberData();
+%%%    end
     function fiberData = buildFiberData(obj)
       % Iterate through all the quadrants and combine the fiber data
       % into one large lattice. Because the quadrants already have
