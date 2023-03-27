@@ -189,11 +189,11 @@ classdef RayTracer < handle
         function layer = findCurrFFRLayer(obj, ffr, photon)
           layer = [];
           ffrLayers = ffr.ffrLayers;
-          Debug.msg("Find curr ffr layer photon y: " + photon.y, 1);
-          for i = 1:size(ffrLayers)
+          %Debug.msg("Find curr ffr layer photon y: " + photon.y, 1);
+          for i = 1:ffr.nLayers
             if ffrLayers(i).containsPhoton(photon)
               layer = ffrLayers(i);
-              Debug.msg("Curr ffr layer i = " + i, 1);
+              %Debug.msg("Curr ffr layer i = " + i, 1);
               return;
             end
           end
