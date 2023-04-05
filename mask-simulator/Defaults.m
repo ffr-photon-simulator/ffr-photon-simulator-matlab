@@ -1,5 +1,4 @@
 classdef Defaults
-  % A data class that provides default configuration values.
   properties (Constant)
     %%% UNITS
     micron = 10^(-6);
@@ -78,14 +77,12 @@ classdef Defaults
 
   methods (Static)
     function debugMessage(message, messageLevel)
-      % If the debug level is greater than or equal to the message level, then display the message.
       if Defaults.DEBUG_LEVEL >= messageLevel
         fprintf("\nDEBUG: " + message)
       end
     end
 
     function debugStruct(struct, message, messageLevel)
-      % If the debug level is greater than or equal to the message level, then display the struct.
       if Defaults.DEBUG_LEVEL >= messageLevel
         fprintf("\nDEBUG Struct: " + message + "\n")
         disp(struct)
@@ -93,7 +90,6 @@ classdef Defaults
     end
 
     function debugArray(array, message, messageLevel)
-      % If the debug level is greater than or equal to the message level, then display the struct.
       if Defaults.DEBUG_LEVEL >= messageLevel
         fprintf("\nDEBUG Array: " + message + "\n")
         disp(array)
@@ -101,8 +97,8 @@ classdef Defaults
     end
 
     function s = coordToString(coords)
-      % Return a string representation of a coordinate pair.
       s = string(coords(1)) + ", " + string(coords(2));
     end
+
   end
 end

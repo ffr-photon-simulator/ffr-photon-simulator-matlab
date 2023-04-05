@@ -1,17 +1,4 @@
 classdef RayTracer < handle
-    % Performs ray tracing on a given Layer (a fiber lattice).
-    % The primary method, rayTrace(layer, incomingPhotons), returns the necessary output.
-    %
-    % rayTrace(layer, incomingPhotons) returns a Map of each boundary name to an array
-    % of the Photon objects which crossed each boundary. rayTrace() iterates through
-    % each photon in the incomingPhotons array. Because each Photon stores its coordinates
-    % and x-y steps, rayTrace() does not have to keep up with the current coordinates and
-    % steps, a major design improvement. It simply calls the Photon's methods to move it
-    % and set new x-y steps. After the Photon moves, rayTrace() checks if it has crossed
-    % a boundary or if it has reflected off of a fiber. If not, the Photon is moved again.
-    % If it's at a boundary, the relevant output information is stored and the iteration
-    % proceeds to the next photon. If the Photon has reflected, its new x-y steps are
-    % calculated and the loop continues.
     properties
       currFFRLayer
       prevFFRLayer
@@ -20,28 +7,23 @@ classdef RayTracer < handle
 
     methods
         function obj = RayTracer(ffr)
-          % Set the current FFR layer to the outer FFR layer.
           obj.outerLayer = ffr.ffrLayers(end);
           obj.currFFRLayer = obj.outerLayer;
         end
 
         function movePhoton(obj, photon)
-          % Move the photon by the x and y steps it has stored.
           photon.move(); % returns a new Photon object for now
         end
 
         function distances = distancesToFiber(obj, photon, fiberCoords)
-          % Calculate the photon's distance to the center of each fiber using vectorization.
           xDistances = abs(fiberCoords(:,1) - photon.x);
           yDistances = abs(fiberCoords(:,2) - photon.y);
           distances = sqrt(xDistances.^2 + yDistances.^2);
         end
 
         function currentQuadrant = findCurrentQuadrant(obj, photon)
-          % Iterate through every quadrant in the current FFR layer and compare
-          % the photon's coordinates to the quadrant's boundaries to determine
-          % which quadrant the photon is currently in.
-          %Debug.msg('Finding current quadrant.', 1);
+          Debug.msg('Finding current quadrant.', 1);
+          currentQuadrant = [];
           quadrantLayers = obj.currFFRLayer.quadrantLayers;
 
           % Vectorize the iteration through the quadrant layers.
@@ -89,9 +71,6 @@ classdef RayTracer < handle
         end
 
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
-          % Use vectorization to calculate the distance of the photon to each fiber
-          % in the current quadrant. Then, use logical indexing to find a fiber whose
-          % reflection radius is greater than or equal to the respective (vectorized) distance.
           fiberData = quadrant.getFiberData();
 
           % First two columns of all rows.
@@ -110,7 +89,6 @@ classdef RayTracer < handle
         end
 
         function [hasCrossed, crossedFFRBound] = checkIfAtFFRBound(obj, photon, ffr)
-          % Check if a photon has crossed an FFR boundary by iterating through the bounds.
           ffrBounds = ffr.boundaries.ffrBounds;
           hasCrossed = false;
           crossedFFRBound = [];
@@ -128,51 +106,13 @@ classdef RayTracer < handle
           end
         end
 
-        function hasCrossed = isAtInteriorBound(obj)
-          % Check if a photon has crossed an interior boundary. To detect an actual crossing,
-          % we need to track some representation of the photon's previous position, because
-          % the photon's current position alone cannot tell us whether a crossing occurred.
-          %
-          % A first attempt involved keeping track of the photon's previous position in a boolean
-          % value which is false and is set to true if the photon crosses into the interior bound's
-          % "range" (small thickness). However, this yielded problems when a photon's slope was so
-          % tiny that it actually moved inside the bound more than once in a row. This was counted as
-          % two crossings, when in reality it is just a single crossing.
-          %
-          % To avoid implementing the logic necessary to fix that bug, the current implementation
-          % keeps track of which two bounds the photon was between before it moved. If the photon
-          % is between a different pair of bounds after it moves, then it has crossed an interior
-          % bound. This new pair of bounds is stored and the process is repeated.
-          %
-          % Say the photon was between interior bounds A and B (A is closer to the outer FFR bound),
-          % and now is between interior bounds C and D (C is closer to the outer FFR bound).
-          % Regardless of the direction of travel, this A/B -> C/D crossing necessarily
-          % implies that bounds B and C are the same, and that this bound is the one
-          % that was crossed.
-          %
-          % We abstract the bounds which the photon is between into the FFR Layer it
-          % is currently in. In the line below, imagine the current FFR layer is
-          % bounded by C and D, and the previous FFR layer is bounded by A and B.
+        function hasCrossed = isAtInteriorBound(obj, photon, ffr)
           curr = obj.currFFRLayer;
           prev = obj.prevFFRLayer;
           hasCrossed = curr ~= prev; % [C D] ~= [A B]
         end
 
         function [newXStep, newYStep] = calculateNewSteps(obj, reflectionPoint, incidentPhotonCoords, reflectedFiberCoords)
-          % Find the slope of the line of the reflected photon.
-          %
-          % The incident photon's last point before reflection is (inc_x, inc_y). The reflection point is (refl_x, refl_y).
-          % The coordinates of the fiber off which the photon reflected are (fiber_x, fiber_y).
-          %
-          % Draw a line R colinear with the fiber coords and reflection coords (a radius). The path of the reflected photon is the
-          % image (reflection) of the path of the incident photon across line R. Draw a line P normal to R and which passes through
-          % the incident coords. The image of the incident coords across R is colinear with P. The distance from the incident coords
-          % to the reflected coords is twice the distance from the incident coords to the intersection point of R and P.
-          %
-          % First, find the intersection point I of R and P. Then, calculate the x and y distances from the incident coords to I.
-          % Add double these distance to the incident coords to get the reflected coords.
-          
-          % disp(">> Calculating new steps.")
           inc_x = incidentPhotonCoords(1);
           inc_y = incidentPhotonCoords(2);
           refl_x = reflectionPoint(1);
@@ -219,8 +159,6 @@ classdef RayTracer < handle
         end
 
         function [bound, direction] = findCrossedBound(obj, photon)
-          % The shared bound between the current and previous FFR layers
-          % is the bound that has been crossed.
           curr = obj.currFFRLayer;
           prev = obj.prevFFRLayer;
           direction = +1; % inner -> outer (positive y movement)
@@ -248,7 +186,6 @@ classdef RayTracer < handle
         end
 
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
-          % Ray traces photons starting from initialCoords through an entire FFR.
           boundInfo = [];
           % Preallocate a massive photonPaths array.
           % Increase size to 10,000,000.
@@ -320,8 +257,8 @@ classdef RayTracer < handle
         end
 
         function s = coordToString(obj, coords)
-          % Return a string representation of a coordinate pair.
           s = string(coords(1)) + ", " + string(coords(2));
         end
+
     end
 end
