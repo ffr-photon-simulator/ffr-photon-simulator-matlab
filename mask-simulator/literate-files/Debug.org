@@ -1,0 +1,108 @@
+#+title: Debug
+#+property: header-args:octave :tangle ../Debug.m
+
+* Class Overview
+Provides debugging helper functions.
+* Properties
+Message importance levels:
+- 0 - high
+- 1 - medium
+- 2 - low
+Setting the level to 1 will show high and medium messages, but not low messages.
+#+begin_src octave
+classdef Debug
+  properties (Constant)
+    LEVEL = 0;
+  end
+#+end_src
+* Methods (Static)
+** =msgIfLevel(msg, level)=
+#+begin_src octave
+  methods (Static)
+    function msgIfLevel(msg, level)
+      if Debug.LEVEL >= level
+        fprintf("\nDEBUG: " + msg);
+      end
+    end
+#+end_src
+** =dispIfLevel(item, level)=
+#+begin_src octave
+    function dispIfLevel(item, level)
+      if Debug.LEVEL >= level
+        disp(item)
+      end
+    end
+#+end_src
+** =msg(msg, level)=
+#+begin_src octave
+    function msg(msg, level)
+      Debug.msgIfLevel(msg, level);
+    end
+#+end_src
+** =msgStruct(msg, struct, level)=
+#+begin_src octave
+    function msgStruct(msg, struct, level)
+      Debug.msgWithItem(msg, struct, level);
+    end
+#+end_src
+** =msgArray(msg, array, level)=
+#+begin_src octave
+    function msgArray(msg, array, level)
+      Debug.msgWithItem(msg, array, level);
+    end
+#+end_src
+** =msgWithItem(msg, item, level)=
+Display some item that can't be concatenated with a string.
+#+begin_src octave
+    function msgWithItem(msg, item, level)
+      Debug.msgIfLevel(msg + "\n", level);
+      Debug.dispIfLevel(item, level)
+    end
+#+end_src
+** =item(item, level)=
+Display some non-string item.
+#+begin_src octave
+    function item(item, level)
+      Debug.dispIfLevel(item, level)
+    end
+#+end_src
+** =newline()=
+#+begin_src octave
+    function newline()
+      fprintf("\n");
+    end
+#+end_src
+** =alert(msg, level)=
+Use the 'warning' builtin (orange text output).
+#+begin_src octave
+    function alert(msg, level)
+      warning(msg);
+    end
+#+end_src
+** =error(msg)=
+Use the 'error' builtin (red text output and stops program).
+#+begin_src octave
+    function error(msg)
+      error(msg);
+    end
+#+end_src
+** =coordToString(coord)=
+Return a string representation of a coordinate pair.
+#+begin_src octave
+    function s = coordToString(coord)
+      s = string(coord(1)) + ", " + string(coord(2));
+    end
+#+end_src
+* Methods
+** Constructor
+#+begin_src octave
+  methods
+    function obj = Debug()
+    end
+  end
+#+end_src
+* Ends
+#+begin_src octave
+  end
+end
+#+end_src

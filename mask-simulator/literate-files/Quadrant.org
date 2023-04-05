@@ -1,0 +1,124 @@
+#+title: Quadrant
+#+property: header-args:octave :tangle ../Quadrant.m
+
+* Class Overview
+A data class representing a quadrant in a quadrant layer. Variable names are copied from =bubblebath_noPlot= when possible to make the connection clear. The constructor runs =bubblebath_noPlot= to get the fiber data (also receives the config struct).
+* Properties (Constant)
+Convenient x-axis basis for lattice length
+Convenient y-axis basis for lattice width
+#+begin_src octave
+classdef Quadrant
+  properties (Constant)
+    F_MIN_SEPARATION = 2*10^(-6);
+
+    LATTICE_I = 10*10^(-6);
+    LATTICE_J = 10*10^(-6);
+  end
+#+end_src
+* Properties
+#+begin_src octave
+  properties
+    minRadius
+    maxRadius
+    density
+    frameSize % quadrant size
+    length
+    width
+    nFibers
+
+    bb_struct = struct();
+
+    % Output of bubblebath_noPlot()
+    bb_struct_out % the struct returned from bubblebath_noPlot
+    bb_data % ([xcoord ycoord radius])
+
+    leftBound
+    rightBound
+    outerBound
+    innerBound
+  end
+#+end_src
+* Methods
+** Constructor
+The config 'c' is a struct of the form:
+- c.minRadius = minimum fiber radius
+- c.maxRadius = maximum fiber radius
+- c.frameSize = quadrant size
+- c.density   = fiber density
+- c.lengthOffset = left bound x coordinate
+- c.heightOffset = bottom bound y coordinate
+
+Steps:
+Store the user-defined values. Set other values necessary for bubblebath_noPlot(). Run bubblebath_noPlot() and store the output. Add the length offset to the x-values in bb_data and store the data. Determine the quadrant's boundary values.
+
+1. Left bound: the length offset, as noted below, starts at the quadrant layer's left bound and adds the length of any previous quadrants along with half the length of this quadrant.
+   - the left bound of this quadrant is just the QL's left bound plus the length of evous quadrants, so we subtract half the length of this quadrant from the lengthOffset.
+2. Right bound: the left bound plus the quadrant's length
+3. Inner bound: the height offset, but minus half the quadrant's width because we've already added half the quadrant layer's width to the height offset (see config.m, about line 70).
+4. Outer bound: the height offset plus the quadrant's width
+
+#+begin_src octave
+  methods
+    function obj = Quadrant(config)
+
+      if nargin > 0
+        obj.minRadius = config.minRadius;
+        obj.maxRadius = config.maxRadius;
+        obj.frameSize = config.frameSize;
+        obj.length    = config.frameSize(1);
+        obj.width     = config.frameSize(2);
+        obj.density   = config.density;
+
+        obj.bb_struct.frameSize      = obj.frameSize; % [length, width], centered at [0,0].
+        obj.bb_struct.circSize       = [obj.minRadius, obj.maxRadius];
+        obj.bb_struct.nSizes         = 5; % number of discrete radii in interval
+        obj.bb_struct.maxCircsPerRad = 3;
+        obj.bb_struct.maxIt          = 200;
+        obj.bb_struct.edgeType       = 1; % all inside frame
+        obj.bb_struct.density        = obj.density; % not yet sure what the "density" does in bubblebath.m
+        obj.bb_struct.overlap        = obj.F_MIN_SEPARATION;
+        obj.bb_struct.overlapType    = 'absolute';
+        obj.bb_struct.drawFrame      = true;
+
+        [obj.bb_data, obj.bb_struct_out] = bubblebath_noPlot(obj.bb_struct);
+        obj.nFibers = size(obj.bb_data, 1);
+
+        obj.bb_data = obj.addLengthOffset(config.lengthOffset);
+        obj.bb_data = obj.addHeightOffset(config.heightOffset);
+
+        obj.leftBound = config.lengthOffset - (config.frameSize(1) / 2);
+
+        obj.rightBound = obj.leftBound + obj.length;
+
+        obj.innerBound = config.heightOffset - (obj.width / 2);
+
+        obj.outerBound = obj.innerBound + obj.width;
+      end
+    end
+#+end_src
+** =addLengthOffset(offset)=
+Add a length offset to this quadrant. The offset is equal to the leftmost x coordinate of the quadrant layer, divided by 2 and negated, then plus the length of any previous quadrants in the layer, and plus half the length of the current quadrant (because the current quadrant is _centered_ on [0,0]).
+#+begin_src octave
+    function data = addLengthOffset(obj, offset)
+      data = obj.bb_data;
+      data(:,1) = data(:,1) + offset;
+    end
+#+end_src
+** =addHeightOffset(offset)=
+#+begin_src octave
+    function data = addHeightOffset(obj, offset)
+      data = obj.bb_data;
+      data(:,2) = data(:,2) + offset;
+    end
+#+end_src
+** =getFiberData()=
+#+begin_src octave
+    function data = getFiberData(obj)
+      data = obj.bb_data;
+    end
+#+end_src
+* Ends
+#+begin_src octave
+  end
+end
+#+end_src

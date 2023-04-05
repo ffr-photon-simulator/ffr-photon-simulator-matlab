@@ -1,0 +1,101 @@
+#+title: FFR Layer
+#+property: header-args:octave :tangle ../FFRLayer.m
+
+* Class Overview
+Inherit from handle to set the nPhotons properties after the ray tracing finishes.
+* Properties
+The photons going IN (aka "entering") are those which cross the layer's upper bound from outer -> inner. The photons going OUT (aka "exiting") are those which cross the layer's inner bound from outer -> inner. These values will be set only after the ray tracing finishes.
+#+begin_src octave
+classdef FFRLayer < handle
+  properties
+    quadrantLayers = [];
+    nQLayers
+    lattice = []; % fiber data
+    latticeWidth
+    latticeLength
+    outerBound
+    innerBound
+    nPhotonsIn
+    nPhotonsOut
+    id
+    nFibers
+  end
+#+end_src
+* Methods
+** Constructor
+Uses a config to create quadrant layers. The config 'c' is a struct of the form:
+- c.nQLayers = number of quadrant layers
+- c.layerType = type of layer ('inner, interior, filtering, or exterior')
+- c.qLayerConfigs = list of structs defining each quadrant layer
+
+Steps:
+1. Give the layer a unique ID to avoid handle/value comparison issues.
+2. Set the bounds of this layer.
+3. Store list of structs which are the configs of the quadrant layers.
+4. Each quadrant layer struct holds the data to make that quadrant layer.
+5. Create QuadrantLayers
+6. Sum number of fibers in this FFR Layer
+7. Aggregate fiber data from the quadrant layers
+#+begin_src octave
+  methods
+    function obj = FFRLayer(config)
+      if nargin > 0
+        obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 8 char hash
+
+        obj.outerBound = config.outerBound;
+        obj.innerBound = config.innerBound;
+
+        qLayerConfigs = config.quadrantLayerConfigs; % [struct1, struct2, struct3, ...]
+        obj.nQLayers = config.nQLayers;
+
+        q = 1:obj.nQLayers;
+        obj.quadrantLayers = QuadrantLayer(qLayerConfigs(q));
+
+        obj.nFibers = sum([obj.quadrantLayers.nFibers]);
+
+        obj.lattice = obj.makeLattice(config.nQLayers, config.nQuadrantsPerQLayer);
+      end
+    end
+#+end_src
+** =makeLattice(obj, nQLayers, nQuadrantsPerQLayer)=
+Add the fiber data from each quadrant layer to this ffr layer.
+#+begin_src octave
+    function lattice = makeLattice(obj, nQLayers, nQuadrantsPerQLayer)
+      lattice = [];
+      %nFibers = single(nQLayers * nQuadrantsPerQLayer * 20); % assume 30 fibers per quadrant
+      % Pre-allocate the lattice
+      %lattice = nan(nFibers, 3);
+      n = 1:nQLayers;
+      lattice = obj.quadrantLayers(n).getFiberData();
+    end
+#+end_src
+** =containsPhoton(obj, photon)=
+Check if a photon is inside this layer.
+#+begin_src octave
+    function bool = containsPhoton(obj, photon)
+      outer = obj.outerBound.bound;
+      inner = obj.innerBound.bound;
+      bool = photon.y <= outer && photon.y > inner;
+      if bool
+        Debug.msg("Contains photon at " + Debug.coordToString(photon.getCoords()), 1);
+      end
+    end
+#+end_src
+** =showPhotonPercentage(obj, nPhotons)=
+#+begin_src octave
+    function showPhotonPercentage(obj, nPhotons)
+      in = obj.nPhotonsIn;
+      %inMinusOut = obj.nPhotonsIn - obj.nPhotonsOut;
+      %pct = inMinusOut / nPhotons;
+      %pct = in / nPhotons;
+      Debug.msg(" - photons in: " + in, 0);
+      %Defaults.debugMessage(" - as pct: " + pct, 1);
+      %Defaults.debugMessage(" - photons out: " + obj.nPhotonsOut, 0);
+      %Defaults.debugMessage(" - photons: " + inMinusOut, 0);
+    end
+#+end_src
+* Ends
+#+begin_src octave
+  end
+end
+#+end_src

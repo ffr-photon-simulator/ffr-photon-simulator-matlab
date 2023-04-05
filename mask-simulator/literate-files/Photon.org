@@ -1,0 +1,76 @@
+#+title: Photon
+#+property: header-args:octave :tangle ../Photon.m
+
+* Class Overview
+* Properties (Constant)
+#+begin_src octave
+classdef Photon < handle
+  properties (Constant) % static
+    WAVELENGTH = Defaults.photonWavelength;
+  end
+#+end_src
+* Properties
+#+begin_src octave
+  properties
+    x
+    y
+    xStep
+    yStep
+    id
+  end
+#+end_src
+* Methods
+** Constructor
+The photon must be assigned coordinates and x and y steps. At Layer 1, the x step is usually 0 and the y step is usually +- WAVELENGTH/2.
+#+begin_src octave
+  methods
+    function obj = Photon(x, y, xStep, yStep)
+      obj.x = x;
+      obj.y = y;
+      obj.xStep = xStep;
+      obj.yStep = yStep;
+      obj.id = extractBefore(char(java.util.UUID.randomUUID), 9); % 9 char hash
+    end
+#+end_src
+** =hasCrossedFFRBound(bound)=
+#+begin_src octave
+    function crossed = hasCrossedFFRBound(obj, bound)
+      if isequal(bound.type, 'left') && obj.x <= bound.bound
+        crossed = true;
+      elseif isequal(bound.type, 'right') && obj.x >= bound.bound
+        crossed = true;
+      elseif isequal(bound.type, 'outer') && obj.y >= bound.bound
+        crossed = true;
+      elseif isequal(bound.type, 'inner') && obj.y <= bound.bound
+        Debug.msg("Crossed inner FFR bound with photon.y = " + obj.y, 1);
+        crossed = true;
+      else
+        crossed = false;
+      end
+    end
+#+end_src
+** =move()=
+#+begin_src octave
+    function move(obj)
+      obj.x = obj.x + obj.xStep;
+      obj.y = obj.y + obj.yStep;
+    end
+#+end_src
+** =getCoords()=
+#+begin_src octave
+    function coords = getCoords(obj)
+      coords = [obj.x obj.y];
+    end
+#+end_src
+** =setSteps(obj, newXStep, newYStep)=
+#+begin_src octave
+    function setSteps(obj, newXStep, newYStep)
+      obj.xStep = newXStep;
+      obj.yStep = newYStep;
+    end
+#+end_src
+* Ends
+#+begin_src octave
+  end
+end
+#+end_src
