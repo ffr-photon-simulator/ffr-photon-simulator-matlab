@@ -1,9 +1,4 @@
 classdef FFRBoundary < Boundary
-  % Represents the exterior boundaries of the FFR.
-  % Keeps track of how many photons have crossed the boundary.
-  % Exterior boundaries are: left, right, outer, inner.
-  % Store the count data and put it in a struct  when the user requests it.
-
   properties
     type % left, right, outer, or inner
   end
@@ -15,8 +10,6 @@ classdef FFRBoundary < Boundary
     end
 
     function addCrossing(obj, photon, direction)
-      % Increment the following counts:
-      %  - toInner or toOuter
       yStep = photon.yStep;
       Debug.msg("Adding FFR bound crossing.", 1);
       if yStep < 0 % crossing outer -> inner
@@ -44,5 +37,6 @@ classdef FFRBoundary < Boundary
       msg = "\nFFRBound type: " + obj.type + "\n - total crossings: " + obj.count;
       Debug.msg(msg, 1);
     end
+
   end
 end

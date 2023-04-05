@@ -18,6 +18,9 @@ classdef Config
                         'xStart', -500*Defaults.micron, ...
                         'xEnd',   +500*Defaults.micron);
   end
+
+
+
   methods (Static)
     function config = addFFRLayerBounds(ffrLayerConfig, ffrConfig, boundaries, i)
       if i == 1
@@ -70,7 +73,6 @@ classdef Config
     end
 
     function struct = inputOrDefault(prompt, struct, fieldName, default)
-      % Read user input and append it (or default) to a given list.
       var = input("> " + prompt + " (" + default + ") ");
       if isempty(var)
         var = default;
@@ -79,8 +81,8 @@ classdef Config
     end
 
     function microns = toMicrons(int)
-      % "Convert" an integer to microns by multiplication.
       microns = int * Defaults.micron;
     end
+
   end
 end
