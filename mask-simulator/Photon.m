@@ -2,6 +2,7 @@ classdef Photon < handle
   properties (Constant) % static
     WAVELENGTH = Defaults.photonWavelength;
   end
+
   properties
     x
     y
@@ -12,8 +13,6 @@ classdef Photon < handle
 
   methods
     function obj = Photon(x, y, xStep, yStep)
-      % The photon must be assigned coordinates and x and y steps. At Layer 1,
-      % the x step is usually 0 and the y step is usually +- WAVELENGTH/2.
       obj.x = x;
       obj.y = y;
       obj.xStep = xStep;
@@ -35,7 +34,7 @@ classdef Photon < handle
         crossed = false;
       end
     end
-    
+
     function move(obj)
       obj.x = obj.x + obj.xStep;
       obj.y = obj.y + obj.yStep;
@@ -49,5 +48,6 @@ classdef Photon < handle
       obj.xStep = newXStep;
       obj.yStep = newYStep;
     end
+
   end
 end
