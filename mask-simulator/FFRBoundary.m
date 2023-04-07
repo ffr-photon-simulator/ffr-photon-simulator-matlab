@@ -18,7 +18,7 @@ classdef FFRBoundary < Boundary
       % Increment the following counts:
       %  - toInner or toOuter
       yStep = photon.yStep;
-      Debug.msg("Adding FFR bound crossing.", 1);
+      %Debug.msg("Adding FFR bound crossing.", 1);
       if yStep < 0 % crossing outer -> inner
         obj.incrementToInner();
       else
@@ -42,7 +42,7 @@ classdef FFRBoundary < Boundary
 
     function printCrossingInfo(obj)
       msg = "\nFFRBound type: " + obj.type + "\n - total crossings: " + obj.count;
-      Debug.msg(msg, 1);
+      %Debug.msg(msg, 1);
     end
   end
 end

@@ -1,5 +1,5 @@
-clear all; % clear workspace
 tic;
+%clear all; % clear workspace
 % Add the configs to the path
 %cwd = pwd % current working directory
 %configDir = cwd + "mask-simulator/ffrConfigs"

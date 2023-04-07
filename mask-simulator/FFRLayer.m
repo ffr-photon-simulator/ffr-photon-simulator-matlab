@@ -62,12 +62,12 @@ classdef FFRLayer < handle
 
     function bool = containsPhoton(obj, photon)
       % Check if a photon is inside this layer.
-      if bool
-        Debug.msg("Contains photon at " + Debug.coordToString(photon.getCoords()), 1);
-      end
       %outer = obj.outerBound.bound;
       %inner = obj.innerBound.bound;
       bool = photon.y <= obj.outerBound.bound && photon.y > obj.innerBound.bound;
+      %if bool
+      %  Debug.msg("Contains photon at " + Debug.coordToString(photon.getCoords()), 1);
+      %end
     end
 
     function showPhotonPercentage(obj, nPhotons)
