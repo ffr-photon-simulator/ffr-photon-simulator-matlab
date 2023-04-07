@@ -54,6 +54,19 @@ Some of these values are randomized and some are calculated based on other value
 Eventually we'd like to move away from these limitations:
 1. Currently, the configs source some values from the =Defaults= data class.
 2. Also, the FFR's length and width must be multiples of the default quadrant length and width, respectively.
+* Reducing runtime
+** Pre-Allocating Arrays
+*** Simple Arrays
+**** photonPaths in rayTrace()
+*** Object Arrays
+**** DONE interiorBounds in FFR constructor
+**** DONE quadrants in QuadrantLayer constructor
+**** FFRLayers in FFR constructor (handle)
+** Vectorizing =for= loops
+**** DONE Create QuadrantLayers in FFRLayer constructor
+**** DONE Make fiber lattice in QuadrantLayer
+**** TODO Make fiber lattice in FFRLayer
+**** DONE findCurrentQuadrant() in RayTracer
 * Visuals
 Black box  - bubble bath frame and lattice boundary.
 Circles    - representation of fibers with center coordinates (dot).
