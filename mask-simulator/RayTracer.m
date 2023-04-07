@@ -42,7 +42,6 @@ classdef RayTracer < handle
           % the photon's coordinates to the quadrant's boundaries to determine
           % which quadrant the photon is currently in.
           Debug.msg('Finding current quadrant.', 1);
-          currentQuadrant = [];
           quadrantLayers = obj.currFFRLayer.quadrantLayers;
 
           % Vectorize the iteration through the quadrant layers.
@@ -57,9 +56,9 @@ classdef RayTracer < handle
           quadrants = quadrantLayer.quadrants;
 
           % Get the left and right bounds of each quadrant.
-          j = 1:single(quadrantLayer.nQuadrants);
-          rightBounds = [quadrants(j).rightBound];
-          leftBounds = [quadrants(j).leftBound];
+          %j = 1:single(quadrantLayer.nQuadrants);
+          rightBounds = [quadrants.rightBound];
+          leftBounds = [quadrants.leftBound];
 
           % Find the common index and get the value, i.e. quadrants([0 1 1] & [1 1 0]) -> quadrants([0 1 0])
           % means the photon is in the middle quadrant.
@@ -112,7 +111,7 @@ classdef RayTracer < handle
           end
         end
 
-        function hasCrossed = isAtInteriorBound(obj, photon, ffr)
+        function hasCrossed = isAtInteriorBound(obj)
           % Check if a photon has crossed an interior boundary. To detect an actual crossing,
           % we need to track some representation of the photon's previous position, because
           % the photon's current position alone cannot tell us whether a crossing occurred.
@@ -187,7 +186,7 @@ classdef RayTracer < handle
         end
 
         function layer = findCurrFFRLayer(obj, ffr, photon)
-          layer = [];
+          %layer = [];
           ffrLayers = ffr.ffrLayers;
           %Debug.msg("Find curr ffr layer photon y: " + photon.y, 1);
           for i = 1:ffr.nLayers
@@ -274,8 +273,8 @@ classdef RayTracer < handle
                 % Update the current FFR Layer.
                 obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
                 % Check for interior bound crossings.
-                if obj.isAtInteriorBound(photon, ffr)
                   Debug.msg("At interior bound.", 1);
+                if obj.isAtInteriorBound()
                   [crossedInteriorBound, direction] = obj.findCrossedBound(photon);
                   crossedInteriorBound.addCrossing(photon, direction);
                 else

@@ -1,4 +1,5 @@
 clear all; % clear workspace
+tic;
 % Add the configs to the path
 %cwd = pwd % current working directory
 %configDir = cwd + "mask-simulator/ffrConfigs"
@@ -108,7 +109,9 @@ end
 ax.XLim = [ffrBounds.leftBound.bound ffrBounds.rightBound.bound];
 ax.YLim = [ffrBounds.innerBound.bound ffrBounds.outerBound.bound];
 
-fprintf("\n")
+Debug.newLine();
+
+toc
 
 % FUNCTIONS
 function [photons, nPhotons] = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, initialXStep, outerToInnerYStep)

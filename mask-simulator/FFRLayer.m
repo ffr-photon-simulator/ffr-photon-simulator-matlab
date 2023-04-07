@@ -53,7 +53,6 @@ classdef FFRLayer < handle
 
     function lattice = makeLattice(obj, nQLayers, nQuadrantsPerQLayer)
       % Add the fiber data from each quadrant layer to this ffr layer.
-      lattice = [];
       %nFibers = single(nQLayers * nQuadrantsPerQLayer * 20); % assume 30 fibers per quadrant
       % Pre-allocate the lattice
       %lattice = nan(nFibers, 3);
@@ -63,12 +62,12 @@ classdef FFRLayer < handle
 
     function bool = containsPhoton(obj, photon)
       % Check if a photon is inside this layer.
-      outer = obj.outerBound.bound;
-      inner = obj.innerBound.bound;
-      bool = photon.y <= outer && photon.y > inner;
       if bool
         Debug.msg("Contains photon at " + Debug.coordToString(photon.getCoords()), 1);
       end
+      %outer = obj.outerBound.bound;
+      %inner = obj.innerBound.bound;
+      bool = photon.y <= obj.outerBound.bound && photon.y > obj.innerBound.bound;
     end
 
     function showPhotonPercentage(obj, nPhotons)

@@ -115,9 +115,8 @@ classdef FFR
       % regarding e.g. a FiberLayer will be accessed through
       % that respective object.
       fiberData = [];
-      ffrLayers = obj.ffrLayers;
-      for i = 1:size(ffrLayers)
-        ffrLayer = ffrLayers(i);
+      for i = 1:size(obj.ffrLayers)
+        ffrLayer = obj.ffrLayers(i);
         quadrantLayers = ffrLayer.quadrantLayers;
         for j = 1:size(quadrantLayers)
           quadrantLayer = quadrantLayers(j);
