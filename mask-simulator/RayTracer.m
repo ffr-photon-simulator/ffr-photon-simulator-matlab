@@ -251,12 +251,12 @@ classdef RayTracer < handle
           % Ray traces photons starting from initialCoords through an entire FFR.
           boundInfo = [];
           % Preallocate a massive photonPaths array.
-          photonPaths = nan(1000000,2);
+          % Increase size to 10,000,000.
+          photonPaths = zeros(10000000,2);
           % We need to keep track of the position within the photonPaths array
           % so we can overwrite the preallocated nan values. Increment this
           % each time coordinates are added to photonPaths.
           pathsIdx = 1;
-
 
           % Get number of rows in first column.
           nPhotons = size(incomingPhotons, 1);
@@ -274,7 +274,10 @@ classdef RayTracer < handle
               obj.prevFFRLayer = obj.currFFRLayer;
               % We need to track the previous photon's coordinates to determine the reflected path.
               previousPhotonCoords = photon.getCoords(); % [x y]
-              photonPaths(pathsIdx,:) = previousPhotonCoords;
+              % Only store the photon coordinates every 1000 moves.
+              if rem(pathsIdx, 100) == 0
+                photonPaths(pathsIdx,:) = previousPhotonCoords;
+              end
               pathsIdx = pathsIdx + 1;
               % Move the photon and check if it has reflected or has crossed a boundary
               obj.movePhoton(photon);
