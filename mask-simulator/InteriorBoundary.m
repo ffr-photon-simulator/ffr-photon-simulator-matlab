@@ -30,7 +30,7 @@ classdef InteriorBoundary < Boundary
       %  - toInner or toOuter
       id = photon.id;
       yStep = photon.yStep;
-      Debug.msg("Adding interior crossing.", 1);
+      %Debug.msg("Adding interior crossing.", 1);
       obj.count = obj.count + 1;
       if yStep < 0 % crossing outer -> inner
         obj.incrementToInner();
@@ -58,9 +58,9 @@ classdef InteriorBoundary < Boundary
 
     function printCrossingInfo(obj)
       m1 = "Interior Bound at " + obj.bound + " w/ total crossings = " + obj.count;
-      Debug.msg(m1, 1);
+      %Debug.msg(m1, 1);
       m2 = " - outer to inner crossings: " + obj.toInner;
-      Debug.msg(m2, 1);
+      %Debug.msg(m2, 1);
       %m2 = "- outer to inner crossings: " + data.toInner + "\n  - repeated: " + data.repeatsToInner;
       %m3 = "- inner to outer crossings: " + data.toOuter + "\n  - repeated: " + data.repeatsToOuter;
       %Defaults.debugMessage(m2, 0);
