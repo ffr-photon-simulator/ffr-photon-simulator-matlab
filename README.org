@@ -74,26 +74,7 @@ Black dots (optional) - centers of the fibers
 Red dots              - paths of ray traced photons
 Blue text             - interior boundary (y-)values
 
-The method =rayTraceSequentialLayers()= ray traces photons through one layer, and makes
-the transmitted photons of that layer the incoming photons for the next layer. It
-repeats this process for an array of layers, with the first element in the array
-as the first layer. For example, the first layer would be the outer exterior layer of
-an FFR, the middle layers would be the interior layers of an FFR-- with some
-filtering layers, specifically--, and the last layer would be the inner exterior
-layer of an FFR.
-
-Each layer has its own boundaries: the inner, outer, left, and right.
-
-For each layer, =rayTraceSequentialLayers()= displays the number of photons which reached:
-- the inner boundary
-- the outer boundary
-- the left boundary
-- the right boundary
-
-At the end, it displays the number of photons which reached:
-- the inner boundary of inner, exterior layer
-- the left boundary of any layer
-- the right boundary of any layer
+#  LocalWords:  FFR FFRLayer QuadrantLayer
 * Naming Conventions
 We need a naming convention for simulation data files and image files. All config variables per simulation are highly relevant to its results, but some are particularly relevant:
 - FFR model
@@ -105,49 +86,10 @@ Including only config information in filenames would lead to duplicates. It's ea
 
 The simulation results (nLayers x 2 array of photons available for decontamination in each FFR Layer) are written to a =csv= file named: =<nPhotons>ph_<nLayers>layer-<time>.csv= in the directory =data/<model>/<length>x<width>/=, where =<model>= is the FFR model, =<length>= is the FFR length, in microns, =<width>= is the FFR width, in microns, =<nPhotons>= are the number of incident photons, =<nLayers>= are the number of FFR layers, and =<time>= is the current time in hours, minutes, and seconds (hh-mm-ss). The number of incident photons is the value which changes most often, so it makes sense to use directories for the other values and exclude them from the filenames.
 
-** FFR
-*** FFRLayer
-**** QuadrantLayer
-***** Quadrant
-* Old Classes
-Some under development on the =layer_quadrants= [[https://github.com/ffr-photon-simulator/ffr-photon-simulator-matlab/tree/layer_quadrants][branch]].
-** =QuadrantLayer=
-Represents a layer of an FFR.
-*** *Attributes*
-- quadrant config
-- a QuadrantLattice, which represents the fibers
-- lattice length (μ)
-- lattice width (μ)
-- axis handle to allow plotting the layer
-*** Methods
-- =plotLayer()= - with bounds, fiber centers, fiber circles
-- =plotPhotons()= - at bounds, ray traced paths
-- lattice attribute getters
-** =QuadrantLattice=
-Represents the fibers in a single layer. Creates and stores Quadrant objects and builds the lattice from the data in the Quadrants.
-*** Attributes
-- =F_MIN_SEPARATION= - the minimum separation between fibers
-- =LATTICE_I= - a 10μ basis distance for the x-axis
-- =LATTICE_J= - a 10μ basis distance for the y-axis
-*** Methods
-** =Quadrant=
-Represents a quadrant in the fiber lattice. The following parameters used in =bubblebath_noPlot= can be configured:
-- size of the quadrant (length and width, μ).
-- mininum and maximum radii of the quadrant's fibers.
 An example: =data/3M9210/5000x900/16000ph_9layer.csv=.
 
-Stores the fiber data and the config struct for =bubblebath_noPlot=.
-*** Attributes
-Set in config file and passed to constructor.
-- =minRadius= - minimum fiber radius.
-- =maxRadius= - maximum fiber radius.
-- =frameSize= - length and width of quadrant (μ).
-- =density= - density of fibers.
-*** Methods
-=Quadrant()= - constructor. Stores quadrant values in a struct and runs =bubblebath_noPlot=.
 The vector graphics image of the simulation visualization and the text file holding the full config used for the simulation follow the same naming convention as the data files, but are under different top-level directories. Examples are sufficiently explanatory:
 - image:  =images/3M9210/5000x900/16000ph_9layer.svg=
 - text config:  =configs/3M9210/5000x900/16000ph_9layer.txt=
 
-#  LocalWords:  FFR FFRLayer QuadrantLayer
 The =data/=, =images/=, and =configs/= directories are all stored under the =results/= directory of the repository.
