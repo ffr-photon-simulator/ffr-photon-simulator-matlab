@@ -68,13 +68,11 @@ Eventually we'd like to move away from these limitations:
 **** TODO Make fiber lattice in FFRLayer
 **** DONE findCurrentQuadrant() in RayTracer
 * Visuals
-Black box  - bubble bath frame and lattice boundary.
-Circles    - representation of fibers with center coordinates (dot).
-Black dots - centers of the fibers
-Red dots   - paths of ray traced photons
-* =ffr_simulator.m=
-This is the script which runs a simulation. You write a config file and this script reads that file.
-It then constructs the necessary layers and runs the requested ray tracing function.
+Thick grey lines      - FFR boundaries
+Black Circles         - representation of fibers with center coordinates (dot).
+Black dots (optional) - centers of the fibers
+Red dots              - paths of ray traced photons
+Blue text             - interior boundary (y-)values
 
 The method =rayTraceSequentialLayers()= ray traces photons through one layer, and makes
 the transmitted photons of that layer the incoming photons for the next layer. It
