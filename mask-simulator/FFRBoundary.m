@@ -28,9 +28,9 @@ classdef FFRBoundary < Boundary
 
     function plot(obj, axisHandle)
       if isequal(obj.type, 'inner') || isequal(obj.type, 'outer')
-        yline(axisHandle, obj.bound, Defaults.ffrBoundStyle, obj.bound, 'LineWidth', Defaults.ffrBoundWeight);
+        yline(axisHandle, obj.bound, Defaults.ffrBoundStyle, 'LineWidth', Defaults.ffrBoundWeight);
       else
-        xline(axisHandle, obj.bound, Defaults.ffrBoundStyle, obj.bound, 'LineWidth', Defaults.ffrBoundWeight);
+        xline(axisHandle, obj.bound, Defaults.ffrBoundStyle, 'LineWidth', Defaults.ffrBoundWeight);
       end
     end
 

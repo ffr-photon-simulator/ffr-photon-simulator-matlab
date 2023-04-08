@@ -1,4 +1,4 @@
-tic;
+plotbool = true
 %clear all; % clear workspace
 % Add the configs to the path
 %cwd = pwd % current working directory
@@ -63,55 +63,58 @@ for i = 1:ffr.nLayers
 end
 
 % Graph FFR fibers and photon paths
-clf; % clear current plot
-ax = axes;
-hold on; % don't overwrite plot
-axis equal; % make x and y axis scale the same
-% Plot fiber centers
-%plot(ax, ffr.fiberData(:,1), ffr.fiberData(:,2), Defaults.fiberCenterStyle,'MarkerSize', Defaults.fiberCenterWeight);
+if plotbool == true
+  clf; % clear current plot
+  ax = axes;
+  axis equal; % make x and y axis scale the same
+  hold on; % don't overwrite plot with each subsequent addition
 
-% Plot fiber circles
-ffrFiberData = ffr.fiberData;
-for i = 1:size(ffrFiberData, 1) % number of rows is the number of fibers
-  data = ffrFiberData(i,:);
-  x = data(1);
-  y = data(2);
-  r = data(3);
-  theta = linspace(0,2*pi,100);
-  xcoords = r * cos(theta) + x;
-  ycoords = r * sin(theta) + y;
-  plot(ax, xcoords, ycoords, Defaults.fiberCircleStyle,'MarkerSize',Defaults.fiberCircleWeight);
-end
+  % Plot fiber centers
+  %plot(ax, ffr.fiberData(:,1), ffr.fiberData(:,2), Defaults.fiberCenterStyle,'MarkerSize', Defaults.fiberCenterWeight);
 
-% Plot photon paths
-plot(ax, photonPaths(:,1), photonPaths(:,2), Defaults.photonPathStyle,'MarkerSize', Defaults.photonPathWeight);
+  % Plot fiber circles
+  ffrFiberData = ffr.fiberData;
+  for i = 1:size(ffrFiberData, 1) % number of rows is the number of fibers
+    data = ffrFiberData(i,:);
+    x = data(1);
+    y = data(2);
+    r = data(3);
+    theta = linspace(0,2*pi,100);
+    xcoords = r * cos(theta) + x;
+    ycoords = r * sin(theta) + y;
+    plot(ax, xcoords, ycoords, Defaults.fiberCircleStyle,'MarkerSize',Defaults.fiberCircleWeight);
+  end
 
-% Plot bounds and print crossing info
-disp("")
-ffrBounds = ffr.ffrBounds;
-fields = fieldnames(ffrBounds);
-for i = 1:numel(fields)
-  bound = ffrBounds.(fields{i});
-  bound.plot(ax);
-  bound.printCrossingInfo();
+  % Plot photon paths
+  plot(ax, photonPaths(:,1), photonPaths(:,2), Defaults.photonPathStyle,'MarkerSize', Defaults.photonPathWeight);
+
+  % Plot bounds and print crossing info
+  disp("")
+  ffrBounds = ffr.ffrBounds;
+  fields = fieldnames(ffrBounds);
+  for i = 1:numel(fields)
+    bound = ffrBounds.(fields{i});
+    bound.plot(ax);
+    bound.printCrossingInfo();
+  end
+
+  %plotFFRBounds(ffrBounds, ax);
+
+  Debug.newline();
+
+  interiorBounds = ffr.boundaries.interiorBounds;
+  for i = 1:size(interiorBounds)
+    bound = interiorBounds(i);
+    bound.plot(ax);
+    bound.printCrossingInfo();
+  end
+
+  % Set plot limits
+  ax.XLim = [ffrBounds.leftBound.bound ffrBounds.rightBound.bound];
+  ax.YLim = [ffrBounds.innerBound.bound ffrBounds.outerBound.bound];
 end
 
 Debug.newline();
-
-interiorBounds = ffr.boundaries.interiorBounds;
-for i = 1:size(interiorBounds)
-  bound = interiorBounds(i);
-  bound.plot(ax);
-  bound.printCrossingInfo();
-end
-
-% Set plot limits
-ax.XLim = [ffrBounds.leftBound.bound ffrBounds.rightBound.bound];
-ax.YLim = [ffrBounds.innerBound.bound ffrBounds.outerBound.bound];
-
-Debug.newLine();
-
-toc
 
 time = datetime('Now','Format','HH-mm-ss');
 photonsInToCSV(ffrLayers, ffr.nLayers, time, ffrConfig, nPhotons);
@@ -183,4 +186,20 @@ function figureToSVG(ffrConfig, nPhotons, ax, time)
   filepath = sprintf("%s/%s/%s/%s_%s.%s", svgdir, model, dim, name, time, ext);
   Debug.msgWithItem("svg path", filepath, 0);
   export_fig(filepath, ax)
+end
+
+function plotFFRBounds(ffrBounds, ax)
+  left = ffrBounds.leftBound.bound;
+  right = ffrBounds.rightBound.bound
+  outer = ffrBounds.outerBound.bound;
+  inner = 0;
+  % Plot FFR Bounds
+  % Inner
+  plot(ax, [left 0], [right 0]);
+  %plot(ax, [left, 0], [right, 0], inner, 'LineWidth', Defaults.ffrBoundWeight);
+  % Outer
+  %plot(ax, [left, outer], [right, outer], outer, 'LineWidth', Defaults.ffrBoundWeight);
+  % Plot left and right bounds
+  %plot(ax, [left, 0], [left, outer], left, 'LineWidth', Defaults.ffrBoundWeight);
+  %plot(ax, [right, 0], [right, inner], right, 'LineWidth', Defaults.ffrBoundWeight);
 end

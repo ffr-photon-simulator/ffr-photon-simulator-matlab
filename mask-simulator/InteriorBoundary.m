@@ -41,7 +41,7 @@ classdef InteriorBoundary < Boundary
 
     function plot(obj, axisHandle)
       % ax, y=bound, style, label
-      yline(axisHandle, obj.bound, Defaults.interiorBoundStyle, obj.bound, 'LineWidth', Defaults.interiorBoundWeight);
+      yline(axisHandle, obj.bound, Defaults.interiorBoundStyle, 'LineWidth', Defaults.interiorBoundWeight);
     end
 
     function data = getCountData(obj)
