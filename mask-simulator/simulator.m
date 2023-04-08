@@ -113,6 +113,11 @@ Debug.newLine();
 
 toc
 
+time = datetime('Now','Format','HH-mm-ss');
+photonsInToCSV(ffrLayers, ffr.nLayers, time, ffrConfig, nPhotons);
+figureToSVG(ffrConfig, nPhotons, ax, time);
+configToMAT(ffrConfig, time, nPhotons);
+
 % FUNCTIONS
 function [photons, nPhotons] = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, initialXStep, outerToInnerYStep)
   % The photons' x-axis range is from xStart to xEnd. Their y coordinate is
@@ -127,4 +132,55 @@ function [photons, nPhotons] = makeInitialPhotons(xStart, xEnd, separation, oute
     %nextPhoton = Photon(xStart + m*separation, Defaults.nQLayers * Defaults.qlWidth, initialXStep, outerToInnerYStep);
     photons = [photons; nextPhoton];
   end
+end
+
+function photonsInToCSV(ffrLayers, nLayers, time, ffrConfig, nPhotons)
+  % Write a 2 x nLayers array to a csv file.
+  data = zeros(nLayers, 2);
+  data(:,1) = 9:-1:1;
+  data(:, 2) = [ffrLayers.nPhotonsIn];
+
+  csvdir = sprintf("results/data");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer", nPhotons, ffrConfig.nLayers);
+  ext = "csv";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", csvdir, model, dim, name, time, ext);
+  Debug.msgWithItem("csv path", filepath, 0);
+  writematrix(data, filepath, 'Delimiter', 'comma');
+end
+
+function configToMAT(ffrConfig, time, nPhotons)
+  % Save the ffrConfig struct as a .mat file. It is hard to save it as anything
+  % else because it is a nested struct with object arrays. Given that we store
+  % the config as a backup, it is reasonable to request the user to open Matlab
+  % to view the config.
+  %
+  % Run this command to get the ffrConfig struct: clear('ffrConfig'); load('<config_name>.mat')
+
+  matdir = sprintf("results/configs");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer", nPhotons, ffrConfig.nLayers);
+  ext = "mat";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", matdir, model, dim, name, time, ext);
+  Debug.msgWithItem("mat path", filepath, 0);
+  save(filepath, 'ffrConfig')
+end
+
+function figureToSVG(ffrConfig, nPhotons, ax, time)
+  % Use export_fig (https://github.com/altmany/export_fig) to generate a high-quality
+  % SVG of the plot. A directory variable does NOT include a trailing backlash.
+  %
+  % Top level dirs: data, images, and configs.
+  % <tld>/<model>/<length>x<width>/<nPhotons>ph_<nLayers>layer-<time>.ext
+
+  svgdir = sprintf("results/images");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer", nPhotons, ffrConfig.nLayers);
+  ext = "svg";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", svgdir, model, dim, name, time, ext);
+  Debug.msgWithItem("svg path", filepath, 0);
+  export_fig(filepath, ax)
 end

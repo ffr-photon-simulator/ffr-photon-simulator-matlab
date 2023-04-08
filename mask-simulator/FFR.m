@@ -6,6 +6,7 @@ classdef FFR
     boundaries = struct();
     ffrBounds = [];
     fiberData = [];
+    model
   end
 
   methods
@@ -15,6 +16,7 @@ classdef FFR
       % c.ffrLayerConfigs = list of structs defining each FFRLayer
 
       obj.nLayers = config.nLayers;
+      obj.model = config.model;
 
       % Create Boundaries
       % FFR bounds

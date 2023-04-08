@@ -3,6 +3,7 @@
 % The FFR config, later renamed to ffrConfig.
 c = struct();
 c.nLayers = Config.ffr_3M9210.nLayers; % number of FFR layers
+c.model = Config.ffr_3M9210.model;
 % Length
 c.lengthI = Config.ffr_3M9210.lengthI;
 c.length = Config.toMicrons(c.lengthI);
