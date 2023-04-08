@@ -94,12 +94,16 @@ At the end, it displays the number of photons which reached:
 - the inner boundary of inner, exterior layer
 - the left boundary of any layer
 - the right boundary of any layer
+* Naming Conventions
+We need a naming convention for simulation data files and image files. All config variables per simulation are highly relevant to its results, but some are particularly relevant:
+- FFR model
+- FFR length and width
+- number of FFR layers
+- number of incident photons
 
-The method =rayTraceSingleLayer()= traces initial photons through a single layer and displays the results.
+Including only config information in filenames would lead to duplicates. It's easiest to include a timestamp to differentiate repeated simulation trials.
 
-The method =rayTraceLayerStack()= traces initial photons through a layer stack, which is just a Layer but represents many layers stacked together.
-* Classes
-An =FFR= is built from =FFRLayers= (exterior, interior, filtering, etc). To achieve a variable density within each =FFRLayer=, the fiber data for each =FFRLayer= is aggregated from the data of at least one =QuadrantLayer=. A =QuadrantLayer= aggregates fiber data from at least one =Quadrant=. Each =Quadrant= runs =bubblebath()= to generate its fiber data.
+The simulation results (nLayers x 2 array of photons available for decontamination in each FFR Layer) are written to a =csv= file named: =<nPhotons>ph_<nLayers>layer-<time>.csv= in the directory =data/<model>/<length>x<width>/=, where =<model>= is the FFR model, =<length>= is the FFR length, in microns, =<width>= is the FFR width, in microns, =<nPhotons>= are the number of incident photons, =<nLayers>= are the number of FFR layers, and =<time>= is the current time in hours, minutes, and seconds (hh-mm-ss). The number of incident photons is the value which changes most often, so it makes sense to use directories for the other values and exclude them from the filenames.
 
 ** FFR
 *** FFRLayer
@@ -130,7 +134,7 @@ Represents the fibers in a single layer. Creates and stores Quadrant objects and
 Represents a quadrant in the fiber lattice. The following parameters used in =bubblebath_noPlot= can be configured:
 - size of the quadrant (length and width, μ).
 - mininum and maximum radii of the quadrant's fibers.
-- density of fibers throughout the quadrant.
+An example: =data/3M9210/5000x900/16000ph_9layer.csv=.
 
 Stores the fiber data and the config struct for =bubblebath_noPlot=.
 *** Attributes
@@ -141,5 +145,9 @@ Set in config file and passed to constructor.
 - =density= - density of fibers.
 *** Methods
 =Quadrant()= - constructor. Stores quadrant values in a struct and runs =bubblebath_noPlot=.
+The vector graphics image of the simulation visualization and the text file holding the full config used for the simulation follow the same naming convention as the data files, but are under different top-level directories. Examples are sufficiently explanatory:
+- image:  =images/3M9210/5000x900/16000ph_9layer.svg=
+- text config:  =configs/3M9210/5000x900/16000ph_9layer.txt=
 
 #  LocalWords:  FFR FFRLayer QuadrantLayer
+The =data/=, =images/=, and =configs/= directories are all stored under the =results/= directory of the repository.
