@@ -125,7 +125,7 @@ function photonsInToCSV(ffrLayers, nLayers, time, ffrConfig, nPhotons)
   ext = "csv";
   filepath = sprintf("%s/%s/%s/%s_%s.%s", csvdir, model, dim, name, time, ext);
   Debug.msgWithItem("csv path", filepath, 0);
-  writematrix(data, filepath, 'Delimiter', 'comma');
+  writematrix(data, filepath, 'Delimiter', 'comma')
 end
 
 function configToMAT(ffrConfig, time, nPhotons)
@@ -147,7 +147,7 @@ function figureToSVG(ffrConfig, nPhotons, ax, time)
   ext = "svg";
   filepath = sprintf("%s/%s/%s/%s_%s.%s", svgdir, model, dim, name, time, ext);
   Debug.msgWithItem("svg path", filepath, 0);
-  export_fig(filepath, ax)
+  export_fig(filepath, ax, '-r600')
 end
 
 function plotFFRBounds(ffrBounds, ax)
