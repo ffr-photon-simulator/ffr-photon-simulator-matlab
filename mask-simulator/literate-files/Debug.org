@@ -94,13 +94,6 @@ Return a string representation of a coordinate pair.
     end
 #+end_src
 * Methods
-** Constructor
-#+begin_src octave
-  methods
-    function obj = Debug()
-    end
-  end
-#+end_src
 * Ends
 #+begin_src octave
   end
