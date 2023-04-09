@@ -42,23 +42,6 @@ classdef RayTracer < handle
           rightBounds = [quadrants.rightBound];
           leftBounds = [quadrants.leftBound];
 
-          % Preallocate the rightBounds and leftBounds array to test for
-          % speed improvements.
-          %rightBounds = nan(single(quadrantLayer.nQuadrants));
-          %leftBounds  = nan(single(quadrantLayer.nQuadrants));
-          %rightBounds = nan(j);
-          %leftBounds = nan(j);
-
-          %currentQuadrant = [];
-          %for i = 1:single(quadrantLayer.nQuadrants)
-          %    quadrant = quadrants(i);
-          %    if quadrant.rightBound >= photon.x && quadrant.leftBound < photon.x
-          %        currentQuadrant = quadrant;
-          %        break;
-          %    end
-          %end
-
-
           % Find the common index and get the value, i.e. quadrants([0 1 1] & [1 1 0]) -> quadrants([0 1 0])
           % means the photon is in the middle quadrant.
           currentQuadrant = quadrants(rightBounds >= photon.x & leftBounds < photon.x);
@@ -106,7 +89,7 @@ classdef RayTracer < handle
           end
         end
 
-        function hasCrossed = isAtInteriorBound(obj, photon, ffr)
+        function hasCrossed = isAtInteriorBound(obj)
           curr = obj.currFFRLayer;
           prev = obj.prevFFRLayer;
           hasCrossed = curr ~= prev; % [C D] ~= [A B]
@@ -146,9 +129,6 @@ classdef RayTracer < handle
           %layer = [];
           ffrLayers = ffr.ffrLayers;
           %Debug.msg("Find curr ffr layer photon y: " + photon.y, 1);
-          %i = 1:ffr.nLayers;
-          %layer = ffrLayers(ffrLayers(i).containsPhoton(photon));
-
           for i = 1:ffr.nLayers
             if ffrLayers(i).containsPhoton(photon)
               layer = ffrLayers(i);
