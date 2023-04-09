@@ -93,3 +93,13 @@ The vector graphics image of the simulation visualization and the text file hold
 - text config:  =configs/3M9210/5000x900/16000ph_9layer.txt=
 
 The =data/=, =images/=, and =configs/= directories are all stored under the =results/= directory of the repository.
+* Git and Literate Programming…
+Most work was done on the master branch. Early on there were some topic branches which were then merged to master. Things get slightly more complicated now that I am including literate files.
+
+The goal and current workflow is to keep production source code on =master= and keep the literate files (and source code) on =literate=. Users should run the simulator using the code on =master=. I'm keeping the literate files off the master branch because the average user will not use literate programming, and keeping the literate files on =master= would only confuse them.
+
+There's also some benefits, as far as I can tell. But I'm not knowledgeable to think of serious drawbacks, so let me know of any. I make all official edits on =literate=. I commit changes to any non-literate files (apart from the tangled source code) and at some point cherry-pick them into =master=. I also commit changes to literate files and their tangled source, but I commit the source separately from the literate files. This allows me to only cherry-pick the tangled source into =master=, while keeping the literate files on =literate=.
+
+Keeping =master= and =literate= separate allow me to make tiny edits on =master= and not have to worry about overwriting them by an accidental `(save-buffer)` saving and tangling my literate files. I can use some =diff= variant to ensure I make the right changes to my literate files if I'm editing the source code on branch other than =literate=.
+
+At some point, it seems at commit =97fd60b= on =master=, I created the literate branch. I made changes on both =master= and =literate=, and the =master= changes were large enough that I rebased =literate= onto =master=. I made the respective changes to the literate org files on =literate=. Unfortunately, I had forgotten to pull some changes here and there, so some more conflicts had to be resolved. Then I was able to cherry-pick the non-literate commits from =literate= onto =master=.
