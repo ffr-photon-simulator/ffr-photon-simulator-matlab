@@ -174,6 +174,7 @@ classdef RayTracer < handle
           % so we can overwrite the preallocated nan values. Increment this
           % each time coordinates are added to photonPaths.
           pathsIdx = 1;
+          insertIdx = 1;
 
           % Get number of rows in first column.
           nPhotons = size(incomingPhotons, 1);
@@ -193,7 +194,8 @@ classdef RayTracer < handle
               previousPhotonCoords = photon.getCoords(); % [x y]
               % Only store the photon coordinates every 1000 moves.
               if rem(pathsIdx, 100) == 0
-                photonPaths(pathsIdx,:) = previousPhotonCoords;
+                photonPaths(insertIdx, :) = previousPhotonCoords;
+                insertIdx = insertIdx + 1;
               end
               pathsIdx = pathsIdx + 1;
               % Move the photon and check if it has reflected or has crossed a boundary
