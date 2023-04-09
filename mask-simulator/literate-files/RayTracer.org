@@ -60,9 +60,9 @@ Iterate through every quadrant in the current FFR layer and compare the photon's
           quadrants = quadrantLayer.quadrants;
 
           % Get the left and right bounds of each quadrant.
-          j = 1:single(quadrantLayer.nQuadrants);
-          rightBounds = [quadrants(j).rightBound];
-          leftBounds = [quadrants(j).leftBound];
+          %j = 1:single(quadrantLayer.nQuadrants);
+          rightBounds = [quadrants.rightBound];
+          leftBounds = [quadrants.leftBound];
 
           % Find the common index and get the value, i.e. quadrants([0 1 1] & [1 1 0]) -> quadrants([0 1 0])
           % means the photon is in the middle quadrant.
@@ -109,7 +109,7 @@ Check if a photon has crossed an FFR boundary by iterating through the bounds.
           for i = 1:numel(fields)
             bound = ffrBounds.(fields{i});
             if photon.hasCrossedFFRBound(bound) == true
-              Debug.msgWithItem("Crossed FFR bound:", bound, 1);
+              %Debug.msgWithItem("Crossed FFR bound:", bound, 1);
               hasCrossed = true;
               crossedFFRBound = bound;
               return;
@@ -143,7 +143,7 @@ We abstract the bounds which the photon is between into the FFR Layer it
 is currently in. In the line below, imagine the current FFR layer is
 bounded by C and D, and the previous FFR layer is bounded by A and B.
 #+begin_src octave
-        function hasCrossed = isAtInteriorBound(obj, photon, ffr)
+        function hasCrossed = isAtInteriorBound(obj)
           curr = obj.currFFRLayer;
           prev = obj.prevFFRLayer;
           hasCrossed = curr ~= prev; % [C D] ~= [A B]
@@ -192,7 +192,7 @@ First, find the intersection point I of R and P. Then, calculate the x and y dis
 ** =findCurrFFRLayer(ffr, photon)=
 #+begin_src octave
         function layer = findCurrFFRLayer(obj, ffr, photon)
-          layer = [];
+          %layer = [];
           ffrLayers = ffr.ffrLayers;
           %Debug.msg("Find curr ffr layer photon y: " + photon.y, 1);
           for i = 1:ffr.nLayers
@@ -224,17 +224,17 @@ is the bound that has been crossed.
           else
             bound = "Unknown crossed bound.";
             Debug.alert("Unknown crossed bound. Photon at y = " + photon.y);
-            Debug.msgWithItem("Current ffr layer: ", curr, 1);
-            Debug.msgWithItem("Previous ffr layer: ", prev, 1);
+            %Debug.msgWithItem("Current ffr layer: ", curr, 1);
+            %Debug.msgWithItem("Previous ffr layer: ", prev, 1);
           end
         end
 #+end_src
 ** =resetCurrFFRLayer()=
 #+begin_src octave
         function resetCurrFFRLayer(obj)
-          Debug.msgWithItem("Resetting curr ffr layer to:", obj.outerLayer, 1);
+          %Debug.msgWithItem("Resetting curr ffr layer to:", obj.outerLayer, 1);
           obj.currFFRLayer = obj.outerLayer;
-          Debug.msgWithItem("Curr ffr layer:", obj.currFFRLayer, 1);
+          %Debug.msgWithItem("Curr ffr layer:", obj.currFFRLayer, 1);
         end
 #+end_src
 ** =rayTrace(ffr, incomingPhotons)=
@@ -243,12 +243,12 @@ Ray traces photons starting from initialCoords through an entire FFR.
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
           boundInfo = [];
           % Preallocate a massive photonPaths array.
-          photonPaths = nan(1000000,2);
+          % Increase size to 10,000,000.
+          photonPaths = zeros(10000000,2);
           % We need to keep track of the position within the photonPaths array
           % so we can overwrite the preallocated nan values. Increment this
           % each time coordinates are added to photonPaths.
           pathsIdx = 1;
-
 
           % Get number of rows in first column.
           nPhotons = size(incomingPhotons, 1);
@@ -266,7 +266,10 @@ Ray traces photons starting from initialCoords through an entire FFR.
               obj.prevFFRLayer = obj.currFFRLayer;
               % We need to track the previous photon's coordinates to determine the reflected path.
               previousPhotonCoords = photon.getCoords(); % [x y]
-              photonPaths(pathsIdx,:) = previousPhotonCoords;
+              % Only store the photon coordinates every 1000 moves.
+              if rem(pathsIdx, 100) == 0
+                photonPaths(pathsIdx,:) = previousPhotonCoords;
+              end
               pathsIdx = pathsIdx + 1;
               % Move the photon and check if it has reflected or has crossed a boundary
               obj.movePhoton(photon);
@@ -281,19 +284,19 @@ Ray traces photons starting from initialCoords through an entire FFR.
                 crossedFFRBound.addCrossing(photon);
                 Debug.msg('Photon ' + string(photonNum) + ' reached ffr bound: ' + crossedFFRBound.type, 0);
               else
-                Debug.msg('Not at FFR bound. Check if at interior bound.', 1);
+                %Debug.msg('Not at FFR bound. Check if at interior bound.', 1);
                 % Update the current FFR Layer.
                 obj.currFFRLayer = obj.findCurrFFRLayer(ffr, photon);
                 % Check for interior bound crossings.
-                if obj.isAtInteriorBound(photon, ffr)
-                  Debug.msg("At interior bound.", 1);
+                if obj.isAtInteriorBound()
+                  %Debug.msg("At interior bound.", 1);
                   [crossedInteriorBound, direction] = obj.findCrossedBound(photon);
                   crossedInteriorBound.addCrossing(photon, direction);
                 else
-                  Debug.msg('Not at interior bound.', 1);
+                  %Debug.msg('Not at interior bound.', 1);
                 end
                 % Check for reflection off a fiber.
-                Debug.msg('Check if reflected.', 1);
+                %Debug.msg('Check if reflected.', 1);
                 currentQuadrant = obj.findCurrentQuadrant(photon);
                 [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(photon, currentQuadrant);
                 if hasReflected == true
@@ -301,7 +304,7 @@ Ray traces photons starting from initialCoords through an entire FFR.
                   reflectionPoint = [photon.x, photon.y];
                   [newXStep, newYStep] = obj.calculateNewSteps(reflectionPoint, previousPhotonCoords, reflectedFiberCoords);
                   photon.setSteps(newXStep, newYStep);
-                  Debug.msg('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1);
+                  %Debug.msg('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1);
                 end
               end
             end
