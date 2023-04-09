@@ -53,10 +53,5 @@ classdef Debug
       s = string(coord(1)) + ", " + string(coord(2));
     end
 
-  methods
-    function obj = Debug()
-    end
-  end
-
   end
 end
