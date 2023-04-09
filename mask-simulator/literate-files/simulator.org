@@ -1,0 +1,233 @@
+#+title: Debug
+#+property: header-args:octave :tangle ../simulator.m
+* Script
+** Initial Setup
+#+begin_src octave
+plotbool = true;
+%clear all; % clear workspace
+#+end_src
+** Source an FFR config file
+#+begin_src octave
+%cwd = pwd % current working directory
+%configDir = cwd + "mask-simulator/ffrConfigs"
+%addpath(configDir)
+%config_3M1860;
+config_3M9210;
+#+end_src
+** Instantiate an FFR from the config
+#+begin_src octave
+ffr = FFR(ffrConfig);
+#+end_src
+** Instantiate a ray tracer
+#+begin_src octave
+rt = RayTracer(ffr);
+#+end_src
+** Generate the incident photons
+First, check if =xStart= is set in the =Config= struct. If not, set its value here, along with =xEnd=.
+=xStart= defaults to 1/4 the FFR length, centered about 0, so 1/8 on either side.
+#+begin_src octave
+if isempty(xStart)
+  xStart = -ffrConfig.length / 8;
+  xEnd = -xStart;
+end
+outerBound = ffr.ffrBounds.outerBound; % the boundary object, not the value
+[initialPhotons, nPhotons] = makeInitialPhotons(xStart, xEnd, Defaults.initialSeparation, outerBound, Defaults.initialXStep, Defaults.outerToInnerYStep);
+#+end_src
+** Ray trace
+#+begin_src octave
+Defaults.debugMessage("Starting ray tracing...", 0);
+[photonPaths, boundInfo] = rt.rayTrace(ffr, initialPhotons);
+Defaults.debugMessage("Finished ray tracing.", 0);
+#+end_src
+** Calculate and store photon crossing information
+Each photon that enters an FFR layer is considered available for decontamination. This is because the photon's energy is independent of how many times it reflects off of fibers. Because the photon's path length (distance traveled) increases if it reflects back into a layer (toOuter direction on inner bound), we need to count it as available for decontamination. To track every photon entering a layer, we total the toInner count for the upper bound and the
+toOuter count for the inner bound.
+
+The photons available for decontamination in the inner layer are necessarily /only/ those which enter its upper bound, since those which leave through its lower bound exit the FFR entirely.
+
+The photons available for decontamination in the outer layer are the incident photons (=nPhotons=) and those which cross back up into the outer layer. This is the same as those which leave the layer below it in the =toOuter= direction.
+#+begin_src octave
+ffrLayers = ffr.ffrLayers;
+interiorBounds = ffr.boundaries.interiorBounds;
+ffrBounds = ffr.boundaries.ffrBounds;
+for i = 1:ffr.nLayers
+  layer = ffrLayers(i);
+  if i == 1 % inner, exterior layer
+    %layer.nPhotonsOut = ffrBounds.innerBound.count;
+    layer.nPhotonsIn  = interiorBounds(i).toInner;
+  elseif i == ffr.nLayers
+    %layer.nPhotonsOut = interiorBounds(i - 1).toInner;
+    layer.nPhotonsIn  = interiorBounds(i - 1).toOuter + nPhotons;
+  else
+    layer.nPhotonsIn  = interiorBounds(i).toInner + interiorBounds(i-1).toOuter;
+    %layer.nPhotonsOut = interiorBounds(i - 1).toInner;
+  end
+end
+#+end_src
+** Calculate photon percentage in each layer
+#+begin_src octave
+Defaults.debugMessage("\nPHOTON PERCENTAGES", 0);
+for i = 1:ffr.nLayers
+  layer = ffrLayers(i);
+  Defaults.debugMessage("FFR Layer " + i, 0);
+  layer.showPhotonPercentage(nPhotons);
+end
+#+end_src
+** Open plotting =if= block and initial setup
+#+begin_src octave
+if plotbool == true
+  clf; % clear current plot
+  ax = axes;
+  axis equal; % make x and y axis scale the same
+  hold on; % don't overwrite plot with each subsequent addition
+#+end_src
+** Plot fiber centers
+#+begin_src octave
+  %plot(ax, ffr.fiberData(:,1), ffr.fiberData(:,2), Defaults.fiberCenterStyle,'MarkerSize', Defaults.fiberCenterWeight);
+#+end_src
+** Plot fiber circles
+#+begin_src octave
+  ffrFiberData = ffr.fiberData;
+  for i = 1:size(ffrFiberData, 1) % number of rows is the number of fibers
+    data = ffrFiberData(i,:);
+    x = data(1);
+    y = data(2);
+    r = data(3);
+    theta = linspace(0,2*pi,100);
+    xcoords = r * cos(theta) + x;
+    ycoords = r * sin(theta) + y;
+    plot(ax, xcoords, ycoords, Defaults.fiberCircleStyle,'MarkerSize',Defaults.fiberCircleWeight);
+  end
+#+end_src
+** Plot photon paths
+#+begin_src octave
+  plot(ax, photonPaths(:,1), photonPaths(:,2), Defaults.photonPathStyle,'MarkerSize', Defaults.photonPathWeight);
+#+end_src
+** Plot bounds and print crossing info
+#+begin_src octave
+  disp("")
+  ffrBounds = ffr.ffrBounds;
+  fields = fieldnames(ffrBounds);
+  for i = 1:numel(fields)
+    bound = ffrBounds.(fields{i});
+    bound.plot(ax);
+    bound.printCrossingInfo();
+  end
+  %plotFFRBounds(ffrBounds, ax);
+
+  Debug.newline();
+
+  interiorBounds = ffr.boundaries.interiorBounds;
+  for i = 1:size(interiorBounds)
+    bound = interiorBounds(i);
+    bound.plot(ax);
+    bound.printCrossingInfo();
+  end
+#+end_src
+** Set plot limits
+#+begin_src octave
+  ax.XLim = [ffrBounds.leftBound.bound ffrBounds.rightBound.bound];
+  ax.YLim = [ffrBounds.innerBound.bound ffrBounds.outerBound.bound];
+#+end_src
+** Close plotting =if= block
+#+begin_src octave
+end
+Debug.newline();
+#+end_src
+** Write results to respective files
+#+begin_src octave
+time = datetime('Now','Format','HH-mm-ss');
+photonsInToCSV(ffrLayers, ffr.nLayers, time, ffrConfig, nPhotons);
+figureToSVG(ffrConfig, nPhotons, ax, time);
+configToMAT(ffrConfig, time, nPhotons);
+#+end_src
+* Functions
+** =makeInitialPhotons()=
+#+begin_src octave
+function [photons, nPhotons] = makeInitialPhotons(xStart, xEnd, separation, outerBoundary, initialXStep, outerToInnerYStep)
+  % The photons' x-axis range is from xStart to xEnd. Their y coordinate is
+  % equal to the value of the outer boundary. The initial photons are
+  % separated by the value of the "separation" variable.
+  nPhotons = fix((xEnd-xStart) / separation); % use 'fix' to round down to nearest integer
+  Defaults.debugMessage("Num photons: " + nPhotons, 0);
+  photons = [];
+  bound = outerBoundary.bound;
+  for m = 1:nPhotons
+    nextPhoton = Photon(xStart + m*separation, bound, initialXStep, outerToInnerYStep);
+    %nextPhoton = Photon(xStart + m*separation, Defaults.nQLayers * Defaults.qlWidth, initialXStep, outerToInnerYStep);
+    photons = [photons; nextPhoton];
+  end
+end
+#+end_src
+** Saving results to files
+Top level dirs: data, images, and configs. Formatted as =<tld>/<model>/<length>x<width>/<nPhotons>ph_<nLayers>layer-<time>.ext=
+*** =photonsInToCSV()=
+Write a 2 x nLayers array to a csv file.
+#+begin_src octave
+function photonsInToCSV(ffrLayers, nLayers, time, ffrConfig, nPhotons)
+  data = zeros(nLayers, 2);
+  data(:,1) = 9:-1:1;
+  data(:, 2) = [ffrLayers.nPhotonsIn];
+
+  csvdir = sprintf("results/data");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer", nPhotons, ffrConfig.nLayers);
+  ext = "csv";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", csvdir, model, dim, name, time, ext);
+  Debug.msgWithItem("csv path", filepath, 0);
+  writematrix(data, filepath, 'Delimiter', 'comma');
+end
+#+end_src
+*** =configToMAT()=
+Save the ffrConfig struct as a .mat file. It is hard to save it as anything
+else because it is a nested struct with object arrays. Given that we store
+the config as a backup, it is reasonable to request the user to open Matlab
+to view the config.
+
+Run this command to get the ffrConfig struct: =clear('ffrConfig'); load('<config_name>.mat')=
+#+begin_src octave
+function configToMAT(ffrConfig, time, nPhotons)
+  matdir = sprintf("results/configs");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer", nPhotons, ffrConfig.nLayers);
+  ext = "mat";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", matdir, model, dim, name, time, ext);
+  Debug.msgWithItem("mat path", filepath, 0);
+  save(filepath, 'ffrConfig')
+end
+#+end_src
+*** =figureToSVG()=
+Use export_fig (https://github.com/altmany/export_fig) to generate a high-quality
+SVG of the plot. A directory variable does NOT include a trailing backlash.
+
+#+begin_src octave
+function figureToSVG(ffrConfig, nPhotons, ax, time)
+  svgdir = sprintf("results/images");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer", nPhotons, ffrConfig.nLayers);
+  ext = "svg";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", svgdir, model, dim, name, time, ext);
+  Debug.msgWithItem("svg path", filepath, 0);
+  export_fig(filepath, ax)
+end
+#+end_src
+** =plotFFRBounds()=
+#+begin_src octave
+function plotFFRBounds(ffrBounds, ax)
+  left = ffrBounds.leftBound.bound;
+  right = ffrBounds.rightBound.bound
+  outer = ffrBounds.outerBound.bound;
+  inner = 0;
+  % Inner
+  plot(ax, [left 0], [right 0]);
+  %plot(ax, [left, 0], [right, 0], inner, 'LineWidth', Defaults.ffrBoundWeight);
+  % Outer
+  %plot(ax, [left, outer], [right, outer], outer, 'LineWidth', Defaults.ffrBoundWeight);
+  % Left and right bounds
+  %plot(ax, [left, 0], [left, outer], left, 'LineWidth', Defaults.ffrBoundWeight);
+  %plot(ax, [right, 0], [right, inner], right, 'LineWidth', Defaults.ffrBoundWeight);
+end
+#+end_src
