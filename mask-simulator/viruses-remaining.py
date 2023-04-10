@@ -69,7 +69,7 @@ with open(photonDataFile, "r") as csvfile:
 
 # Normalize photon data
 norm_factor = N_INC_PHOTONS/photonsEntered[0]
-for l in range(0,N_LAYERS):
+for l in range(0, N_LAYERS):
     photonsEnteredNorm.append(photonsEntered[l] * norm_factor)
 
 # Set absorption percentage per sub-layer
@@ -81,19 +81,43 @@ pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
 for i in range(1, N_LAYERS):
     pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i-1] / PCT_PHO_ABSORBED_DECREASE)
 
-### Calculate num photons absorbed by viruses per sub-layer
-photons_for_decon = []
+### Calculate num photons absorbed by viruses per sub-layer and store this in the
+### photonsAbsorbed list defined at the beginning.
+###
+### As an intermediary, we need to calculate the photons available for decontamination
+### in each sublayer. Store these values in photonsForDecon, defined here. We need to fill
+### both the photonsForDecon and photonsAbsorbed lists simultaneously because the photons
+### available for decontamination in a given layer changes based on how many photons were
+### absorbed in the layers before it.
+###
+### NOTE: the number of photons available for decontamination is considered, in this script, the
+### number of photons which enter a given layer before any accounting for viral absorption.
+photonsForDecon = []
 for i in range(0,N_LAYERS):
-    n_photons_entered_norm = photonsEnteredNorm[i]
+    nPhotonsEnteredNorm = photonsEnteredNorm[i]
+    # For the first layer, the photons for decon are just those which enter
     if i == 0:
-        n_photons_for_decon = n_photons_entered_norm
-        photons_for_decon.append(n_photons_for_decon)
+        nPhotonsForDecon = nPhotonsEnteredNorm
+        photonsForDecon.append(nPhotonsForDecon)
+    # For other layers, the process is more complicated because we have to account
+    # for the photons which were absorbed by viruses in the previous layer. For these other layers,
+    # we cannot rely on the specific photon quantities given by the simulation because the simulation
+    # did not take into account viral absorption of photons.
+    #
+    # Rather, we use the /ratios/ given by the simulation to calculate how many photons
+    # are available for decontamination in the current layer.
     else:
         prev = i - 1
-        ratio = n_photons_entered_norm / photonsEnteredNorm[prev]
-        n_photons_for_decon = (photons_for_decon[prev] * ratio) - photonsAbsorbed[prev]
-        photons_for_decon.append(n_photons_for_decon)
-    nPhotonsAbsorbed = n_photons_for_decon * pctPhotonsAbsorbed[i]
+        # The fraction of photons which enter this layer for *any* given amount of photons in the previous.
+        ratio = nPhotonsEnteredNorm / photonsEnteredNorm[prev]
+        # Use the photons available for decontamination in the previous layer along with the ratio to calculate
+        # how many photons are available for decontamination in this layer. Then, subtract the number of photons
+        # absorbed from the previous layer to get the actual number of photons available for decontamination
+        # in this layer.
+        nPhotonsForDecon = (photonsForDecon[prev] * ratio) - photonsAbsorbed[prev]
+        photonsForDecon.append(nPhotonsForDecon)
+    # Now, calculate how many photons are absorbed in this layer.
+    nPhotonsAbsorbed = nPhotonsForDecon * pctPhotonsAbsorbed[i]
     photonsAbsorbed.append(nPhotonsAbsorbed)
 
 ### Calculate num viruses deactivated
