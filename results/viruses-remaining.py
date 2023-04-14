@@ -14,37 +14,44 @@ We assume these values:
                      PCT_PHO_ABSORBED_DECREASE value.
  - PCT_PHOTONS_DEACTIVATING: the percentage of photons which actually deactivate a coronavirus
                              after being absorbed by one.
+
+
+ARGS:
+1 - virus data file for FFR sample
 """
 
 import csv
 import sys
+import math
+
+if len(sys.argv) == 1:
+    print("viruses-remaining.py must be run with three arguments: ")
+    print("1. Experimental virus csv file for FFR sample.")
+    print("2. Simulated average photon csv  file for FFR.")
+    print("3. Variable number of photons available for decontamination in the outer layer.")
+    sys.exit(1)
 
 ### CONSTANTS
 N_LAYERS                  = 9
-TOTAL_VIRUSES             = 119000
-VIRUSES_PER_LAYER         = TOTAL_VIRUSES / N_LAYERS
 PCT_PHO_ABSORBED          = 0.1
-PCT_PHO_ABSORBED_DECREASE = 2
+PCT_PHO_ABSORBED_DECREASE = 0.5
 PCT_PHOTONS_DEACTIVATING  = 0.8
 
-if len(sys.argv) == 2:
-    N_INC_PHOTONS =  int(sys.argv[1])
-else:
-    N_INC_PHOTONS = 16000
+virusDataFile  = sys.argv[1]
+photonDataFile = sys.argv[2]
+N_INC_PHOTONS  =  int(sys.argv[3])
 
 # VARIABLES
-virusDataFile = "./virus-data.csv"
+#virusDataFile = "./virus-data.csv"
 exposureTime = []
 viralLoad = []
 
-photonDataFile = "./photon-data.csv"
+#photonDataFile = "./photon-data.csv"
 photonsEntered = []
 photonsEnteredNorm = []
 
 subLayers = []
 
-viruses = [VIRUSES_PER_LAYER] * N_LAYERS
-pctPhotonsAbsorbed = []
 photonsAbsorbed = []
 deactivatedViruses = []
 deactivatedVirusesBiDir = []
@@ -58,6 +65,11 @@ with open(virusDataFile, "r") as csvfile:
         exposureTime.append(int(row[0]))
         viralLoad.append(int(row[1]))
     csvfile.close()
+
+# Get total number of viruses in the outer layer
+TOTAL_VIRUSES = viralLoad[0]
+VIRUSES_PER_LAYER = TOTAL_VIRUSES / N_LAYERS
+viruses = [VIRUSES_PER_LAYER] * N_LAYERS
 
 # Get photon data
 with open(photonDataFile, "r") as csvfile:
@@ -76,10 +88,13 @@ for l in range(0, N_LAYERS):
 #for i in range(0,N_LAYERS):
     #pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
 
-# Calculate the absorption percentage per sub-layer
-pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
-for i in range(1, N_LAYERS):
-    pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i-1] / PCT_PHO_ABSORBED_DECREASE)
+# Determine the absorption percentage per sub-layer
+pctPhotonsAbsorbed = []
+
+if len(pctPhotonsAbsorbed) == 0:
+    pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
+    for i in range(1, N_LAYERS):
+        pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i-1] * PCT_PHO_ABSORBED_DECREASE)
 
 ### Calculate num photons absorbed by viruses per sub-layer and store this in the
 ### photonsAbsorbed list defined at the beginning.
@@ -142,7 +157,7 @@ for i in range(0, N_LAYERS):
 for nVirusesRemaining in virusesRemaining:
     totalVirusesRemaining += nVirusesRemaining
 
-print(f"Viruses remaining in each sub-layer (outer -> inner): {virusesRemaining}")
+#print(f"Viruses remaining in each sub-layer (outer -> inner): {virusesRemaining}")
 print(f"Total viruses remaining in FFR: {int(round(totalVirusesRemaining))}")
 
 # Exp #5, 3M1870+ - slit
