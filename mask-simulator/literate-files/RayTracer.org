@@ -333,9 +333,10 @@ Ray traces photons starting from initialCoords through an entire FFR.
                 [inAbsorptionRadius, absorbedFiberCoords] = obj.withinAbsorptionRadius(currentQuadrant, photon);
                 % Photon is inside the absorption radius.
                 if inAbsorptionRadius == true
-                  % If the photon was already within the absorption radius, do nothing.
-                  % If not, it has entered the radius, so increase the possibleAbsorptionCount by 1.
-                  if ~ photon.inAbsorptionRadius == true
+                  % If the photon was not inside an absorption radius, it has entered one,
+                  %   so increase the possibleAbsorptionCount by 1.
+                  % If the photon was inside, do nothing.
+                  if photon.inAbsorptionRadius == false
                     curr = obj.currFFRLayer;
                     curr.incrementAbsorptionCount();
                     %Debug.msg("Entered fiber absorption radius.", 0);
@@ -348,6 +349,7 @@ Ray traces photons starting from initialCoords through an entire FFR.
                   % If the photon was previously outside, do nothing.
                   if photon.inAbsorptionRadius == true
                     photon.inAbsorptionRadius = false;
+                    %Debug.msg("Left fiber absorption radius.", 0);
                   end
                 end
               end
