@@ -10,6 +10,12 @@ classdef Photon < handle
   end
 #+end_src
 * Properties
+The =inAbsorptionRadius= boolean tracks whether the photon is in an absorption radius of a fiber. It's toggled by the ray tracer under these circumstances:
+1. If it's false, and the photon is /inside/ the absorption radius of a fiber, it's toggled to true.
+2. If it's true, and the photon is /outside/ the absorption radius of a fiber, it's toggled to false.
+3. Else the boolean is not changed (true and inside; false and outside).
+
+The actual detection of whether the photon is within the absorption radius of a fiber is done elsewhere.
 #+begin_src octave
   properties
     x
@@ -17,6 +23,7 @@ classdef Photon < handle
     xStep
     yStep
     id
+    inAbsorptionRadius = false;
   end
 #+end_src
 * Methods
