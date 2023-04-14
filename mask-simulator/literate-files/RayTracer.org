@@ -339,6 +339,7 @@ Ray traces photons starting from initialCoords through an entire FFR.
                   if photon.inAbsorptionRadius == false
                     curr = obj.currFFRLayer;
                     curr.incrementAbsorptionCount();
+                    photon.inAbsorptionRadius = true;
                     %Debug.msg("Entered fiber absorption radius.", 0);
                     %disp(absorbedFiberCoords)
                   end
