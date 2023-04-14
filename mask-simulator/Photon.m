@@ -9,6 +9,7 @@ classdef Photon < handle
     xStep
     yStep
     id
+    inAbsorptionRadius = false;
   end
 
   methods
