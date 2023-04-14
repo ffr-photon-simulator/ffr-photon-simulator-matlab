@@ -11,6 +11,7 @@ classdef FFRLayer < handle
     nPhotonsOut
     id
     nFibers
+    possibleAbsorptionCount = 0;
   end
 
   methods
@@ -57,9 +58,14 @@ classdef FFRLayer < handle
       %pct = inMinusOut / nPhotons;
       %pct = in / nPhotons;
       Debug.msg(" - photons in: " + in, 0);
+      Debug.msg(" - possible photon absorption count: " + string(obj.possibleAbsorptionCount), 0);
       %Defaults.debugMessage(" - as pct: " + pct, 1);
       %Defaults.debugMessage(" - photons out: " + obj.nPhotonsOut, 0);
       %Defaults.debugMessage(" - photons: " + inMinusOut, 0);
+    end
+
+    function incrementAbsorptionCount(obj)
+      obj.possibleAbsorptionCount = obj.possibleAbsorptionCount + 1;
     end
 
   end
