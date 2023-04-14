@@ -237,6 +237,27 @@ is the bound that has been crossed.
           %Debug.msgWithItem("Curr ffr layer:", obj.currFFRLayer, 1);
         end
 #+end_src
+** =withinAbsorptionRadius(currentQuadrant, photon)=
+Check if a photon is within the absorption radii of any of the fibers in the current quadrant. We assume the photon is either in zero or one absorption radii, never two or more.
+#+begin_src octave
+        function inAbsorptionRadius = withinAbsorptionRadius(obj, currentQuadrant, photon)
+          fiberData = currentQuadrant.getFiberData();
+
+          % First two columns of all rows.
+          fiberCoords = fiberData(:, 1:2);
+          % Fiber radius plus 5 microns.
+          absorptionRadii = fiberData(:, 3) + (5 * Defaults.micron);
+
+          % Calculate the distances.
+          distances = obj.distancesToFiber(photon, fiberCoords);
+
+          % The reflected fiber coords are the first and second columns of the nth row,
+          % where n corresponds to the row of distances whose value is less than
+          % the reflection radius of the same nth row.
+          absorbedFiberCoords = fiberCoords(distances(:) <= absorptionRadii(:), 1:2);
+          inAbsorptionRadius = ~isempty(absorbedFiberCoords);
+        end
+#+end_src
 ** =rayTrace(ffr, incomingPhotons)=
 Ray traces photons starting from initialCoords through an entire FFR.
 #+begin_src octave
