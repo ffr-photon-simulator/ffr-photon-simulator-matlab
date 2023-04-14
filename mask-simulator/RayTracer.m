@@ -165,6 +165,24 @@ classdef RayTracer < handle
           %Debug.msgWithItem("Curr ffr layer:", obj.currFFRLayer, 1);
         end
 
+        function [inAbsorptionRadius, absorbedFiberCoords] = withinAbsorptionRadius(obj, currentQuadrant, photon)
+          fiberData = currentQuadrant.getFiberData();
+
+          % First two columns of all rows.
+          fiberCoords = fiberData(:, 1:2);
+          % Fiber radius plus 5 microns.
+          absorptionRadii = fiberData(:, 3) + (5 * Defaults.micron);
+
+          % Calculate the distances.
+          distances = obj.distancesToFiber(photon, fiberCoords);
+
+          % The reflected fiber coords are the first and second columns of the nth row,
+          % where n corresponds to the row of distances whose value is less than
+          % the reflection radius of the same nth row.
+          absorbedFiberCoords = fiberCoords(distances(:) <= absorptionRadii(:), 1:2);
+          inAbsorptionRadius = ~isempty(absorbedFiberCoords);
+        end
+
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
           boundInfo = [];
           % Preallocate a massive photonPaths array.
