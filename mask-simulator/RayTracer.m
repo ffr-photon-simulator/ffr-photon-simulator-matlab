@@ -233,6 +233,30 @@ classdef RayTracer < handle
                   photon.setSteps(newXStep, newYStep);
                   %Debug.msg('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1);
                 end
+                % Check whether the photon is within the absorption radius of a fiber in the current quadrant.
+                [inAbsorptionRadius, absorbedFiberCoords] = obj.withinAbsorptionRadius(currentQuadrant, photon);
+                % Photon is inside the absorption radius.
+                if inAbsorptionRadius == true
+                  % If the photon was not inside an absorption radius, it has entered one,
+                  %   so increase the possibleAbsorptionCount by 1.
+                  % If the photon was inside, do nothing.
+                  if photon.inAbsorptionRadius == false
+                    curr = obj.currFFRLayer;
+                    curr.incrementAbsorptionCount();
+                    photon.inAbsorptionRadius = true;
+                    %Debug.msg("Entered fiber absorption radius.", 0);
+                    %disp(absorbedFiberCoords)
+                  end
+                % Photon is outside the absorption radius.
+                else
+                  % If the photon was previously inside the absorption radius, it has just left, so set its
+                  %   inAbsorptionRadius property to false.
+                  % If the photon was previously outside, do nothing.
+                  if photon.inAbsorptionRadius == true
+                    photon.inAbsorptionRadius = false;
+                    %Debug.msg("Left fiber absorption radius.", 0);
+                  end
+                end
               end
             end
           end
