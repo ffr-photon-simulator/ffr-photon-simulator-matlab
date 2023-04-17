@@ -319,28 +319,32 @@ Ray traces photons starting from initialCoords through an entire FFR.
                   photon.setSteps(newXStep, newYStep);
                   %Debug.msg('Photon ' + string(photonNum) + ' reflected at fiber: ' + obj.coordToString(reflectedFiberCoords), 1);
                 end
-                % Check whether the photon is within the absorption radius of a fiber in the current quadrant.
-                [inAbsorptionRadius, absorbedFiberCoords] = obj.withinAbsorptionRadius(currentQuadrant, photon);
-                % Photon is inside the absorption radius.
-                if inAbsorptionRadius == true
-                  % If the photon was not inside an absorption radius, it has entered one,
-                  %   so increase the possibleAbsorptionCount by 1.
-                  % If the photon was inside, do nothing.
-                  if photon.inAbsorptionRadius == false
-                    curr = obj.currFFRLayer;
-                    curr.incrementAbsorptionCount();
-                    photon.inAbsorptionRadius = true;
-                    %Debug.msg("Entered fiber absorption radius.", 0);
-                    %disp(absorbedFiberCoords)
-                  end
-                % Photon is outside the absorption radius.
-                else
-                  % If the photon was previously inside the absorption radius, it has just left, so set its
-                  %   inAbsorptionRadius property to false.
-                  % If the photon was previously outside, do nothing.
-                  if photon.inAbsorptionRadius == true
-                    photon.inAbsorptionRadius = false;
-                    %Debug.msg("Left fiber absorption radius.", 0);
+                % Don't check for absorption if the photon has already been absorbed.
+                if photon.absorbed == false
+                  absorptionRadii = reflectionRadii + ((5 * Defaults.micron) - (Defaults.photonWavelength / 2));
+                  % Check whether the photon is within the absorption radius of a fiber in the current quadrant.
+                  inAbsorptionRadius = obj.withinAbsorptionRadius(fiberCoords, absorptionRadii, distances);
+                  % Photon is inside the absorption radius.
+                  if inAbsorptionRadius == true
+                    % If the photon was not inside an absorption radius, it has entered one.
+                    % If the photon was already inside, do nothing.
+                    if photon.inAbsorptionRadius == false
+                      photon.inAbsorptionRadius = true;
+                      % Upon entering an absorption radius, some percentage of photons will be "absorbed."
+                      if randi([1 obj.pctAbsorbedByParticle]) == 1
+                        curr = obj.currFFRLayer;
+                        curr.incrementAbsorptionCount();
+                        photon.absorbed = true;
+                      end
+                    end
+                  % Photon is outside the absorption radius.
+                  else
+                    % If the photon was previously inside the absorption radius, it has just left, so set its
+                    %   inAbsorptionRadius property to false.
+                    % If the photon was previously outside, do nothing.
+                    if photon.inAbsorptionRadius == true
+                      photon.inAbsorptionRadius = false;
+                    end
                   end
                 end
               end
