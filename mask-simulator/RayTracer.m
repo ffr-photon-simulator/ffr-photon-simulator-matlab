@@ -3,6 +3,7 @@ classdef RayTracer < handle
       currFFRLayer
       prevFFRLayer
       outerLayer
+      pctAbsorbedByParticle = 5;
     end
 
     methods
@@ -53,20 +54,7 @@ classdef RayTracer < handle
           %end
         end
 
-        function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
-          fiberData = quadrant.getFiberData();
-
-          % First two columns of all rows.
-          fiberCoords = fiberData(:,1:2);
-          % Fiber radius plus half wavelength.
-          % TODO: put a getReflRadius(radius) function in the Defaults class.
-          reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2);
-
-          % Calculate the distances.
-          distances = obj.distancesToFiber(photon, fiberCoords);
-          % The reflected fiber coords are the x and y columns of the nth row,
-          % where n corresponds to the row of distances whose value is less than
-          % the reflection radius of the same nth row.
+        function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, fiberCoords, reflectionRadii, distances)
           reflectedFiberCoords = fiberCoords(distances(:) <= reflectionRadii(:),1:2);
           hasReflected = ~isempty(reflectedFiberCoords);
         end
@@ -165,20 +153,7 @@ classdef RayTracer < handle
           %Debug.msgWithItem("Curr ffr layer:", obj.currFFRLayer, 1);
         end
 
-        function [inAbsorptionRadius, absorbedFiberCoords] = withinAbsorptionRadius(obj, currentQuadrant, photon)
-          fiberData = currentQuadrant.getFiberData();
-
-          % First two columns of all rows.
-          fiberCoords = fiberData(:, 1:2);
-          % Fiber radius plus 5 microns.
-          absorptionRadii = fiberData(:, 3) + (5 * Defaults.micron);
-
-          % Calculate the distances.
-          distances = obj.distancesToFiber(photon, fiberCoords);
-
-          % The reflected fiber coords are the first and second columns of the nth row,
-          % where n corresponds to the row of distances whose value is less than
-          % the reflection radius of the same nth row.
+        function [inAbsorptionRadius, absorbedFiberCoords] = withinAbsorptionRadius(obj, fiberCoords, absorptionRadii, distances)
           absorbedFiberCoords = fiberCoords(distances(:) <= absorptionRadii(:), 1:2);
           inAbsorptionRadius = ~isempty(absorbedFiberCoords);
         end
@@ -243,7 +218,17 @@ classdef RayTracer < handle
                 % Check for reflection off a fiber.
                 %Debug.msg('Check if reflected.', 1);
                 currentQuadrant = obj.findCurrentQuadrant(photon);
-                [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(photon, currentQuadrant);
+
+                fiberData = currentQuadrant.getFiberData();
+
+                % First two columns of all rows.
+                fiberCoords = fiberData(:,1:2);
+                reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2);
+
+                % Calculate the distances.
+                distances = obj.distancesToFiber(photon, fiberCoords);
+
+                [hasReflected, reflectedFiberCoords] = obj.checkIfReflected(fiberCoords, reflectionRadii, distances);
                 if hasReflected == true
                   % Calculate the new steps and make a new Photon with those steps.
                   reflectionPoint = [photon.x, photon.y];
