@@ -44,7 +44,7 @@ Calculate the photon's distance to the center of each fiber using vectorization.
 Iterate through every quadrant in the current FFR layer and compare the photon's coordinates to the quadrant's boundaries to determine which quadrant the photon is currently in.
 #+begin_src octave
         function currentQuadrant = findCurrentQuadrant(obj, photon)
-          Debug.msg('Finding current quadrant.', 1);
+          %Debug.msg('Finding current quadrant.', 1);
           currentQuadrant = [];
           quadrantLayers = obj.currFFRLayer.quadrantLayers;
 
@@ -69,10 +69,10 @@ Iterate through every quadrant in the current FFR layer and compare the photon's
           currentQuadrant = quadrants(rightBounds >= photon.x & leftBounds < photon.x);
 
           % Fail with a custom alert.
-          if isempty(currentQuadrant)
-            Debug.alert('Current quadrant not found.', 0);
-            Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
-          end
+          %if isempty(currentQuadrant)
+            %Debug.alert('Current quadrant not found.', 0);
+            %Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
+          %end
         end
 #+end_src
 ** =checkIfReflected(photon, quadrant)=
