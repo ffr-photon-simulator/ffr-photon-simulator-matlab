@@ -150,13 +150,11 @@ else:
 ### photonsAbsorbed list defined at the beginning.
 ###
 ### As an intermediary, we need to calculate the photons available for decontamination
-### in each sublayer. Store these values in photonsForDecon, defined here. We need to fill
+### in each sublayer. Store these values in photonsForDecon, defined here. We fill
 ### both the photonsForDecon and photonsAbsorbed lists simultaneously because the photons
 ### available for decontamination in a given layer changes based on how many photons were
 ### absorbed in the layers before it.
-###
-### NOTE: the number of photons available for decontamination is considered, in this script, the
-### number of photons which enter a given layer before any accounting for viral absorption.
+
 photonsForDecon = []
 for i in range(0,N_LAYERS):
     nPhotonsEnteredNorm = photonsEnteredNorm[i]
@@ -191,12 +189,14 @@ for nPhotonsAbsorbed in photonsAbsorbed:
     nDeactivatedViruses = nPhotonsAbsorbed * PCT_PHOTONS_DEACTIVATING
     deactivatedViruses.append(nDeactivatedViruses)
 
+# Account for bidirectionality by adding the number of deactivated viruses
+# from sub-layers 1 and 9, 2 and 8, 3 and 7, and so on.
 mid = (len(deactivatedViruses) + 1) // 2
-
 for outerLayer, innerLayer in zip(deactivatedViruses, deactivatedViruses[::-1]):
     deactivatedVirusesBiDir.append(outerLayer + innerLayer)
 
-### Calculate num viruses remaining per sub-layer
+### Calculate num viruses remaining per sub-layer. If the number of deactivated viruses is
+### more than the number of viruses in the layer, set the number of viruses remaining to 0.
 for i in range(0, N_LAYERS):
     nDeactivatedViruses = deactivatedVirusesBiDir[i]
     nVirusesRemainingPossiblyNegative = viruses[i] - nDeactivatedViruses
