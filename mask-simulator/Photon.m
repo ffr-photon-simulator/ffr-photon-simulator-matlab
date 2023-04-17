@@ -10,6 +10,7 @@ classdef Photon < handle
     yStep
     id
     inAbsorptionRadius = false;
+    absorbed = false;
   end
 
   methods
