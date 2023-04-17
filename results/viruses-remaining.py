@@ -24,22 +24,56 @@ import csv
 import sys
 import math
 
-if len(sys.argv) == 1:
-    print("viruses-remaining.py must be run with three arguments: ")
+N_ARGS = 5
+
+if len(sys.argv) < N_ARGS:
+    print(f"viruses-remaining.py must be run with {N_ARGS} arguments: ")
     print("1. Experimental virus csv file for FFR sample.")
-    print("2. Simulated average photon csv  file for FFR.")
-    print("3. Variable number of photons available for decontamination in the outer layer.")
+    print("2. Simulated average photon csv file for FFR.")
+    print("3. Absorption coefficient value, between 0 and 1.")
+    print("4. Absorption coefficient method:")
+    print("   --constant")
+    print("       Keep the absorption coefficient constant for each sub-layer.")
+    print("   --decrease=[factor]")
+    print("       Decrease the absorption coefficient by a constant factor for each sub-layer, between 0 and 1.")
+    print("   --scaled")
+    print("       Scale the absorption coefficient with the photon data.")
+    print("5. Variable number of photons available for decontamination in the outer layer.")
     sys.exit(1)
 
 ### CONSTANTS
 N_LAYERS                  = 9
-PCT_PHO_ABSORBED          = 0.1
-PCT_PHO_ABSORBED_DECREASE = 0.5
 PCT_PHOTONS_DEACTIVATING  = 0.8
 
+# ARGUMENTS
 virusDataFile  = sys.argv[1]
 photonDataFile = sys.argv[2]
-N_INC_PHOTONS  =  int(sys.argv[3])
+
+coeff = float(sys.argv[3])
+PCT_PHO_ABSORBED = coeff
+
+absMethodFlag = sys.argv[4]
+# Constant
+if absMethodFlag == '--constant':
+    ABS_METHOD = 'constant'
+    PCT_PHO_ABSORBED_DECREASE = float(1)
+    print("Using constant absorption coefficient.")
+# Scaled
+elif absMethodFlag == '--scaled':
+    ABS_METHOD = 'scaled'
+    print("Using scaled absorption coefficient.")
+# Decrease
+elif '=' in absMethodFlag:
+    # Get flag and parameters
+    ABS_METHOD = 'decrease'
+    PCT_PHO_ABSORBED_DECREASE = float(absMethodFlag.split('=')[1])
+    print("Using decreasing absorption coefficient.")
+else:
+    print(f"Unrecognized absorption coefficient flag {absMethodFlag}.")
+
+# N_INC_PHOTONS will always be the last argument.
+N_INC_PHOTONS  =  int(sys.argv[N_ARGS])
+
 
 # VARIABLES
 #virusDataFile = "./virus-data.csv"
