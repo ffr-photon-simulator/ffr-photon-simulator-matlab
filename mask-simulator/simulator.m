@@ -102,6 +102,7 @@ Debug.newline();
 
 time = datetime('Now','Format','HH-mm-ss');
 photonsInToCSV(ffrLayers, ffr.nLayers, time, ffrConfig, nPhotons);
+possibleAbsorptionCountToCSV(ffrLayers, ffr.nLayers, time, ffrConfig, nPhotons);
 figureToSVG(ffrConfig, nPhotons, ax, time);
 configToMAT(ffrConfig, time, nPhotons);
 
@@ -132,6 +133,21 @@ function photonsInToCSV(ffrLayers, nLayers, time, ffrConfig, nPhotons)
   ext = "csv";
   filepath = sprintf("%s/%s/%s/%s_%s.%s", csvdir, model, dim, name, time, ext);
   Debug.msgWithItem("csv path", filepath, 0);
+  writematrix(data, filepath, 'Delimiter', 'comma')
+end
+
+function possibleAbsorptionCountToCSV(ffrLayers, nLayers, time, ffrConfig, nPhotons)
+  data = zeros(nLayers, 2);
+  data(:,1) = 9:-1:1;
+  data(:, 2) = [ffrLayers.possibleAbsorptionCount];
+
+  csvdir = sprintf("results/data");
+  model = ffrConfig.model;
+  dim = sprintf("%dx%d", ffrConfig.lengthI, ffrConfig.widthI);
+  name = sprintf("%dph_%dlayer_abs-count", nPhotons, ffrConfig.nLayers);
+  ext = "csv";
+  filepath = sprintf("%s/%s/%s/%s_%s.%s", csvdir, model, dim, name, time, ext);
+  Debug.msgWithItem("possible absorption count csv path", filepath, 0);
   writematrix(data, filepath, 'Delimiter', 'comma')
 end
 
