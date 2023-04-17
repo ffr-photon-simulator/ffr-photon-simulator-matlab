@@ -24,6 +24,7 @@ The actual detection of whether the photon is within the absorption radius of a 
     yStep
     id
     inAbsorptionRadius = false;
+    absorbed = false;
   end
 #+end_src
 * Methods
