@@ -86,6 +86,7 @@ photonsEnteredNorm = []
 
 subLayers = []
 
+pctPhotonsAbsorbed = [] # first item (index 0) is never used
 photonsAbsorbed = []
 deactivatedViruses = []
 deactivatedVirusesBiDir = []
@@ -118,14 +119,29 @@ norm_factor = N_INC_PHOTONS/photonsEntered[0]
 for l in range(0, N_LAYERS):
     photonsEnteredNorm.append(photonsEntered[l] * norm_factor)
 
-# Set absorption percentage per sub-layer
-#for i in range(0,N_LAYERS):
-    #pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
+# Get the ratios of the number of photons in one sub-layer with the number in the previous
+photonsEnteredRatios = []
+for i in range(0, N_LAYERS):
+    nPhotonsEnteredNorm = photonsEnteredNorm[i]
+    # For the first layer, set the ratio to 1.
+    if i == 0:
+        photonsEnteredRatios.append(1)
+    else:
+        prev = i - 1
+        # The fraction of photons which enter this layer for *any* given amount of photons in the previous.
+        ratio = nPhotonsEnteredNorm / photonsEnteredNorm[prev]
+        photonsEnteredRatios.append(ratio)
 
 # Determine the absorption percentage per sub-layer
-pctPhotonsAbsorbed = []
-
-if len(pctPhotonsAbsorbed) == 0:
+if ABS_METHOD == 'scaled':
+    pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
+    # Use the sub-layer photon ratios to scale the absorption factor
+    for i in range(1, N_LAYERS):
+        # Multiply previous sub-layers percentage with the ratio of the
+        # current sub-layer's number of photons to the previous sub-layer's.
+        nextPct = pctPhotonsAbsorbed[i - 1] * photonsEnteredRatios[i]
+        pctPhotonsAbsorbed.append(nextPct)
+else:
     pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
     for i in range(1, N_LAYERS):
         pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i-1] * PCT_PHO_ABSORBED_DECREASE)
