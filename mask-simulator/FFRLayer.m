@@ -47,9 +47,6 @@ classdef FFRLayer < handle
       outer = obj.outerBound.bound;
       inner = obj.innerBound.bound;
       bool = photon.y <= outer && photon.y > inner;
-      if bool
-        Debug.msg("Contains photon at " + Debug.coordToString(photon.getCoords()), 1);
-      end
     end
 
     function showPhotonPercentage(obj, nPhotons)

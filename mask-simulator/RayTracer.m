@@ -22,7 +22,7 @@ classdef RayTracer < handle
         end
 
         function currentQuadrant = findCurrentQuadrant(obj, photon)
-          Debug.msg('Finding current quadrant.', 1);
+          %Debug.msg('Finding current quadrant.', 1);
           currentQuadrant = [];
           quadrantLayers = obj.currFFRLayer.quadrantLayers;
 
@@ -47,10 +47,10 @@ classdef RayTracer < handle
           currentQuadrant = quadrants(rightBounds >= photon.x & leftBounds < photon.x);
 
           % Fail with a custom alert.
-          if isempty(currentQuadrant)
-            Debug.alert('Current quadrant not found.', 0);
-            Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
-          end
+          %if isempty(currentQuadrant)
+            %Debug.alert('Current quadrant not found.', 0);
+            %Debug.msg('Photon coords: ' + obj.coordToString([ photon.x photon.y ]), 0);
+          %end
         end
 
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
