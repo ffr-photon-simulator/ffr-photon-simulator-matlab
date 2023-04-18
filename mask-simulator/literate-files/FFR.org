@@ -12,6 +12,7 @@ classdef FFR
     boundaries = struct();
     ffrBounds = [];
     fiberData = [];
+    model
   end
 #+end_src
 * Methods
@@ -38,6 +39,7 @@ Steps:
   methods
     function obj = FFR(config)
       obj.nLayers = config.nLayers;
+      obj.model = config.model;
 
       ffrBounds = struct();
       ffrBounds.leftBound = FFRBoundary(config.boundaries.ffrBounds.leftBound, 'left');
