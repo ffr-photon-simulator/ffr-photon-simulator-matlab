@@ -25,7 +25,7 @@ Increment the following counts:
 #+begin_src octave
     function addCrossing(obj, photon, direction)
       yStep = photon.yStep;
-      Debug.msg("Adding FFR bound crossing.", 1);
+      %Debug.msg("Adding FFR bound crossing.", 1);
       if yStep < 0 % crossing outer -> inner
         obj.incrementToInner();
       else
@@ -55,7 +55,7 @@ Increment the following counts:
 #+begin_src octave
     function printCrossingInfo(obj)
       msg = "\nFFRBound type: " + obj.type + "\n - total crossings: " + obj.count;
-      Debug.msg(msg, 1);
+      %Debug.msg(msg, 1);
     end
 #+end_src
 * Ends
