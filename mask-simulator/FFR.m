@@ -53,8 +53,9 @@ classdef FFR
 
     function fiberData = buildFiberData(obj)
       fiberData = [];
-      for i = 1:size(obj.ffrLayers)
-        ffrLayer = obj.ffrLayers(i);
+      ffrLayers = obj.ffrLayers;
+      for i = 1:size(ffrLayers)
+        ffrLayer = ffrLayers(i);
         quadrantLayers = ffrLayer.quadrantLayers;
         for j = 1:size(quadrantLayers)
           quadrantLayer = quadrantLayers(j);
