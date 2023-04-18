@@ -1,5 +1,5 @@
 #+title: Interior Boundary
-#+property: header-args:octave :tangle ../InteriorBoundary.m
+#+property: header-args:octave :tangle ../InteriorBoundary.m :tangle-mode (identity #o444)
 
 * Class Overview
 Represents the boundary between two FFR Layers. Keeps track of how many photons have crossed the boundary, and from which direction. Also keeps track of repeated photon crossings.

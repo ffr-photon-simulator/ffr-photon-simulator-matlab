@@ -1,5 +1,5 @@
 #+title: Debug
-#+property: header-args:octave :tangle ../simulator.m
+#+property: header-args:octave :tangle ../simulator.m :tangle-mode (identity #o444)
 * Script
 ** Initial Setup
 Set the plot to use LaTeX as its text interpreter.

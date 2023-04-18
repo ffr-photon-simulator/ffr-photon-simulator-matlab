@@ -1,5 +1,5 @@
 #+title: Config
-#+property: header-args:octave :tangle ../Config.m
+#+property: header-args:octave :tangle ../Config.m :tangle-mode (identity #o444)
 
 * Class Overview
 * Properties

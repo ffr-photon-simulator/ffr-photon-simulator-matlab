@@ -1,5 +1,5 @@
 #+title: Ray Tracer
-#+property: header-args:octave :tangle ../RayTracer.m
+#+property: header-args:octave :tangle ../RayTracer.m :tangle-mode (identity #o444)
 
 * Class Overview
 Performs ray tracing on a given Layer (a fiber lattice). The primary method, rayTrace(layer, incomingPhotons), returns the necessary output.

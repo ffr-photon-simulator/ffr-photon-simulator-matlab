@@ -1,5 +1,5 @@
 #+title: FFR Layer
-#+property: header-args:octave :tangle ../FFRLayer.m
+#+property: header-args:octave :tangle ../FFRLayer.m :tangle-mode (identity #o444)
 
 * Class Overview
 Inherit from handle to set the nPhotons properties after the ray tracing finishes.

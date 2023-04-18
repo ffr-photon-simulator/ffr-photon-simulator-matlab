@@ -1,5 +1,5 @@
 #+title: Quadrant Layer
-#+property: header-args:octave :tangle ../QuadrantLayer.m
+#+property: header-args:octave :tangle ../QuadrantLayer.m :tangle-mode (identity #o444)
 
 * Class Overview
 Stores fiber data representing several quadrants of variable fiber density or radial range.

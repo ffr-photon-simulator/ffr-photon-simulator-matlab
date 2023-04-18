@@ -1,5 +1,5 @@
 #+title: Debug
-#+property: header-args:octave :tangle ../Debug.m
+#+property: header-args:octave :tangle ../Debug.m :tangle-mode (identity #o444)
 
 * Class Overview
 Provides debugging helper functions.

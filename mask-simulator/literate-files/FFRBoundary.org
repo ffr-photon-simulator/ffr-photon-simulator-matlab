@@ -1,5 +1,5 @@
 #+title: FFR Boundary
-#+property: header-args:octave :tangle ../FFRBoundary.m
+#+property: header-args:octave :tangle ../FFRBoundary.m :tangle-mode (identity #o444)
 
 * Class Overview
 Represents the exterior boundaries of the FFR. Keeps track of how many photons have crossed the boundary. Exterior boundaries are: left, right, outer, inner. Store the count data and put it in a struct  when the user requests it.

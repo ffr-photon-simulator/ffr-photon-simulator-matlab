@@ -1,5 +1,5 @@
 #+title: Quadrant
-#+property: header-args:octave :tangle ../Quadrant.m
+#+property: header-args:octave :tangle ../Quadrant.m :tangle-mode (identity #o444)
 
 * Class Overview
 A data class representing a quadrant in a quadrant layer. Variable names are copied from =bubblebath_noPlot= when possible to make the connection clear. The constructor runs =bubblebath_noPlot= to get the fiber data (also receives the config struct).

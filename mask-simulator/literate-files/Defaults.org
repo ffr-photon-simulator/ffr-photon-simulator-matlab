@@ -1,5 +1,5 @@
 #+title: Defaults
-#+property: header-args:octave :tangle ../Defaults.m
+#+property: header-args:octave :tangle ../Defaults.m :tangle-mode (identity #o444)
 
 * Class Overview
 A data class that provides default configuration values.

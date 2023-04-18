@@ -1,5 +1,5 @@
 #+title: Boundary
-#+property: header-args:octave :tangle ../Boundary.m
+#+property: header-args:octave :tangle ../Boundary.m :tangle-mode (identity #o444)
 
 * Class Overview
 Represents the boundary between two FFR Layers. Keeps track of how many photons have crossed the boundary, and from which direction. Also keeps track of repeated photon crossings. Store the count data and put it in a struct when the user requests it. Do not keep track of the number of repeats, instead add the sizes of the two repeated photon ID hash sets when the user requests the data.

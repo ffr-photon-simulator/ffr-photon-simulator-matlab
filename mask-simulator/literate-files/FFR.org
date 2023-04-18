@@ -1,5 +1,5 @@
 #+title: FFR
-#+property: header-args:octave :tangle ../FFR.m
+#+property: header-args:octave :tangle ../FFR.m :tangle-mode (identity #o444)
 
 * Class Overview
 A class representing an FFR.
