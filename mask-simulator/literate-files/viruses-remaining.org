@@ -1,5 +1,5 @@
 #+title: Viruses Remaining
-#+property: header-args:octave :tangle ../../results/viruses-remaining.py
+#+property: header-args:python :tangle ../../results/viruses-remaining.py :tangle-mode (identity #o555)
 
 * Class Overview
 A script which calculates, for a given number of photons available for decontamination
