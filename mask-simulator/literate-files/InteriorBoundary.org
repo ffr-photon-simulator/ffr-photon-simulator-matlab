@@ -32,7 +32,7 @@ Increment the following counts:
     function addCrossing(obj, photon, direction)
       id = photon.id;
       yStep = photon.yStep;
-      Debug.msg("Adding interior crossing.", 1);
+      %Debug.msg("Adding interior crossing.", 1);
       obj.count = obj.count + 1;
       if yStep < 0 % crossing outer -> inner
         obj.incrementToInner();
@@ -45,7 +45,7 @@ Increment the following counts:
 #+begin_src octave
     function plot(obj, axisHandle)
       % ax, y=bound, style, label
-      yline(axisHandle, obj.bound, Defaults.interiorBoundStyle, obj.bound, 'LineWidth', Defaults.interiorBoundWeight);
+      yline(axisHandle, obj.bound, Defaults.interiorBoundStyle, 'LineWidth', Defaults.interiorBoundWeight);
     end
 #+end_src
 ** =getCountData()=
