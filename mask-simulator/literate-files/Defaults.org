@@ -14,7 +14,7 @@ classdef Defaults
     % Change the x-separation between each initial photon:
     %  >1 increases the number of photons
     %  <1 decreases the number of photons
-    separationMultiplier = 1000;
+    separationMultiplier = 0.5; % 0.5 ~ 16000 photons
     % Change the length of the initial photons' y step:
     %  >1 increases the y step
     %  <1 decreases the y step
