@@ -45,7 +45,7 @@ if len(sys.argv) < N_ARGS:
 
 ### CONSTANTS
 N_LAYERS                  = 9
-PCT_PHOTONS_DEACTIVATING  = 0.8
+PCT_PHOTONS_DEACTIVATING  = 0.3
 
 # ARGUMENTS
 virusDataFile  = sys.argv[1]
@@ -55,6 +55,7 @@ coeff = float(sys.argv[3])
 PCT_PHO_ABSORBED = coeff
 
 absMethodFlag = sys.argv[4]
+
 # Constant
 if absMethodFlag == '--constant':
     ABS_METHOD = 'constant'
@@ -120,7 +121,7 @@ with open(photonDataFile, "r") as csvfile:
         photonsEntered.append(int(row[1]))
     csvfile.close()
 #+end_src
-** Normalize
+** Normalize Photon Data
 #+begin_src python
 norm_factor = N_INC_PHOTONS/photonsEntered[0]
 for l in range(0, N_LAYERS):
@@ -140,7 +141,7 @@ for i in range(0, N_LAYERS):
         photonsEnteredRatios.append(ratio)
 #+end_src
 ** Determine the absorption percentage per sub-layer
-Use the sub-layer photon ratios to scale the absorption factor. Multiply previous sub-layers percentage with the ratio of the current sub-layer's number of photons to the previous sub-layer's.
+Use the sub-layer photon ratios to scale the absorption factor. Multiply previous sub-layers absorption coefficient with the ratio of the current sub-layer's number of photons to the previous sub-layer's.
 #+begin_src python
 if ABS_METHOD == 'scaled':
     pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
@@ -150,7 +151,8 @@ if ABS_METHOD == 'scaled':
 else:
     pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
     for i in range(1, N_LAYERS):
-        pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i-1] * PCT_PHO_ABSORBED_DECREASE)
+        pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i - 1] * PCT_PHO_ABSORBED_DECREASE)
+print(pctPhotonsAbsorbed)
 #+end_src
 ** Calculate photons absorbed per sub-layer
 Calculate num photons absorbed by viruses per sub-layer and store this in the =photonsAbsorbed= list defined at the beginning.
@@ -178,12 +180,15 @@ Use the photons available for decontamination in the previous layer along with t
         ratio = nPhotonsEnteredNorm / photonsEnteredNorm[prev]
         nPhotonsForDecon = (photonsForDecon[prev] * ratio) - photonsAbsorbed[prev]
         photonsForDecon.append(nPhotonsForDecon)
+    #print(photonsForDecon)
 #+end_src
 
 Now, calculate how many photons are absorbed in this layer.
 #+begin_src python
     nPhotonsAbsorbed = nPhotonsForDecon * pctPhotonsAbsorbed[i]
     photonsAbsorbed.append(nPhotonsAbsorbed)
+
+print(photonsAbsorbed)
 #+end_src
 ** Calculate number of deactivated viruses
 #+begin_src python

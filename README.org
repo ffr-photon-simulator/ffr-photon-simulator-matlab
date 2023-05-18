@@ -111,7 +111,7 @@ At some point, it seems at commit =97fd60b= on =master=, I created the literate 
 *NOTE:* I now do a "selective merge" instead of cherry-picking. The process is as follows:
 1. On =master=, checkout =temp=.
 2. Merge =literate= into =temp= with =$ git merge --no-commit --no-ff literate=.
-3. Unstage =literate/*= (and any other files relevant to =literate=).
+3. Unstage and/or discard =literate/*= (and any other files relevant to =literate=).
 4. Commit other changes to =temp=.
 5. Merge =temp= into =master=.
 6. Delete =temp=.
