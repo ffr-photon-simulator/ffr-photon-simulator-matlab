@@ -56,18 +56,11 @@ classdef RayTracer < handle
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
           fiberData = quadrant.getFiberData();
 
-          % First two columns of all rows.
-          fiberCoords = fiberData(:,1:2);
-          % Fiber radius plus half wavelength.
-          % TODO: put a getReflRadius(radius) function in the Defaults class.
-          reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2);
+          fiberCoords = fiberData(:,1:2); % 1
+          reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2); % 2
 
-          % Calculate the distances.
-          distances = obj.distancesToFiber(photon, fiberCoords);
-          % The reflected fiber coords are the x and y columns of the nth row,
-          % where n corresponds to the row of distances whose value is less than
-          % the reflection radius of the same nth row.
-          reflectedFiberCoords = fiberCoords(distances(:) <= reflectionRadii(:),1:2);
+          distances = obj.distancesToFiber(photon, fiberCoords); % 3
+          reflectedFiberCoords = fiberCoords(distances(:) <= reflectionRadii(:),1:2); % 4,5
           hasReflected = ~isempty(reflectedFiberCoords);
         end
 
