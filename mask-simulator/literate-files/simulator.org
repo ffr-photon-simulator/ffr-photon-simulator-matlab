@@ -48,8 +48,8 @@ Defaults.debugMessage("Starting ray tracing...", 0);
 Defaults.debugMessage("Finished ray tracing.", 0);
 #+end_src
 ** Calculate and store photon crossing information
-Each photon that enters an FFR layer is considered available for decontamination. This is because the photon's energy is independent of how many times it reflects off of fibers. Because the photon's path length (distance traveled) increases if it reflects back into a layer (toOuter direction on inner bound), we need to count it as available for decontamination. To track every photon entering a layer, we total the toInner count for the upper bound and the
-toOuter count for the inner bound.
+
+Each photon that enters an FFR layer is considered available for decontamination. This is because the photon's energy is independent of how many times it reflects off of fibers. Because the photon's path length (distance traveled) increases if it reflects back into a layer (=toOuter= direction on inner bound), we need to count it as available for decontamination. To track every photon entering a layer, we total the =toInner= count for the upper bound and the =toOuter= count for the inner bound.
 
 The photons available for decontamination in the inner layer are necessarily /only/ those which enter its upper bound, since those which leave through its lower bound exit the FFR entirely.
 

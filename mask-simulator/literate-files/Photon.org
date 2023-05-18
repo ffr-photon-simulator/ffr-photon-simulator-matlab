@@ -21,6 +21,7 @@ classdef Photon < handle
 #+end_src
 * Methods
 ** Constructor
+
 The photon must be assigned coordinates and x and y steps. At Layer 1, the x step is usually 0 and the y step is usually +- WAVELENGTH/2.
 #+begin_src octave
   methods

@@ -6,6 +6,7 @@ Performs ray tracing on a given Layer (a fiber lattice). The primary method, ray
 
 =rayTrace(layer, incomingPhotons)= returns a Map of each boundary name to an array of the Photon objects which crossed each boundary. rayTrace() iterates through each photon in the incomingPhotons array. Because each Photon stores its coordinates and x-y steps, rayTrace() does not have to keep up with the current coordinates and steps, a major design improvement. It simply calls the Photon's methods to move it and set new x-y steps. After the Photon moves, rayTrace() checks if it has crossed a boundary or if it has reflected off of a fiber. If not, the Photon is moved again. If it's at a boundary, the relevant output information is stored and the iteration proceeds to the next photon. If the Photon has reflected, its new x-y steps are calculated and the loop continues.
 * Properties
+The ray tracer tracks the current FFR layer.
 #+begin_src octave
 classdef RayTracer < handle
     properties
@@ -76,23 +77,20 @@ Iterate through every quadrant in the current FFR layer and compare the photon's
         end
 #+end_src
 ** =checkIfReflected(photon, quadrant)=
-Use vectorization to calculate the distance of the photon to each fiber in the current quadrant. Then, use logical indexing to find a fiber whose reflection radius is greater than or equal to the respective (vectorized) distance.
+1. Store the first two columns of all =fiberData= rows.
+2. Add half wavelength to fiber radius to get fiber reflection radius.
+3. Calculate the distances to all the fibers in the current quadrant.
+4. Use logical indexing to find a fiber whose reflection radius is greater than or equal to the respective distance.
+5. The reflected fiber coords are the x and y columns of the nth row, where n corresponds to the row of distances whose value is less than the reflection radius of the same nth row.
 #+begin_src octave
         function [hasReflected, reflectedFiberCoords] = checkIfReflected(obj, photon, quadrant)
           fiberData = quadrant.getFiberData();
 
-          % First two columns of all rows.
-          fiberCoords = fiberData(:,1:2);
-          % Fiber radius plus half wavelength.
-          % TODO: put a getReflRadius(radius) function in the Defaults class.
-          reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2);
+          fiberCoords = fiberData(:,1:2); % 1
+          reflectionRadii = fiberData(:,3) + (Defaults.photonWavelength / 2); % 2
 
-          % Calculate the distances.
-          distances = obj.distancesToFiber(photon, fiberCoords);
-          % The reflected fiber coords are the x and y columns of the nth row,
-          % where n corresponds to the row of distances whose value is less than
-          % the reflection radius of the same nth row.
-          reflectedFiberCoords = fiberCoords(distances(:) <= reflectionRadii(:),1:2);
+          distances = obj.distancesToFiber(photon, fiberCoords); % 3
+          reflectedFiberCoords = fiberCoords(distances(:) <= reflectionRadii(:),1:2); % 4,5
           hasReflected = ~isempty(reflectedFiberCoords);
         end
 #+end_src
@@ -150,14 +148,10 @@ bounded by C and D, and the previous FFR layer is bounded by A and B.
         end
 #+end_src
 ** =calculateNewSteps(reflectionPoint, incidentPhotonCoords, reflectedFiberCoords)=
-Find the slope of the line of the reflected photon.
-
-The incident photon's last point before reflection is (inc_x, inc_y). The reflection point is (refl_x, refl_y).
-The coordinates of the fiber off which the photon reflected are (fiber_x, fiber_y).
-
-Draw a line R colinear with the fiber coords and reflection coords (a radius). The path of the reflected photon is the image (reflection) of the path of the incident photon across line R. Draw a line P normal to R and which passes through the incident coords. The image of the incident coords across R is colinear with P. The distance from the incident coords to the reflected coords is twice the distance from the incident coords to the intersection point of R and P.
-
-First, find the intersection point I of R and P. Then, calculate the x and y distances from the incident coords to I. Add double these distance to the incident coords to get the reflected coords.
+1. Find the slope of the line of the reflected photon.
+2. The incident photon's last point before reflection is (inc_x, inc_y). The reflection point is (refl_x, refl_y). The coordinates of the fiber off which the photon reflected are (fiber_x, fiber_y).
+3. Draw a line R colinear with the fiber coords and reflection coords (a radius). The path of the reflected photon is the image (reflection) of the path of the incident photon across line R. Draw a line P normal to R and which passes through the incident coords. The image of the incident coords across R is colinear with P. The distance from the incident coords to the reflected coords is twice the distance from the incident coords to the intersection point of R and P.
+4. First, find the intersection point I of R and P. Then, calculate the x and y distances from the incident coords to I. Add double these distance to the incident coords to get the reflected coords.
 #+begin_src octave
         function [newXStep, newYStep] = calculateNewSteps(obj, reflectionPoint, incidentPhotonCoords, reflectedFiberCoords)
           inc_x = incidentPhotonCoords(1);
@@ -238,7 +232,8 @@ is the bound that has been crossed.
         end
 #+end_src
 ** =rayTrace(ffr, incomingPhotons)=
-Ray traces photons starting from initialCoords through an entire FFR.
+
+Ray traces photons starting from =initialCoords= through an entire FFR.
 #+begin_src octave
         function [photonPaths, boundInfo] = rayTrace(obj, ffr, incomingPhotons)
           boundInfo = [];

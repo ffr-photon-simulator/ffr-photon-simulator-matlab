@@ -40,16 +40,17 @@ classdef Quadrant
 #+end_src
 * Methods
 ** Constructor
-The config 'c' is a struct of the form:
-- c.minRadius = minimum fiber radius
-- c.maxRadius = maximum fiber radius
-- c.frameSize = quadrant size
-- c.density   = fiber density
-- c.lengthOffset = left bound x coordinate
-- c.heightOffset = bottom bound y coordinate
+
+The config =c= is a struct of the form:
+- =c.minRadius= = minimum fiber radius
+- =c.maxRadius= = maximum fiber radius
+- =c.frameSize= = quadrant size
+- =c.density=   = fiber density
+- =c.lengthOffset= = left bound x coordinate
+- =c.heightOffset= = bottom bound y coordinate
 
 Steps:
-Store the user-defined values. Set other values necessary for bubblebath_noPlot(). Run bubblebath_noPlot() and store the output. Add the length offset to the x-values in bb_data and store the data. Determine the quadrant's boundary values.
+Store the user-defined values. Set other values necessary for =bubblebath_noPlot()=. Run =bubblebath_noPlot()= and store the output. Add the length offset to the x-values in =bb_data= and store the data. Determine the quadrant's boundary values.
 
 1. Left bound: the length offset, as noted below, starts at the quadrant layer's left bound and adds the length of any previous quadrants along with half the length of this quadrant.
    - the left bound of this quadrant is just the QL's left bound plus the length of evous quadrants, so we subtract half the length of this quadrant from the lengthOffset.

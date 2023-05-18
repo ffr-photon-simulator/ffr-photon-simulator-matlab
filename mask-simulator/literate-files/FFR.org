@@ -17,24 +17,24 @@ classdef FFR
 #+end_src
 * Methods
 ** Constructor
-The config 'c' is a struct of the form:
-- c.nLayers = number of layers in FFR
-- c.ffrLayerConfigs = list of structs defining each FFRLayer
+
+The config =c= is a struct of the form:
+- =c.nLayers= = number of layers in FFR
+- =c.ffrLayerConfigs= = list of structs defining each FFRLayer
 
 Steps:
 1. Create Boundaries
-2. FFR bounds
-3. Interior bounds
-4. Preallocate the array and create the last InteriorBoundary in the array.
-5. Iterate through the interiorBounds array and create the other interior boundaries.
-6. We need to transpose interiorBounds because the preallocated interiorBounds is a row vector,
-7. while the prior, non-preallocated, interiorBounds was a column vector. Instead of going through
-8. all the instances in which, e.g. size(interiorBounds) is used and fixing it, just transpose it here.
-9. Assemble obj.boundaries
-10. Store list of structs which are the configs of the FFRLayers.
-11. Each FFRLayer struct holds the data to make that FFR layer.
-12. Create FFRLayers
-13. Aggregate entire FFR fiber data
+   - FFR bounds
+   - Interior bounds
+     - preallocate the array and create the last InteriorBoundary in the array
+     - iterate through the =interiorBounds= array and create the other interior boundaries.
+     - we need to transpose =interiorBounds= because the preallocated =interiorBounds= is a row vector,
+     - while the prior, non-preallocated, =interiorBounds= was a column vector. Instead of going through all the instances in which, e.g. =size(interiorBounds)= is used and fixing it, just transpose it here.
+2. Assemble =obj.boundaries=
+   - store list of structs which are the configs of the FFRLayers.
+   - each FFRLayer struct holds the data to make that FFR layer.
+3. Create FFRLayers
+4. Aggregate entire FFR fiber data
 #+begin_src octave
   methods
     function obj = FFR(config)
