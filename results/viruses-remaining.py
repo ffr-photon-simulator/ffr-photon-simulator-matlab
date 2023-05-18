@@ -23,7 +23,7 @@ if len(sys.argv) < N_ARGS:
 
 ### CONSTANTS
 N_LAYERS                  = 9
-PCT_PHOTONS_DEACTIVATING  = 0.8
+PCT_PHOTONS_DEACTIVATING  = 0.3
 
 # ARGUMENTS
 virusDataFile  = sys.argv[1]
@@ -33,6 +33,7 @@ coeff = float(sys.argv[3])
 PCT_PHO_ABSORBED = coeff
 
 absMethodFlag = sys.argv[4]
+
 # Constant
 if absMethodFlag == '--constant':
     ABS_METHOD = 'constant'
@@ -113,7 +114,8 @@ if ABS_METHOD == 'scaled':
 else:
     pctPhotonsAbsorbed.append(PCT_PHO_ABSORBED)
     for i in range(1, N_LAYERS):
-        pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i-1] * PCT_PHO_ABSORBED_DECREASE)
+        pctPhotonsAbsorbed.append(pctPhotonsAbsorbed[i - 1] * PCT_PHO_ABSORBED_DECREASE)
+print(pctPhotonsAbsorbed)
 
 photonsForDecon = []
 for i in range(0,N_LAYERS):
@@ -127,9 +129,12 @@ for i in range(0,N_LAYERS):
         ratio = nPhotonsEnteredNorm / photonsEnteredNorm[prev]
         nPhotonsForDecon = (photonsForDecon[prev] * ratio) - photonsAbsorbed[prev]
         photonsForDecon.append(nPhotonsForDecon)
+    #print(photonsForDecon)
 
     nPhotonsAbsorbed = nPhotonsForDecon * pctPhotonsAbsorbed[i]
     photonsAbsorbed.append(nPhotonsAbsorbed)
+
+print(photonsAbsorbed)
 
 for nPhotonsAbsorbed in photonsAbsorbed:
     nDeactivatedViruses = nPhotonsAbsorbed * PCT_PHOTONS_DEACTIVATING

@@ -8,5 +8,5 @@
 declare -a photons=($1 $2 $3 $4)
 
 for n in "${photons[@]}"; do
-    ./viruses-remaining.py $5 $6 $7 $8 --scaled $n
+    ./viruses-remaining.py $5 $6 $7 --scaled $n
 done
